@@ -3,6 +3,20 @@
 import math
 from typing import Literal
 
+# ELO Constants
+DEFAULT_RATING_MEAN = 1500.0  # Standard ELO starting rating
+DEFAULT_RATING_STD = 200.0  # Initial uncertainty
+
+# ELO Calculation Constants
+ELO_SCALE_FACTOR = 400.0  # Standard ELO scale factor
+ELO_BASE = 10.0  # Base for exponential in win probability
+K_FACTOR = 32.0  # Learning rate (standard for chess)
+
+# Bayesian Update Constants
+PROCESS_NOISE = 5.0  # Uncertainty added per match
+MEASUREMENT_STD = 200.0  # Uncertainty in outcome measurement
+CONFIDENCE_INTERVAL_SIGMA = 2.0  # 95% confidence (±2σ)
+
 
 class BayesianELO:
     """ELO rating with Gaussian uncertainty.
@@ -11,7 +25,9 @@ class BayesianELO:
     the mean rating and standard deviation (uncertainty).
     """
 
-    def __init__(self, prior_mean: float = 1500.0, prior_std: float = 200.0):
+    def __init__(
+        self, prior_mean: float = DEFAULT_RATING_MEAN, prior_std: float = DEFAULT_RATING_STD
+    ):
         """Initialize Bayesian ELO rating.
 
         Args:
@@ -28,29 +44,21 @@ class BayesianELO:
             opponent: Opponent's rating
             result: Match result ('win', 'loss', or 'tie')
         """
-        # Expected win probability
-        expected = 1.0 / (1.0 + 10 ** ((opponent.mean - self.mean) / 400.0))
+        # Expected win probability using logistic function
+        expected = 1.0 / (1.0 + ELO_BASE ** ((opponent.mean - self.mean) / ELO_SCALE_FACTOR))
 
         # Actual outcome
         actual_map = {"win": 1.0, "loss": 0.0, "tie": 0.5}
         actual = actual_map[result]
 
-        # K-factor (learning rate)
-        k = 32.0
-
         # Kalman filter-like update
-        # Increase uncertainty slightly based on match variance
-        process_noise = 5.0  # Small constant added to std each match
-        measurement_std = 200.0  # Uncertainty in outcome measurement
+        kalman_gain = (self.std**2) / (self.std**2 + MEASUREMENT_STD**2)
 
-        # Kalman gain
-        kalman_gain = (self.std**2) / (self.std**2 + measurement_std**2)
+        # Update mean with K-factor weighted prediction error
+        self.mean += kalman_gain * K_FACTOR * (actual - expected)
 
-        # Update mean
-        self.mean += kalman_gain * k * (actual - expected)
-
-        # Update std (uncertainty decreases with more matches)
-        self.std = math.sqrt((1.0 - kalman_gain) * self.std**2 + process_noise**2)
+        # Update std (uncertainty decreases with more matches, process noise adds back some)
+        self.std = math.sqrt((1.0 - kalman_gain) * self.std**2 + PROCESS_NOISE**2)
 
     def conservative_estimate(self) -> float:
         """Return conservative estimate (95% confidence lower bound).
@@ -58,7 +66,7 @@ class BayesianELO:
         Returns:
             Rating minus 2 standard deviations
         """
-        return self.mean - 2.0 * self.std
+        return self.mean - CONFIDENCE_INTERVAL_SIGMA * self.std
 
     def __str__(self) -> str:
         """String representation."""
