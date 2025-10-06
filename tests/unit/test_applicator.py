@@ -145,3 +145,65 @@ def test_apply_empty_solution(workspace):
     applicator = SolutionApplicator(workspace)
     # Should not raise
     applicator.apply(solution)
+
+
+def test_apply_diff_success(workspace):
+    """Test applying unified diff successfully."""
+    import subprocess
+
+    # Initialize git repo in workspace
+    subprocess.run(["git", "init"], cwd=workspace, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=workspace,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test User"],
+        cwd=workspace,
+        check=True,
+        capture_output=True,
+    )
+
+    # Create a file and commit it
+    test_file = workspace / "test.txt"
+    test_file.write_text("line 1\nline 2\nline 3\n")
+    subprocess.run(["git", "add", "test.txt"], cwd=workspace, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Initial commit"],
+        cwd=workspace,
+        check=True,
+        capture_output=True,
+    )
+
+    # Create a diff
+    diff_content = """--- a/test.txt
++++ b/test.txt
+@@ -1,3 +1,4 @@
+ line 1
++new line
+ line 2
+ line 3
+"""
+
+    applicator = SolutionApplicator(workspace)
+    applicator.apply_diff(diff_content)
+
+    # Check the file was modified
+    assert "new line" in test_file.read_text()
+
+
+def test_apply_diff_failure(workspace):
+    """Test applying invalid diff raises error."""
+    import subprocess
+
+    # Initialize git repo
+    subprocess.run(["git", "init"], cwd=workspace, check=True, capture_output=True)
+
+    # Invalid diff
+    diff_content = "invalid diff content"
+
+    applicator = SolutionApplicator(workspace)
+    with pytest.raises(RuntimeError, match="Failed to apply diff"):
+        applicator.apply_diff(diff_content)

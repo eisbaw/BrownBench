@@ -27,10 +27,10 @@ pkgs.mkShell {
 
   shellHook = ''
     if [ ! -d .venv ]; then
-      uv venv .venv
+      uv venv .venv > /dev/null 2>&1
     fi
     source .venv/bin/activate
-    uv pip install -e ".[dev]"
+    uv pip install -e ".[dev]" > /dev/null 2>&1
     export CODEGEN_BENCH_DEV=1
   '';
 }
