@@ -28,3 +28,29 @@ def sample_task_dict(tmp_codebase: Path) -> dict:
         "constraints": ["Must be backwards compatible"],
         "key_files": ["main.py"],
     }
+
+
+@pytest.fixture
+def sample_task(sample_task_dict: dict):
+    """Sample Task instance."""
+    from codegen_bench.core.task import Task
+
+    return Task(**sample_task_dict)
+
+
+@pytest.fixture
+def sample_solution():
+    """Sample Solution instance."""
+    from datetime import UTC, datetime
+
+    from codegen_bench.core.solution import Solution
+
+    return Solution(
+        approach_id="test-dut",
+        task_id="test_001",
+        seed=42,
+        timestamp=datetime.now(UTC),
+        changed_files={"main.py": "def hello(): print('Hello')"},
+        total_tokens=100,
+        cost_usd=0.01,
+    )

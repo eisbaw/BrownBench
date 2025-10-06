@@ -1,0 +1,183 @@
+"""Claude-based judge implementation."""
+
+import os
+import re
+
+import anthropic
+from tenacity import retry, stop_after_attempt, wait_exponential  # type: ignore[import-not-found]
+
+from codegen_bench.core.arena import Arena
+from codegen_bench.core.judgment import JudgeVote
+from codegen_bench.core.solution import Solution
+from codegen_bench.core.task import Task
+from codegen_bench.judge.base import Judge
+
+
+class ClaudeJudge(Judge):
+    """Claude-based judge for comparing solutions."""
+
+    client: anthropic.Anthropic | None
+
+    def __init__(
+        self,
+        api_key: str | None = None,
+        model: str = "claude-sonnet-4-20250514",
+        temperature: float = 0.3,
+        variant: int = 0,
+    ):
+        """Initialize ClaudeJudge.
+
+        Args:
+            api_key: Anthropic API key (defaults to ANTHROPIC_API_KEY env var)
+            model: Claude model to use
+            temperature: Sampling temperature
+            variant: Prompt variant for diversity
+        """
+        super().__init__(model, temperature, variant)
+        self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
+        self.client = None  # Lazy initialization
+
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))  # type: ignore[misc]
+    def evaluate(
+        self, solution_a: Solution, solution_b: Solution, arena: Arena, task: Task
+    ) -> JudgeVote:
+        """Evaluate two solutions using Claude.
+
+        Args:
+            solution_a: First solution
+            solution_b: Second solution
+            arena: Arena to evaluate in
+            task: Task being solved
+
+        Returns:
+            JudgeVote with winner, reasoning, and confidence
+
+        Raises:
+            ValueError: If API key not configured
+        """
+        # Initialize client if needed
+        if self.client is None:
+            if not self.api_key:
+                raise ValueError("ANTHROPIC_API_KEY not found in environment")
+            self.client = anthropic.Anthropic(api_key=self.api_key)
+
+        # Build prompt
+        prompt = self._build_prompt(solution_a, solution_b, arena, task)
+
+        # Call API
+        response = self.client.messages.create(
+            model=self.model,
+            max_tokens=2000,
+            temperature=self.temperature,
+            messages=[{"role": "user", "content": prompt}],
+        )
+
+        # Parse response
+        return self._parse_vote(response.content[0].text)
+
+    def _build_prompt(
+        self, solution_a: Solution, solution_b: Solution, arena: Arena, task: Task
+    ) -> str:
+        """Build evaluation prompt.
+
+        Args:
+            solution_a: First solution
+            solution_b: Second solution
+            arena: Arena to evaluate in
+            task: Task being solved
+
+        Returns:
+            Formatted prompt string
+        """
+        # Load arena-specific prompt template
+        arena_criteria = "\n".join(f"- {c}" for c in arena.criteria)
+
+        solution_a_text = self._format_solution(solution_a)
+        solution_b_text = self._format_solution(solution_b)
+
+        return f"""You are an expert code reviewer evaluating two solutions to a programming task.
+
+Task: {task.name}
+
+Specification:
+{task.specification}
+
+Constraints:
+{chr(10).join(f"- {c}" for c in task.constraints)}
+
+Evaluation Criteria ({arena.display_name}):
+{arena.description}
+
+{arena_criteria}
+
+Solution A:
+{solution_a_text}
+
+Solution B:
+{solution_b_text}
+
+Compare these two solutions based on the criteria above. Which solution is better?
+
+Respond in the following format:
+WINNER: A|B|TIE
+REASONING: <2-3 sentences explaining your decision>
+CONFIDENCE: <0.0-1.0, where 1.0 is completely certain>
+
+Be objective and focus on the quality dimensions specified in the criteria.
+"""
+
+    def _format_solution(self, solution: Solution) -> str:
+        """Format solution for display in prompt.
+
+        Args:
+            solution: Solution to format
+
+        Returns:
+            Formatted string showing file changes
+        """
+        if not solution.changed_files:
+            return "(No files changed)"
+
+        parts = []
+        for path, content in solution.changed_files.items():
+            parts.append(f"File: {path}")
+            parts.append("```")
+            parts.append(content)
+            parts.append("```")
+            parts.append("")
+
+        return "\n".join(parts)
+
+    def _parse_vote(self, response: str) -> JudgeVote:
+        """Parse judge response into JudgeVote.
+
+        Args:
+            response: Raw judge response
+
+        Returns:
+            Parsed JudgeVote
+
+        Raises:
+            ValueError: If response format is invalid
+        """
+        # Extract WINNER
+        winner_match = re.search(r"WINNER:\s*(A|B|TIE)", response, re.IGNORECASE)
+        if not winner_match:
+            raise ValueError(f"Could not parse WINNER from response: {response}")
+        winner = winner_match.group(1).upper()
+
+        # Extract REASONING
+        reasoning_match = re.search(
+            r"REASONING:\s*(.+?)(?=CONFIDENCE:|$)", response, re.IGNORECASE | re.DOTALL
+        )
+        reasoning = reasoning_match.group(1).strip() if reasoning_match else ""
+
+        # Extract CONFIDENCE
+        confidence_match = re.search(r"CONFIDENCE:\s*([0-9.]+)", response, re.IGNORECASE)
+        confidence = float(confidence_match.group(1)) if confidence_match else 0.5
+
+        # Validate winner
+        if winner not in ["A", "B", "TIE"]:
+            raise ValueError(f"Invalid winner: {winner}")
+
+        return JudgeVote(vote=winner, reasoning=reasoning, confidence=confidence)  # type: ignore[arg-type]
