@@ -27,10 +27,8 @@ class SimpleChatDUT(CodeGenerationApproach):
         """
         super().__init__(config)
         self.model = config.get("model", "claude-sonnet-4-20250514")
-        api_key = config.get("api_key") or os.getenv("ANTHROPIC_API_KEY")
-        if not api_key:
-            raise ValueError("ANTHROPIC_API_KEY not found in config or environment")
-        self.client = anthropic.Anthropic(api_key=api_key)
+        self.api_key = config.get("api_key") or os.getenv("ANTHROPIC_API_KEY")
+        self.client = None  # Lazy initialization
         self.max_tokens = config.get("max_tokens", 8000)
         self.temperature = config.get("temperature", 0.3)
 
@@ -44,6 +42,12 @@ class SimpleChatDUT(CodeGenerationApproach):
         Returns:
             Solution with generated code
         """
+        # Initialize client if needed
+        if self.client is None:
+            if not self.api_key:
+                raise ValueError("ANTHROPIC_API_KEY not found in config or environment")
+            self.client = anthropic.Anthropic(api_key=self.api_key)
+
         start_time = time.time()
 
         # Build simple prompt

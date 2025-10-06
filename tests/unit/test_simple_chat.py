@@ -80,11 +80,12 @@ def test_simple_chat_init_with_custom_config():
     assert dut.temperature == 0.5
 
 
-def test_simple_chat_init_no_api_key(monkeypatch):
-    """Test SimpleChatDUT initialization fails without API key."""
+def test_simple_chat_solve_no_api_key(monkeypatch, simple_task):
+    """Test SimpleChatDUT solve fails without API key."""
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    dut = SimpleChatDUT(config={})
     with pytest.raises(ValueError, match="ANTHROPIC_API_KEY not found"):
-        SimpleChatDUT(config={})
+        dut.solve(simple_task, seed=42)
 
 
 def test_simple_chat_solve(mock_anthropic_client, simple_task):

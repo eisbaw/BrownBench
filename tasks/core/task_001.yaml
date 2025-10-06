@@ -1,0 +1,28 @@
+id: task_001
+name: "Add hello world function"
+project: test_project
+domain: testing
+difficulty: easy
+
+codebase_path: test_project
+
+specification: |
+  Create a simple hello world function in C that:
+  - Prints "Hello, World!" to stdout
+  - Returns 0 on success
+  - Is in a file called src/hello.c
+  - Includes a header declaration in src/hello.h
+
+constraints:
+  - Must use stdio.h
+  - Function must be named 'hello_world'
+  - Must return int
+
+key_files:
+  - src/hello.c
+  - src/hello.h
+
+compile_command: "gcc -c src/hello.c -o /tmp/hello.o"
+test_command: "echo 'Manual test: check files exist' && test -f src/hello.c && test -f src/hello.h"
+
+expected_human_time_minutes: 5
