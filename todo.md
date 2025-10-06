@@ -1,0 +1,660 @@
+# BrownBench Development Todo
+
+**Last Updated:** 2025-10-07
+**Timeline:** 24 weeks (6 months)
+**Budget:** $55K-85K total
+
+## Phase 0: Foundations (Weeks 1-3)
+
+### Week 1: Project Setup & Core Models
+
+- [ ] **Project scaffolding**
+  - [ ] Initialize git repository
+  - [ ] Create pyproject.toml with uv dependencies
+  - [ ] Set up shell.nix for reproducible environment
+  - [ ] Create justfile with common tasks
+  - [ ] Configure pytest, mypy, ruff
+  - [ ] Set up pre-commit hooks
+
+- [ ] **Core data models** `src/codegen_bench/core/`
+  - [ ] Implement Task dataclass with validation
+  - [ ] Implement Solution dataclass
+  - [ ] Implement Arena dataclass
+  - [ ] Implement JudgeVote and JudgmentResult
+  - [ ] Add serialization (to_dict/from_dict)
+  - [ ] Write unit tests for all models
+
+- [ ] **Task loader** `src/codegen_bench/tasks/`
+  - [ ] YAML schema for task definitions
+  - [ ] TaskLoader class with validation
+  - [ ] Support for loading task sets (core, embedded, all)
+  - [ ] Error handling for malformed tasks
+  - [ ] Unit tests with fixture tasks
+
+### Week 2: DUT System & Caching
+
+- [ ] **DUT base infrastructure** `src/codegen_bench/dut/`
+  - [ ] CodeGenerationApproach abstract base class
+  - [ ] ApproachMetadata dataclass
+  - [ ] DUT registry/factory pattern
+  - [ ] Unit tests for registry
+
+- [ ] **SimpleChatDUT implementation**
+  - [ ] Anthropic API client integration
+  - [ ] Prompt building
+  - [ ] Response parsing (basic)
+  - [ ] Cost calculation
+  - [ ] Unit tests with mocked API
+
+- [ ] **Solution caching** `src/codegen_bench/cache/`
+  - [ ] SolutionCache with SHA-256 keying
+  - [ ] Disk persistence (JSON)
+  - [ ] Cache invalidation logic
+  - [ ] Unit tests for cache hit/miss
+
+- [ ] **Code extraction** `src/codegen_bench/parsing/`
+  - [ ] CodeExtractor with multiple strategies
+  - [ ] Markdown block parser
+  - [ ] Diff format parser
+  - [ ] Fallback parsers
+  - [ ] Unit tests with real LLM outputs
+
+### Week 3: Validation Pipeline
+
+- [ ] **Git worktree isolation** `src/codegen_bench/validation/`
+  - [ ] GitWorktreeStrategy implementation
+  - [ ] Workspace creation & cleanup
+  - [ ] Error handling for non-git repos
+  - [ ] Unit tests
+
+- [ ] **SolutionApplicator**
+  - [ ] Apply changed files to workspace
+  - [ ] Handle both full files and diffs
+  - [ ] Apply diff using git apply
+  - [ ] Integration tests with sample repos
+
+- [ ] **ValidationExecutor**
+  - [ ] Compile command execution
+  - [ ] Test command execution
+  - [ ] Test output parsing (pytest, unittest)
+  - [ ] Timeout handling
+  - [ ] Integration tests
+
+- [ ] **CLI skeleton** `src/codegen_bench/cli/`
+  - [ ] Click-based CLI structure
+  - [ ] `codegen-bench init` command
+  - [ ] `codegen-bench generate` command
+  - [ ] `codegen-bench validate` command
+  - [ ] Rich terminal output
+  - [ ] Basic error handling
+
+**Phase 0 Deliverable:** Generate and validate solution for 1 sample task
+
+---
+
+## Phase 1: Minimal Viable Benchmark (Weeks 4-7)
+
+### Week 4: Judge System
+
+- [ ] **Judge base infrastructure** `src/codegen_bench/judge/`
+  - [ ] Judge abstract base class
+  - [ ] ClaudeJudge implementation
+  - [ ] Retry logic with tenacity
+  - [ ] Rate limiting
+
+- [ ] **Judge prompts** `src/codegen_bench/judge/prompts/`
+  - [ ] Base prompt template structure
+  - [ ] Maintainability arena prompt
+  - [ ] Architecture arena prompt
+  - [ ] Prompt versioning with SHA-256
+  - [ ] Load and format prompts
+
+- [ ] **Vote parsing**
+  - [ ] Parse structured judge output (WINNER/REASONING/CONFIDENCE)
+  - [ ] Handle malformed responses
+  - [ ] Confidence score extraction
+  - [ ] Unit tests with sample outputs
+
+- [ ] **Judge orchestrator**
+  - [ ] JudgeOrchestrator class
+  - [ ] Consensus algorithm (majority vote)
+  - [ ] Agreement rate calculation
+  - [ ] Position randomization (A/B swap)
+  - [ ] Unit tests for consensus logic
+
+### Week 5: Simple ELO & Tournament
+
+- [ ] **Simple ELO ratings** `src/codegen_bench/stats/ratings/`
+  - [ ] BayesianELO implementation
+  - [ ] Update mechanism
+  - [ ] Uncertainty tracking
+  - [ ] Unit tests
+
+- [ ] **Tournament runner** `src/codegen_bench/core/`
+  - [ ] TournamentRunner class
+  - [ ] Pairwise comparison scheduling
+  - [ ] Fixed sample size mode
+  - [ ] Progress tracking
+  - [ ] Result aggregation
+  - [ ] Integration tests
+
+- [ ] **Terminal reporting** `src/codegen_bench/reporting/`
+  - [ ] TerminalReporter with rich tables
+  - [ ] ELO leaderboard display
+  - [ ] Per-arena breakdown
+  - [ ] Cost summary
+  - [ ] Formatting tests
+
+### Week 6-7: Task Curation & Testing
+
+- [ ] **Create 5 benchmark tasks**
+  - [ ] Task 1: C project (ffmpeg/nginx/redis)
+  - [ ] Task 2: Python project (requests/flask)
+  - [ ] Task 3: Systems programming task
+  - [ ] Task 4: Algorithm optimization
+  - [ ] Task 5: Bug fix with edge cases
+  - [ ] Write specifications for each
+  - [ ] Validate test suites (must pass on original)
+  - [ ] Document gotchas
+
+- [ ] **ElaboratePromptDUT**
+  - [ ] Enhanced system prompt
+  - [ ] Codebase analysis integration
+  - [ ] Unit tests
+
+- [ ] **End-to-end testing**
+  - [ ] Run mini-tournament on 2 DUTs, 5 tasks
+  - [ ] Validate all outputs
+  - [ ] Fix bugs discovered
+  - [ ] Document edge cases
+
+**Phase 1 Deliverable:** Working tournament with 2 DUTs on 5 tasks
+
+---
+
+## Phase 2: Statistical Rigor (Weeks 8-12)
+
+### Week 8: TrueSkill & Effect Sizes
+
+- [ ] **TrueSkill ratings** `src/codegen_bench/stats/ratings/`
+  - [ ] TrueSkillRating wrapper
+  - [ ] Update mechanism
+  - [ ] Conservative estimate (mu - 2*sigma)
+  - [ ] Match quality prediction
+  - [ ] Unit tests
+
+- [ ] **Effect size calculation** `src/codegen_bench/stats/`
+  - [ ] **FIX:** Use paired Hedges' g (not unpaired)
+  - [ ] Bootstrap confidence intervals
+  - [ ] CLES calculation
+  - [ ] Interpretation (SE field norms)
+  - [ ] Unit tests with known effect sizes
+
+- [ ] **Variance decomposition**
+  - [ ] Mixed linear models with statsmodels
+  - [ ] ICC calculation
+  - [ ] Variance components (approach, task, arena, residual)
+  - [ ] Unit tests
+
+### Week 9: Multiple Comparison Correction
+
+- [ ] **Correction methods** `src/codegen_bench/stats/`
+  - [ ] FDR (Benjamini-Hochberg) - default
+  - [ ] Holm-Bonferroni
+  - [ ] Dunnett's test for MAMS
+  - [ ] Wrapper function for all methods
+  - [ ] Unit tests
+
+- [ ] **Power analysis** `src/codegen_bench/stats/`
+  - [ ] Sample size calculation
+  - [ ] Power calculation for achieved samples
+  - [ ] Minimum detectable effect
+  - [ ] Unit tests
+
+### Week 10: Sequential Testing
+
+- [ ] **Group sequential design** `src/codegen_bench/stats/adaptive/`
+  - [ ] GroupSequentialDesign class
+  - [ ] O'Brien-Fleming boundaries
+  - [ ] Interim analysis checkpoints
+  - [ ] Early stopping logic (efficacy/futility)
+  - [ ] Conditional power calculation
+  - [ ] Unit tests
+
+- [ ] **Sequential tournament mode**
+  - [ ] Integrate sequential testing into TournamentRunner
+  - [ ] Checkpoint evaluation
+  - [ ] Early stop reporting
+  - [ ] Integration tests
+
+### Week 11: MAMS Adaptive Design
+
+- [ ] **MAMS implementation** `src/codegen_bench/stats/adaptive/`
+  - [ ] MAMSDesign class
+  - [ ] Stage 1: cheap metric evaluation
+  - [ ] Dunnett's test for arm selection
+  - [ ] Select top 2-3 performers
+  - [ ] Unit tests
+
+- [ ] **MAMS tournament mode**
+  - [ ] Phase 1: screening with cheap metrics
+  - [ ] Phase 2: full evaluation of selected DUTs
+  - [ ] Integration with sequential testing
+  - [ ] End-to-end test
+
+### Week 12: Pre-registration System
+
+- [ ] **Pre-registration** `src/codegen_bench/cli/`
+  - [ ] PreregistrationPlan dataclass
+  - [ ] YAML schema for analysis plan
+  - [ ] Hypotheses specification
+  - [ ] Stopping rules
+  - [ ] Timestamp generation
+  - [ ] SHA-256 hash for verification
+
+- [ ] **Tournament adherence checking**
+  - [ ] Load preregistration file
+  - [ ] Verify tournament follows plan
+  - [ ] Detect deviations
+  - [ ] Report in results
+
+- [ ] **Expand to 15 tasks**
+  - [ ] Add 10 more tasks across domains
+  - [ ] Validate all test suites
+  - [ ] Update task set configurations
+
+**Phase 2 Deliverable:** Statistically rigorous tournaments with adaptive designs
+
+---
+
+## Phase 3: Judge Calibration (Weeks 13-15)
+
+### Week 13: Ground Truth Collection
+
+- [ ] **Crowdsourcing platform setup**
+  - [ ] Create web interface for comparisons
+  - [ ] Simple A/B comparison UI
+  - [ ] Response collection backend
+  - [ ] Authentication for participants
+
+- [ ] **Select 50-100 comparison pairs**
+  - [ ] Diverse difficulty levels
+  - [ ] Multiple arenas covered
+  - [ ] Edge cases included
+  - [ ] Document selection criteria
+
+- [ ] **Recruit participants**
+  - [ ] 10 mid-level programmers
+  - [ ] Pay $10 per comparison
+  - [ ] Limit sessions to 30 minutes
+  - [ ] Rotate task order to prevent fatigue
+
+### Week 14: Judge Calibration Metrics
+
+- [ ] **Calibration metrics** `src/codegen_bench/stats/`
+  - [ ] Agreement rate with ground truth
+  - [ ] Fleiss' Kappa (inter-rater reliability)
+  - [ ] Per-judge accuracy tracking
+  - [ ] Confusion matrix analysis
+  - [ ] Unit tests
+
+- [ ] **Bias detection** `src/codegen_bench/judge/`
+  - [ ] Position bias measurement (A vs B)
+  - [ ] Length bias detection & correction
+  - [ ] Regression-based adjustment
+  - [ ] Bias reporting in results
+
+- [ ] **Calibration command** `src/codegen_bench/cli/`
+  - [ ] `codegen-bench calibrate` CLI
+  - [ ] Load ground truth file
+  - [ ] Run judges on calibration set
+  - [ ] Generate calibration report
+  - [ ] Integration tests
+
+### Week 15: Prompt Engineering Iteration
+
+- [ ] **Analyze calibration results**
+  - [ ] Identify disagreement patterns
+  - [ ] Find ambiguous criteria
+  - [ ] Document failure modes
+
+- [ ] **Iterate on prompts**
+  - [ ] Update arena prompts based on findings
+  - [ ] Add clarifying examples
+  - [ ] Test revised prompts on calibration set
+  - [ ] Repeat until ≥85% agreement achieved
+
+- [ ] **Prompt versioning**
+  - [ ] Git tag each prompt version
+  - [ ] Record which version used in judgments
+  - [ ] Changelog for prompt evolution
+
+**Phase 3 Deliverable:** Judges achieve ≥85% agreement with ground truth
+
+---
+
+## Phase 4: Security & Robustness (Weeks 16-17)
+
+### Week 16: Container Isolation
+
+- [ ] **Docker integration** `src/codegen_bench/isolation/`
+  - [ ] ContainerIsolation class
+  - [ ] Build DUT container images
+  - [ ] Network restriction (API proxy only)
+  - [ ] Resource limits (CPU, memory)
+  - [ ] Read-only mounts
+  - [ ] Cleanup after execution
+
+- [ ] **API proxy** `src/codegen_bench/isolation/`
+  - [ ] APIProxy server
+  - [ ] Temporary key generation
+  - [ ] Request forwarding with real key
+  - [ ] Cost tracking per DUT
+  - [ ] Budget enforcement
+  - [ ] Integration tests
+
+- [ ] **DUT auditing** `src/codegen_bench/security/`
+  - [ ] DUTAuditor class
+  - [ ] Static analysis for dangerous patterns
+  - [ ] Network access detection
+  - [ ] Audit report generation
+  - [ ] Integration with DUT loading
+
+### Week 17: State Management & Recovery
+
+- [ ] **Checkpointing** `src/codegen_bench/core/`
+  - [ ] TournamentCheckpoint class
+  - [ ] Serialize tournament state to disk
+  - [ ] Resume from checkpoint
+  - [ ] Handle partial results
+  - [ ] Integration tests
+
+- [ ] **Budget enforcement**
+  - [ ] BudgetEnforcer class
+  - [ ] Per-DUT cost limits
+  - [ ] Global tournament budget
+  - [ ] Warnings at thresholds
+  - [ ] Hard stops when exceeded
+
+- [ ] **Error handling improvements**
+  - [ ] Comprehensive error taxonomy
+  - [ ] Actionable error messages
+  - [ ] Retry strategies
+  - [ ] Graceful degradation
+  - [ ] Error reporting in results
+
+**Phase 4 Deliverable:** Production-grade isolation and robustness
+
+---
+
+## Phase 5: Usability & Polish (Weeks 18-20)
+
+### Week 18: Visualization & Export
+
+- [ ] **HTML reports** `src/codegen_bench/reporting/`
+  - [ ] Jinja2 template for HTML output
+  - [ ] Interactive Plotly charts
+  - [ ] Sortable leaderboard tables
+  - [ ] Per-arena breakdowns
+  - [ ] Cost analysis charts
+
+- [ ] **Pareto frontier** `src/codegen_bench/stats/`
+  - [ ] Multi-objective optimization with pymoo
+  - [ ] Pareto frontier calculation
+  - [ ] Hypervolume metric
+  - [ ] Dominated solution identification
+  - [ ] Plotly visualization
+  - [ ] Unit tests
+
+- [ ] **Export formats**
+  - [ ] JSON exporter with schema
+  - [ ] CSV exporter for custom analysis
+  - [ ] LaTeX table generator
+  - [ ] Export CLI options
+
+### Week 19: Documentation
+
+- [ ] **User documentation** `docs/`
+  - [ ] Installation guide
+  - [ ] Quickstart tutorial (5-min)
+  - [ ] CLI reference
+  - [ ] Configuration guide
+  - [ ] Troubleshooting guide
+
+- [ ] **Developer documentation**
+  - [ ] Architecture overview
+  - [ ] Adding new DUTs guide
+  - [ ] Adding new arenas guide
+  - [ ] Contributing guidelines
+  - [ ] API reference (auto-generated)
+
+- [ ] **Statistical methods document**
+  - [ ] Explain rating systems
+  - [ ] Effect size interpretation
+  - [ ] Multiple testing rationale
+  - [ ] Adaptive design benefits
+  - [ ] References to literature
+
+### Week 20: Example Content & Polish
+
+- [ ] **Expand to 20 tasks**
+  - [ ] 5 additional C/C++ tasks
+  - [ ] 5 additional Python tasks
+  - [ ] Document each thoroughly
+
+- [ ] **Example configurations** `configs/`
+  - [ ] Default tournament config
+  - [ ] Quick evaluation config
+  - [ ] Full research config
+  - [ ] Per-DUT example configs
+
+- [ ] **Sample DUT implementations**
+  - [ ] Document SimpleChatDUT
+  - [ ] Document ElaboratePromptDUT
+  - [ ] Template for custom DUTs
+
+- [ ] **Polish UI/UX**
+  - [ ] Improve progress indicators
+  - [ ] Better error messages
+  - [ ] Consistent formatting
+  - [ ] Help text for all commands
+
+**Phase 5 Deliverable:** Production-ready system with great UX
+
+---
+
+## Phase 6: Validation & Publication (Weeks 21-24)
+
+### Week 21: External Testing
+
+- [ ] **Beta program**
+  - [ ] Recruit 3-5 research groups
+  - [ ] Provide onboarding
+  - [ ] Collect feedback
+  - [ ] Fix critical issues
+
+- [ ] **Validation study design**
+  - [ ] Design comparison with human experts
+  - [ ] Select test cases
+  - [ ] Recruit expert evaluators
+  - [ ] Plan statistical analysis
+
+### Week 22: Validation Execution
+
+- [ ] **Run validation study**
+  - [ ] Collect expert judgments
+  - [ ] Run automated benchmarks
+  - [ ] Compare results
+  - [ ] Statistical analysis
+
+- [ ] **Results analysis**
+  - [ ] Agreement metrics
+  - [ ] Identify discrepancies
+  - [ ] Root cause analysis
+  - [ ] Document limitations
+
+### Week 23: Publication Preparation
+
+- [ ] **Paper writing**
+  - [ ] Introduction & motivation
+  - [ ] Related work
+  - [ ] Methodology
+  - [ ] Results & validation
+  - [ ] Discussion & limitations
+  - [ ] Future work
+
+- [ ] **Publication-ready figures**
+  - [ ] Leaderboard tables
+  - [ ] Pareto frontiers
+  - [ ] Statistical analyses
+  - [ ] Architecture diagrams
+
+- [ ] **Data release preparation**
+  - [ ] Anonymize if needed
+  - [ ] Package datasets
+  - [ ] Write data documentation
+  - [ ] Choose license (MIT/Apache 2.0)
+
+### Week 24: Launch
+
+- [ ] **Public release**
+  - [ ] PyPI package publication
+  - [ ] GitHub public repository
+  - [ ] Documentation site (readthedocs)
+  - [ ] Announcement blog post
+
+- [ ] **Leaderboard setup**
+  - [ ] Public leaderboard website
+  - [ ] Submission system
+  - [ ] Automated benchmarking
+  - [ ] Community moderation
+
+- [ ] **Paper submission**
+  - [ ] Submit to conference/arxiv
+  - [ ] Preprint release
+  - [ ] Social media announcement
+
+**Phase 6 Deliverable:** Published benchmark, paper, public leaderboard
+
+---
+
+## Ongoing Tasks (Throughout All Phases)
+
+- [ ] **Testing**
+  - Maintain >90% code coverage
+  - Add integration tests for new features
+  - Run test suite before all commits
+  - Fix flaky tests immediately
+
+- [ ] **Code quality**
+  - Run ruff linter regularly
+  - Type check with mypy
+  - Review code for maintainability
+  - Refactor technical debt
+
+- [ ] **API cost management**
+  - Use record/replay for development
+  - Monitor spending weekly
+  - Optimize prompts for token efficiency
+  - Budget reviews at phase boundaries
+
+- [ ] **Documentation updates**
+  - Update docs with new features
+  - Fix outdated information
+  - Add examples as features stabilize
+  - Maintain changelog
+
+---
+
+## Critical Milestones & Decision Points
+
+### Week 3 Checkpoint
+- ✅ Can we generate and validate a solution end-to-end?
+- ❌ If no: Fix validation pipeline before Phase 1
+
+### Week 7 Checkpoint
+- ✅ Can we run a mini-tournament successfully?
+- ❌ If no: Fix tournament runner before Phase 2
+
+### Week 12 Checkpoint
+- ✅ Do adaptive designs work correctly?
+- ❌ If no: Fall back to fixed sample sizes
+
+### Week 15 Checkpoint
+- ✅ Do judges achieve ≥85% agreement?
+- ❌ If no: Iterate prompts OR lower threshold to 80% with disclosure
+
+### Week 17 Checkpoint
+- ✅ Is container isolation working?
+- ❌ If no: Document security limitations, proceed with multiprocessing
+
+### Week 22 Checkpoint
+- ✅ Does validation study show statistical rigor?
+- ❌ If no: Revise methodology, re-run critical experiments
+
+---
+
+## Resource Allocation
+
+**Developer Time:**
+- Phase 0: 3 weeks × 40 hrs = 120 hours
+- Phase 1: 4 weeks × 40 hrs = 160 hours
+- Phase 2: 5 weeks × 40 hrs = 200 hours
+- Phase 3: 3 weeks × 40 hrs = 120 hours
+- Phase 4: 2 weeks × 40 hrs = 80 hours
+- Phase 5: 3 weeks × 40 hrs = 120 hours
+- Phase 6: 4 weeks × 40 hrs = 160 hours
+- **Total: 960 hours (24 weeks)**
+
+**Budget:**
+- Developer: $50K-75K (primary)
+- Ground truth: $1K-2K
+- Dev API: $1.5K-2K
+- Validation API: $3K-5K
+- Contingency: $10K-15K
+- **Total: $55K-85K**
+
+---
+
+## Risk Mitigation Checklist
+
+- [ ] API rate limits mapped and respected
+- [ ] Fallback isolation strategy if Docker unavailable
+- [ ] Alternative if judge calibration fails (<85% agreement)
+- [ ] Budget buffer for unexpected API costs
+- [ ] Backup plan if task creation takes too long
+- [ ] Contingency if beta testers don't materialize
+- [ ] Plan B if validation study shows major issues
+
+---
+
+## Success Criteria
+
+**Technical:**
+- [ ] Judges ≥85% agreement with ground truth
+- [ ] Test-retest reliability ≥85%
+- [ ] Tier 2 tournament costs <$500
+- [ ] Adaptive designs save 30-50% cost
+- [ ] All statistical tests properly powered
+
+**Scientific:**
+- [ ] Pre-registered hypotheses
+- [ ] Effect sizes with CIs reported
+- [ ] FDR control maintained
+- [ ] Reproducible results
+- [ ] Open data & code
+
+**Adoption:**
+- [ ] ≥3 external research groups using it
+- [ ] Community task contributions
+- [ ] Paper accepted/published
+- [ ] ≥100 GitHub stars
+- [ ] Integration in ≥1 company pipeline
+
+---
+
+**Next Steps:**
+1. Set up development environment (shell.nix, uv, justfile)
+2. Start Phase 0, Week 1: Project scaffolding
+3. Create first task definition
+4. Begin SimpleChatDUT implementation
