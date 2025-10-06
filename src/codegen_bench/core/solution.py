@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Optional
+from typing import Any
 
 
 @dataclass
@@ -19,8 +19,8 @@ class Solution:
     changed_files: dict[str, str] = field(default_factory=dict)  # path -> content
     new_files: dict[str, str] = field(default_factory=dict)
     deleted_files: list[str] = field(default_factory=list)
-    tests: Optional[dict[str, str]] = None
-    documentation: Optional[str] = None
+    tests: dict[str, str] | None = None
+    documentation: str | None = None
 
     # Metrics
     generation_time_seconds: float = 0.0
@@ -31,15 +31,15 @@ class Solution:
     cost_usd: float = 0.0
 
     # Intermediate state (for analysis)
-    reasoning_trace: Optional[str] = None
+    reasoning_trace: str | None = None
     iterations: int = 1
 
     # Validation results
-    compiles: Optional[bool] = None
-    tests_pass: Optional[bool] = None
-    test_output: Optional[str] = None
+    compiles: bool | None = None
+    tests_pass: bool | None = None
+    test_output: str | None = None
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize to dict for caching."""
         return {
             "approach_id": self.approach_id,
@@ -65,7 +65,7 @@ class Solution:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> "Solution":
+    def from_dict(cls, data: dict[str, Any]) -> "Solution":
         """Deserialize from dict."""
         # Parse timestamp
         if isinstance(data.get("timestamp"), str):

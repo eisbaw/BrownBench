@@ -12,6 +12,10 @@ pkgs.mkShell {
     # Just for task running
     just
 
+    # Linting and type checking (use nix versions to avoid dynamic linking issues)
+    ruff
+    python312Packages.mypy
+
     # Development tools
     git
     gnumake

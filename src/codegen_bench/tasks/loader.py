@@ -1,0 +1,101 @@
+"""Task loader with validation."""
+
+from pathlib import Path
+
+from codegen_bench.core.task import Task
+
+
+class TaskLoader:
+    """Load tasks from various sources."""
+
+    def __init__(self, base_path: Path):
+        """Initialize task loader.
+
+        Args:
+            base_path: Base directory containing task definitions
+        """
+        self.base_path = base_path
+
+    def load_task(self, task_id: str) -> Task:
+        """Load single task by ID.
+
+        Args:
+            task_id: Task identifier
+
+        Returns:
+            Task object
+
+        Raises:
+            FileNotFoundError: If task file doesn't exist
+            ValueError: If task validation fails
+        """
+        # Try direct path first
+        path = self.base_path / f"{task_id}.yaml"
+        if not path.exists():
+            # Try looking in subdirectories
+            matches = list(self.base_path.rglob(f"{task_id}.yaml"))
+            if not matches:
+                raise FileNotFoundError(f"Task {task_id} not found in {self.base_path}")
+            path = matches[0]
+
+        task = Task.from_yaml(path)
+
+        # Validate task
+        if not task.validate():
+            raise ValueError(f"Task {task_id} failed validation")
+
+        return task
+
+    def load_task_set(self, name: str) -> list[Task]:
+        """Load predefined task set.
+
+        Args:
+            name: Task set name (core, embedded, all) or glob pattern
+
+        Returns:
+            List of Task objects
+
+        Raises:
+            ValueError: If any task fails validation
+        """
+        if name == "core":
+            pattern = "core/*.yaml"
+        elif name == "embedded":
+            pattern = "embedded/*.yaml"
+        elif name == "all":
+            pattern = "**/*.yaml"
+        else:
+            # Custom pattern
+            pattern = name
+
+        paths = sorted(self.base_path.glob(pattern))
+        if not paths:
+            raise FileNotFoundError(f"No tasks found matching pattern: {pattern}")
+
+        tasks = []
+        for path in paths:
+            try:
+                task = Task.from_yaml(path)
+                if not task.validate():
+                    raise ValueError(f"Task {task.id} failed validation")
+                tasks.append(task)
+            except Exception as e:
+                raise ValueError(f"Failed to load task from {path}: {e}") from e
+
+        return tasks
+
+    def list_available_tasks(self) -> list[str]:
+        """List all available task IDs.
+
+        Returns:
+            List of task IDs
+        """
+        tasks = []
+        for path in self.base_path.rglob("*.yaml"):
+            try:
+                task = Task.from_yaml(path)
+                tasks.append(task.id)
+            except Exception:
+                # Skip invalid tasks
+                continue
+        return sorted(tasks)

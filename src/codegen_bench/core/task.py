@@ -2,9 +2,9 @@
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Any, Literal
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 
 @dataclass
@@ -23,9 +23,9 @@ class Task:
     constraints: list[str] = field(default_factory=list)
 
     # Validation
-    test_suite_path: Optional[Path] = None
-    compile_command: Optional[str] = None
-    test_command: Optional[str] = None
+    test_suite_path: Path | None = None
+    compile_command: str | None = None
+    test_command: str | None = None
 
     # Metadata
     expected_human_time_minutes: int = 0
@@ -33,7 +33,7 @@ class Task:
     gotchas: list[str] = field(default_factory=list)
 
     # Reference solution (for metrics)
-    reference_solution_path: Optional[Path] = None
+    reference_solution_path: Path | None = None
 
     @classmethod
     def from_yaml(cls, path: Path) -> "Task":
@@ -71,7 +71,7 @@ class Task:
 
         return True
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize to dict."""
         return {
             "id": self.id,
