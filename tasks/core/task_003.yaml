@@ -1,0 +1,40 @@
+id: task_003
+name: "Fix string utility bugs"
+project: python_bugfix
+domain: bug_fix
+difficulty: easy
+
+codebase_path: test_projects/python_bugfix
+
+specification: |
+  Fix bugs in the reverse_words function in string_utils.py:
+
+  Current behavior:
+  - reverse_words("hello  world") returns "world hello" (loses extra space)
+  - reverse_words(" hello world ") returns "world hello" (loses leading/trailing spaces)
+
+  Expected behavior:
+  - reverse_words("hello  world") should return "world  hello" (preserve spacing)
+  - reverse_words(" hello world ") should return " world hello " (preserve whitespace)
+
+  The bug is that split() without arguments collapses multiple spaces.
+  Fix: Use split(" ") to preserve exact spacing between words.
+
+constraints:
+  - Do not change the function signature
+  - Do not change the function name
+  - All tests must pass after the fix
+  - Do not modify count_vowels or is_palindrome functions
+  - Only modify string_utils.py
+
+key_files:
+  - string_utils.py
+
+test_command: "python -m pytest test_string_utils.py -v"
+
+expected_human_time_minutes: 10
+
+gotchas:
+  - Python's split() without arguments behaves differently than split(" ")
+  - split() collapses whitespace, split(" ") preserves it
+  - Must handle both multiple spaces and leading/trailing spaces

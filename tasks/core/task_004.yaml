@@ -1,0 +1,43 @@
+id: task_004
+name: "Implement dynamic string buffer"
+project: c_memory
+domain: systems_programming
+difficulty: medium
+
+codebase_path: test_projects/c_memory
+
+specification: |
+  Implement a dynamic string buffer in strbuf.c with the following functions:
+
+  1. strbuf_init: Allocate initial buffer with malloc
+  2. strbuf_append: Append string, growing buffer if needed (use realloc)
+  3. strbuf_free: Free allocated memory
+  4. strbuf_cstr: Return null-terminated C string
+
+  Requirements:
+  - Buffer must grow automatically when capacity is exceeded
+  - Growth strategy: double the capacity when full
+  - Null-terminate strings properly
+  - Handle empty strings correctly
+  - No memory leaks (all malloc'd memory must be freed)
+
+constraints:
+  - Must use malloc/realloc/free (no static buffers)
+  - Must handle capacity growth correctly
+  - Must null-terminate strings
+  - Do not modify strbuf.h or test_strbuf.c
+  - Only modify strbuf.c
+
+key_files:
+  - strbuf.c
+
+compile_command: "make clean && make"
+test_command: "make test"
+
+expected_human_time_minutes: 30
+
+gotchas:
+  - Must null-terminate the buffer
+  - Capacity must include space for null terminator
+  - realloc can fail, but tests don't check for that
+  - Initial buffer should be allocated in strbuf_init

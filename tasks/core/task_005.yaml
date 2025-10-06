@@ -1,0 +1,46 @@
+id: task_005
+name: "Optimize array sum function"
+project: c_optimization
+domain: performance_optimization
+difficulty: medium
+
+codebase_path: test_projects/c_optimization
+
+specification: |
+  Optimize the array_sum function in array_ops.c for better performance.
+
+  Current implementation: Naive sequential loop
+  Target: Reduce execution time by using optimization techniques
+
+  Suggested optimizations:
+  - Loop unrolling (process 4-8 elements per iteration)
+  - Use multiple accumulators to reduce dependency chains
+  - Add restrict keyword for pointer aliasing hints
+  - Consider compiler optimization pragmas
+
+  Requirements:
+  - Must pass all correctness tests
+  - Should improve performance on large arrays (10M elements)
+  - Must not change function signature
+  - Must compile with -O2 flag
+
+constraints:
+  - Do not change array_ops.h
+  - Do not modify test_array_ops.c
+  - Only modify array_ops.c
+  - Must maintain correct results
+  - Cannot use assembly or intrinsics
+
+key_files:
+  - array_ops.c
+
+compile_command: "make clean && make"
+test_command: "make test"
+
+expected_human_time_minutes: 20
+
+gotchas:
+  - Loop unrolling must handle non-multiple lengths correctly
+  - Multiple accumulators reduce data dependencies
+  - Compiler may already optimize with -O2, but manual unrolling can still help
+  - restrict keyword tells compiler pointers don't alias

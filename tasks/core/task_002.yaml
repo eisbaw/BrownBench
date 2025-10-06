@@ -1,0 +1,34 @@
+id: task_002
+name: "Implement binary search algorithm"
+project: python_algorithms
+domain: algorithms
+difficulty: medium
+
+codebase_path: test_projects/python_algorithms
+
+specification: |
+  Replace the linear_search function with a binary_search implementation that:
+  - Takes a sorted array and target value
+  - Returns the index of target if found, -1 otherwise
+  - Uses O(log n) binary search algorithm instead of O(n) linear search
+  - Maintains the same function signature
+  - Passes all existing tests
+
+constraints:
+  - Must be named 'linear_search' (do not rename the function)
+  - Must maintain the same signature: linear_search(arr, target)
+  - Must handle edge cases: empty list, single element, target not found
+  - Must work on sorted arrays only
+  - Do not add external dependencies
+
+key_files:
+  - algorithms.py
+
+test_command: "python -m pytest test_algorithms.py -v"
+
+expected_human_time_minutes: 15
+
+gotchas:
+  - The function is named linear_search but should use binary search internally
+  - Tests expect the function to work with sorted arrays
+  - Must handle empty arrays without errors
