@@ -1,7 +1,7 @@
 """Integration test for end-to-end workflow."""
 
 import json
-import os
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
@@ -159,9 +159,6 @@ def test_registry_integration():
 
 def test_solution_persistence(tmp_path):
     """Test solution can be saved and loaded from JSON."""
-    from codegen_bench.core.solution import Solution
-    from datetime import UTC, datetime
-
     # Create solution
     solution = Solution(
         approach_id="test-dut",
