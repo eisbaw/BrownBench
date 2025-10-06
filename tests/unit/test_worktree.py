@@ -122,3 +122,22 @@ def test_worktree_isolation(git_repo):
 
     # Clean up
     strategy.remove_worktree(worktree_path)
+
+
+def test_create_worktree_failure(tmp_path):
+    """Test worktree creation failure handling."""
+    # Create a non-git directory
+    non_git = tmp_path / "non_git"
+    non_git.mkdir()
+
+    with pytest.raises(ValueError, match="Not a git repository"):
+        GitWorktreeStrategy(non_git)
+
+
+def test_remove_nonexistent_worktree(git_repo):
+    """Test removing non-existent worktree raises error."""
+    strategy = GitWorktreeStrategy(git_repo)
+    fake_path = git_repo.parent / "nonexistent_worktree"
+
+    with pytest.raises(RuntimeError, match="Failed to remove worktree"):
+        strategy.remove_worktree(fake_path)
