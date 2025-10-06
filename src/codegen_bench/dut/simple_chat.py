@@ -9,6 +9,7 @@ import anthropic
 from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
 from codegen_bench.dut.base import ApproachMetadata, CodeGenerationApproach
+from codegen_bench.parsing.extractor import CodeExtractor
 
 
 class SimpleChatDUT(CodeGenerationApproach):
@@ -121,10 +122,7 @@ int main() {{
     def _parse_code_changes(self, response: str) -> dict[str, str]:
         """Extract file changes from response.
 
-        Parses code blocks in the format:
-        ```language:path/to/file.ext
-        code content
-        ```
+        Uses CodeExtractor to support multiple formats.
 
         Args:
             response: LLM response text
@@ -132,28 +130,7 @@ int main() {{
         Returns:
             Dictionary mapping file paths to file contents
         """
-        changed_files = {}
-        lines = response.split("\n")
-        i = 0
-
-        while i < len(lines):
-            line = lines[i]
-            # Look for code block start with file path
-            if line.startswith("```") and ":" in line:
-                # Extract language and path
-                parts = line[3:].split(":", 1)
-                if len(parts) == 2:
-                    path = parts[1].strip()
-                    # Collect code until closing ```
-                    code_lines = []
-                    i += 1
-                    while i < len(lines) and not lines[i].strip().startswith("```"):
-                        code_lines.append(lines[i])
-                        i += 1
-                    changed_files[path] = "\n".join(code_lines)
-            i += 1
-
-        return changed_files
+        return CodeExtractor.extract_all(response)
 
     def _calculate_cost(self, input_tokens: int, output_tokens: int) -> float:
         """Calculate API cost based on token usage.
