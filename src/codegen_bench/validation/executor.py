@@ -131,7 +131,7 @@ class ValidationExecutor:
         """
         import re
 
-        metrics = {
+        metrics: dict[str, int | str] = {
             "framework": "pytest",
             "passed": 0,
             "failed": 0,
@@ -166,7 +166,7 @@ class ValidationExecutor:
         """
         import re
 
-        metrics = {
+        metrics: dict[str, int | str] = {
             "framework": "unittest",
             "passed": 0,
             "failed": 0,

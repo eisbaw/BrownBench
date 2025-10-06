@@ -4,8 +4,9 @@
 # Variables
 python := ".venv/bin/python"
 pytest := ".venv/bin/pytest"
-ruff := ".venv/bin/ruff"
-mypy := ".venv/bin/mypy"
+# Use nix-provided tools to avoid dynamic linking issues on NixOS
+ruff := `echo $PATH | tr ":" "\n" | grep -m1 ruff | xargs -I{} echo {}/ruff`
+mypy := `echo $PATH | tr ":" "\n" | grep -m1 mypy | xargs -I{} echo {}/mypy`
 
 # Default recipe (list available recipes)
 default:

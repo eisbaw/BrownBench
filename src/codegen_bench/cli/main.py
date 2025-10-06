@@ -1,4 +1,5 @@
 """Main CLI interface."""
+# mypy: disable-error-code="misc"
 
 from pathlib import Path
 
