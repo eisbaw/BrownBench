@@ -103,7 +103,7 @@ class ValidationExecutor:
                 timed_out=False,
             )
 
-    def parse_test_output(self, output: str, framework: str = "pytest") -> dict:
+    def parse_test_output(self, output: str, framework: str = "pytest") -> dict[str, int | str]:
         """Parse test output to extract metrics.
 
         Args:
@@ -120,7 +120,7 @@ class ValidationExecutor:
         else:
             return {"framework": framework, "raw_output": output}
 
-    def _parse_pytest_output(self, output: str) -> dict:
+    def _parse_pytest_output(self, output: str) -> dict[str, int | str]:
         """Parse pytest output.
 
         Args:
@@ -155,7 +155,7 @@ class ValidationExecutor:
 
         return metrics
 
-    def _parse_unittest_output(self, output: str) -> dict:
+    def _parse_unittest_output(self, output: str) -> dict[str, int | str]:
         """Parse unittest output.
 
         Args:
@@ -187,6 +187,8 @@ class ValidationExecutor:
                     metrics["failed"] = int(fail_match.group(1))
                 if err_match:
                     metrics["errors"] = int(err_match.group(1))
-                metrics["passed"] = total - metrics["failed"] - metrics["errors"]
+                failed_count = metrics["failed"] if isinstance(metrics["failed"], int) else 0
+                errors_count = metrics["errors"] if isinstance(metrics["errors"], int) else 0
+                metrics["passed"] = total - failed_count - errors_count
 
         return metrics

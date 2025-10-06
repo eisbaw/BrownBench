@@ -3,7 +3,6 @@
 import hashlib
 import json
 from pathlib import Path
-from typing import Any
 
 from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
@@ -66,7 +65,7 @@ class SolutionCache:
             with open(cache_file) as f:
                 data = json.load(f)
             return Solution.from_dict(data)
-        except (json.JSONDecodeError, KeyError, ValueError) as e:
+        except (json.JSONDecodeError, KeyError, ValueError):
             # Cache file corrupted, return None
             return None
 

@@ -1,7 +1,6 @@
 """Tests for solution applicator."""
 
-from datetime import datetime, timezone
-from pathlib import Path
+from datetime import UTC, datetime
 
 import pytest
 
@@ -24,7 +23,7 @@ def sample_solution():
         approach_id="test-dut",
         task_id="test_task",
         seed=42,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         changed_files={
             "src/main.c": "#include <stdio.h>\n\nint main() {\n    return 0;\n}\n",
             "src/helper.c": "void helper() {}\n",
@@ -93,7 +92,7 @@ def test_apply_creates_directories(workspace):
         approach_id="test",
         task_id="test",
         seed=42,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         changed_files={"deep/nested/dir/file.c": "content"},
     )
 
@@ -140,7 +139,7 @@ def test_apply_empty_solution(workspace):
         approach_id="test",
         task_id="test",
         seed=42,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
     )
 
     applicator = SolutionApplicator(workspace)

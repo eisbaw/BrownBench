@@ -1,7 +1,6 @@
 """Tests for solution caching."""
 
-from datetime import datetime, timezone
-from pathlib import Path
+from datetime import UTC, datetime
 
 import pytest
 
@@ -67,7 +66,7 @@ def sample_solution(simple_task):
         approach_id="test-dut",
         task_id=simple_task.id,
         seed=42,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         changed_files={"main.c": "int main() { return 0; }"},
         generation_time_seconds=1.0,
         total_tokens=100,

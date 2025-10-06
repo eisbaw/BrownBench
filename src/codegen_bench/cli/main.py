@@ -89,9 +89,9 @@ def generate(
     try:
         task = task_loader.load_task(task_id)
         console.print(f"Task: {task.name}")
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         console.print(f"[red]Error: Task {task_id} not found[/red]")
-        raise click.Abort()
+        raise click.Abort() from e
 
     # Get DUT
     try:
@@ -100,7 +100,7 @@ def generate(
         dut_instance = dut_class(dut_config)
     except (ValueError, KeyError) as e:
         console.print(f"[red]Error: {e}[/red]")
-        raise click.Abort()
+        raise click.Abort() from e
 
     # Setup cache
     cache_dir = ctx.obj["cache_dir"]
@@ -168,9 +168,9 @@ def validate(
     task_loader = TaskLoader(Path("tasks"))
     try:
         task = task_loader.load_task(solution.task_id)
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         console.print(f"[red]Error: Task {solution.task_id} not found[/red]")
-        raise click.Abort()
+        raise click.Abort() from e
 
     # Create worktree
     if not task.codebase_path.exists():
@@ -183,7 +183,7 @@ def validate(
         console.print(f"Created worktree at: {worktree_path}")
     except ValueError as e:
         console.print(f"[red]Error: {e}[/red]")
-        raise click.Abort()
+        raise click.Abort() from e
 
     try:
         # Apply solution

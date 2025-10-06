@@ -1,7 +1,6 @@
 """Extract code changes from LLM outputs."""
 
 import re
-from typing import Any
 
 
 class CodeExtractor:

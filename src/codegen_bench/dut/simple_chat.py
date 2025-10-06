@@ -2,7 +2,8 @@
 
 import os
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from typing import Any
 
 import anthropic
 
@@ -15,7 +16,9 @@ from codegen_bench.parsing.extractor import CodeExtractor
 class SimpleChatDUT(CodeGenerationApproach):
     """Single-turn chat with minimal prompting using Claude."""
 
-    def __init__(self, config: dict):
+    client: anthropic.Anthropic | None
+
+    def __init__(self, config: dict[str, Any]):
         """Initialize SimpleChatDUT.
 
         Args:
@@ -75,7 +78,7 @@ class SimpleChatDUT(CodeGenerationApproach):
             approach_id=self.get_metadata().id,
             task_id=task.id,
             seed=seed,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             changed_files=changed_files,
             generation_time_seconds=elapsed,
             total_tokens=response.usage.input_tokens + response.usage.output_tokens,
