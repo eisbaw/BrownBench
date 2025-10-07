@@ -250,7 +250,6 @@ def test_worktree_context_manager_fallback_cleanup(git_repo, monkeypatch):
     tracked_path = None
 
     # Mock remove_worktree to fail
-    original_remove = strategy.remove_worktree
     remove_called = [False]
 
     def mock_remove(path):
