@@ -738,10 +738,10 @@
   - NOTE: Low priority - not a known issue
 
 **Edge Case Tests:**
-- [ ] **Tournament runner with API failures**
-  - What happens if all judge calls fail?
-  - Test: Mock persistent API errors, verify graceful degradation
-  - NOTE: Medium priority
+- [x] **DONE: Tournament runner with API failures**
+  - Test: test_tournament_with_persistent_api_failures
+  - Verifies error propagation when all API calls fail
+  - Commit: (current session)
 
 - [x] **DONE: MAMS with scipy.stats.dunnett unavailable**
   - FIXED: test_mams_dunnett_fallback_to_bonferroni added
@@ -859,11 +859,64 @@
 ✅ Proper resource cleanup with context managers and finally blocks
 
 **Remaining Optional Improvements (LOW PRIORITY):**
-- [ ] Add error path tests for CLI commands (to reach 90%+ coverage)
+- [ ] Add error path tests for CLI commands (to reach 95%+ coverage on CLI)
 - [ ] Add performance benchmarks for large tournaments
 - [ ] Implement async support for parallel judge evaluations - FUTURE
 - [ ] Add rate limiting for API calls - FUTURE
 - [ ] Implement graceful shutdown handling - FUTURE
+
+**New Issues Found (2025-10-07 Final Review):**
+
+### Missing Tests (Medium Priority)
+- [ ] **ISSUE 8.1: Task validation error paths uncovered** (Impact: Medium, Effort: Low)
+  - Location: src/codegen_bench/core/task.py:83-102
+  - Problem: shlex.split() error paths not tested (lines 83-90, 95-102)
+  - Test: test_task_validate_invalid_compile_command, test_task_validate_invalid_test_command
+  - Coverage: 83% → expected 95%+
+
+- [ ] **ISSUE 8.2: TaskLoader error paths uncovered** (Impact: Medium, Effort: Low)
+  - Location: src/codegen_bench/tasks/loader.py:64-87, 102-107
+  - Problem: OSError/ValueError/KeyError handling not tested
+  - Test: test_load_task_set_missing_pattern, test_load_task_set_corrupted_yaml
+  - Coverage: 87% → expected 95%+
+
+- [ ] **ISSUE 8.3: Cache concurrent corruption handling** (Impact: Low, Effort: Low)
+  - Location: src/codegen_bench/cache/store.py:138-144
+  - Problem: Exception path in atomic write cleanup not tested
+  - Test: test_cache_put_exception_during_write
+  - Coverage: 88% → expected 95%+
+
+- [ ] **ISSUE 8.4: Applicator exception paths uncovered** (Impact: Low, Effort: Low)
+  - Location: src/codegen_bench/validation/applicator.py:67-70, 86-89, 114, 118
+  - Problem: OSError/PermissionError paths not tested
+  - Test: test_apply_write_permission_denied, test_apply_delete_permission_denied, test_apply_diff_timeout
+  - Coverage: 85% → expected 95%+
+
+### Potential Bugs (Low Priority)
+- [ ] **ISSUE 9.1: __main__.py never tested or executed** (Impact: Low, Effort: Low)
+  - Location: src/codegen_bench/__main__.py:3-6
+  - Problem: 0% coverage, CLI entry point not tested
+  - Test: test_main_entry_point (integration test)
+  - Coverage: 0% → expected 100%
+
+- [ ] **ISSUE 9.2: Worktree error logging incomplete** (Impact: Low, Effort: Low)
+  - Location: src/codegen_bench/validation/worktree.py:86, 97-98, 107-109, 138
+  - Problem: Some error paths don't have tests (OSError on line 109, 138)
+  - Test: test_worktree_create_oserror, test_worktree_remove_oserror
+  - Coverage: 91% → expected 95%+
+
+### Code Smells (Low Priority)
+- [ ] **ISSUE 10.1: Inconsistent error handling in executor** (Impact: Low, Effort: Medium)
+  - Location: src/codegen_bench/validation/executor.py:100-103, 126, 158-159
+  - Problem: Some subprocess errors caught, others not
+  - Fix: Make error handling consistent (either catch all or catch none)
+  - Test: test_executor_compile_oserror, test_executor_test_calledprocesserror
+
+- [ ] **ISSUE 10.2: CLI error messages lack context** (Impact: Low, Effort: Low)
+  - Location: src/codegen_bench/cli/main.py:51, 101-102, 170-172, etc.
+  - Problem: Generic error messages without actionable guidance
+  - Fix: Add context (DUT name, task ID, what failed)
+  - Test: test_cli_generate_error_messages, test_cli_validate_error_messages
 
 **Code Quality Improvements from Architecture Review (2025-10-07):**
 
@@ -1057,23 +1110,21 @@ Ready to proceed with Phase 1: Judge system and tournament runner
 
 ### Low Priority (Nice to Have)
 
-- [ ] **ISSUE 2.2: Remove empty directories** (Impact: Low, Effort: Low)
+- [x] **DONE: ISSUE 2.2: Remove empty directories** (Impact: Low, Effort: Low)
   - Location: src/codegen_bench/isolation/, src/codegen_bench/config/
-  - Problem: Premature abstraction
-  - Fix: Delete empty directories
-  - Test: N/A
+  - Fixed: Empty directories removed
+  - Commit: (current session)
 
-- [ ] **ISSUE 7.1: Document magic numbers** (Impact: Low, Effort: Low)
+- [x] **DONE: ISSUE 7.1: Document magic numbers** (Impact: Low, Effort: Low)
   - Location: src/codegen_bench/stats/ratings/bayesian_elo.py:6-18
-  - Problem: No explanation of WHY these values chosen
-  - Fix: Add explanatory comments with sources
-  - Test: N/A
+  - Fixed: Added historical context and rationale for all ELO constants
+  - Commit: (current session)
 
-- [ ] **ISSUE 7.2: Clarify code extraction precedence** (Impact: Low, Effort: Low)
+- [x] **DONE: ISSUE 7.2: Clarify code extraction precedence** (Impact: Low, Effort: Low)
   - Location: src/codegen_bench/parsing/extractor.py:122-167
-  - Problem: Merge order unclear
-  - Fix: Make precedence explicit with clear comments
-  - Test: Verify precedence order
+  - Fixed: Added detailed precedence documentation and rationale
+  - Test: test_extract_all_xml_overrides_comments added
+  - Commit: (current session)
 
 ---
 

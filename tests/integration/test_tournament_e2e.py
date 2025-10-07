@@ -225,10 +225,11 @@ def test_tournament_runner_initialization(tmp_path):
 
 
 def test_tournament_with_persistent_api_failures(tmp_path):
-    """Test tournament graceful degradation when all judge API calls fail.
+    """Test that DUT API failures propagate as exceptions.
 
-    This verifies that the tournament runner handles persistent API failures
-    without crashing, and provides meaningful error messages.
+    Verifies that when all API calls fail, the tournament runner propagates
+    the error rather than silently swallowing it, allowing calling code to
+    handle the failure appropriately.
     """
     from codegen_bench.cache.store import SolutionCache
     from codegen_bench.judge.claude_judge import ClaudeJudge
