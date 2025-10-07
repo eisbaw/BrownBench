@@ -94,7 +94,7 @@ class TournamentResult:
     arenas: list[str]
     total_comparisons: int = 0
     total_cost_usd: float = 0.0
-    start_time: float = field(default_factory=time.time)
+    start_time: float = 0.0  # Set explicitly when tournament starts
     end_time: float = 0.0
 
     @property
