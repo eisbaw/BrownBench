@@ -1043,33 +1043,29 @@ Ready to proceed with Phase 1: Judge system and tournament runner
 ## Architectural Improvements from MPED Review - Second Pass (2025-10-07 Evening)
 
 ### High Priority (Affects Maintainability)
-- [ ] **ISSUE 11.1: Refactor Task.validate() to raise exceptions instead of returning bool**
-  - Location: src/codegen_bench/core/task.py:64-104
-  - Problem: Boolean blindness - validation failures lose specificity
-  - Impact: Callers get generic "failed validation" instead of specific errors
-  - Fix: Raise ValidationError with specific messages (e.g., "Codebase path does not exist: {path}")
-  - Violates MPED fail-fast principle
-  - Effort: Medium (affects TaskLoader and all validate() callers)
+- [x] **DONE: ISSUE 11.1: Refactor Task.validate() to raise exceptions instead of returning bool**
+  - Fixed: Task.validate() now raises ValidationError with specific error details
+  - Fixed: All validation failures log consistently before raising
+  - Fixed: TaskLoader wraps ValidationError as TaskError to maintain interface
+  - Test: All tests updated to expect ValidationError with specific messages
+  - Commit: 5310891
 
-### Medium Priority (Code Quality)
-- [ ] **ISSUE 11.2: Inconsistent logging in Task.validate()**
-  - Location: src/codegen_bench/core/task.py:68-77 (path checks), 84-102 (command checks)
-  - Problem: Command validation logs errors, path validation doesn't
-  - Fix: Log all validation failures consistently
-  - Effort: Low
+- [x] **DONE: ISSUE 11.2: Inconsistent logging in Task.validate()**
+  - Fixed: All validation failures now log consistently (missing_task_id, missing_task_name, codebase_not_found, etc.)
+  - All path checks and command checks log before raising ValidationError
+  - Commit: 5310891 (same commit as 11.1)
 
 ### Low Priority (Test Quality)
-- [ ] **ISSUE 11.3: Uncertain behavior in test_main_entry_point_version**
-  - Location: tests/unit/test_main_entry.py:30
-  - Problem: Accepts returncode in (0, 2) - suggests uncertainty about correct behavior
-  - Fix: Determine actual expected behavior, test specifically
-  - Effort: Low
+- [x] **DONE: ISSUE 11.3: Uncertain behavior in test_main_entry_point_version**
+  - Fixed: Renamed to test_main_entry_point_invalid_option
+  - Test now validates expected behavior: invalid options exit with code 2
+  - Removed ambiguity from test expectations
+  - Commit: 2fa9969
 
-- [ ] **ISSUE 11.4: Test error message quality**
-  - Location: tests/unit/test_task_loader.py:123, 137, 159
-  - Problem: Tests only match "failed validation" / "Failed to load" without verifying specifics
-  - Fix: Verify specific error messages to ensure quality debugging info
-  - Effort: Low
+- [x] **DONE: ISSUE 11.4: Test error message quality**
+  - Fixed: test_load_invalid_task_fails_validation now matches specific error "codebase path does not exist"
+  - All TaskError messages now include specific ValidationError details
+  - Commit: 5310891 (validated as part of 11.1)
 
 ---
 
