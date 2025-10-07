@@ -199,3 +199,71 @@ def test_worktree_context_manager_multiple(git_repo):
     worktrees = strategy.list_worktrees()
     for path in paths:
         assert path not in worktrees
+
+
+def test_list_worktrees_error(git_repo, monkeypatch):
+    """Test list_worktrees handles subprocess errors."""
+    strategy = GitWorktreeStrategy(git_repo)
+
+    def mock_run(*args, **kwargs):
+        raise subprocess.CalledProcessError(1, ["git"], stderr="error")
+
+    monkeypatch.setattr(subprocess, "run", mock_run)
+
+    with pytest.raises(RuntimeError, match="Failed to list worktrees"):
+        strategy.list_worktrees()
+
+
+def test_create_worktree_timeout(git_repo, monkeypatch):
+    """Test create_worktree handles timeout."""
+    strategy = GitWorktreeStrategy(git_repo)
+
+    def mock_run(*args, **kwargs):
+        raise subprocess.TimeoutExpired(["git"], 30)
+
+    monkeypatch.setattr(subprocess, "run", mock_run)
+
+    with pytest.raises(RuntimeError, match="Worktree creation timed out"):
+        strategy.create_worktree()
+
+
+def test_remove_worktree_timeout(git_repo, monkeypatch):
+    """Test remove_worktree handles timeout."""
+    strategy = GitWorktreeStrategy(git_repo)
+    worktree_path = strategy.create_worktree()
+
+    def mock_run(*args, **kwargs):
+        # Only timeout on remove, not on create
+        if "remove" in args[0]:
+            raise subprocess.TimeoutExpired(["git"], 30)
+        return subprocess.CompletedProcess(args[0], 0)
+
+    monkeypatch.setattr(subprocess, "run", mock_run)
+
+    with pytest.raises(RuntimeError, match="Worktree removal timed out"):
+        strategy.remove_worktree(worktree_path)
+
+
+def test_worktree_context_manager_fallback_cleanup(git_repo, monkeypatch):
+    """Test context manager fallback to manual cleanup when git remove fails."""
+    strategy = GitWorktreeStrategy(git_repo)
+    tracked_path = None
+
+    # Mock remove_worktree to fail
+    original_remove = strategy.remove_worktree
+    remove_called = [False]
+
+    def mock_remove(path):
+        remove_called[0] = True
+        raise RuntimeError("Git worktree remove failed")
+
+    with strategy.worktree() as worktree_path:
+        tracked_path = worktree_path
+        assert worktree_path.exists()
+        # Patch remove_worktree to fail
+        monkeypatch.setattr(strategy, "remove_worktree", mock_remove)
+
+    # Should have tried git remove
+    assert remove_called[0]
+    # Path should still be cleaned up (via shutil.rmtree fallback)
+    assert not tracked_path.exists()
