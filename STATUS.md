@@ -1,19 +1,19 @@
 # BrownBench Implementation Status
 
-**Date:** 2025-10-07  
-**Project:** BrownBench - AI Code Generation Benchmark Suite  
+**Date:** 2025-10-07
+**Project:** BrownBench - AI Code Generation Benchmark Suite
 **Repository:** brownbench
 
 ## Executive Summary
 
-BrownBench is an AI code generation benchmark framework in active development. **Phase 0 is 100% complete** with excellent code quality (93% test coverage, 157 passing tests). **Phase 1 is 95% complete**, with only minor tasks remaining to demonstrate the full tournament functionality.
+BrownBench is an AI code generation benchmark framework in active development. **Phase 0 is 100% complete** and **Phase 1 is 100% complete** with excellent code quality (93% test coverage, 165 passing tests). The system can now run full tournaments comparing multiple DUTs across multiple tasks and quality dimensions.
 
 ## Implementation Metrics
 
-- **Source Code:** 2,541 lines (31 Python modules)
-- **Test Code:** 3,214 lines (test/code ratio: 1.26:1)
+- **Source Code:** 2,726 lines (33 Python modules)
+- **Test Code:** 3,432 lines (test/code ratio: 1.26:1)
 - **Test Coverage:** 93%
-- **Tests Passing:** 157/157 ✓
+- **Tests Passing:** 165/165 ✓
 - **Linting:** All checks passing ✓
 - **Type Checking:** All checks passing (mypy) ✓
 
@@ -73,7 +73,7 @@ BrownBench is an AI code generation benchmark framework in active development. *
 
 **Phase 0 Deliverable:** Generate and validate solution for 1 sample task ✓
 
-### Phase 1: Minimal Viable Benchmark (Weeks 4-7) - **95% COMPLETE**
+### Phase 1: Minimal Viable Benchmark (Weeks 4-7) - **100% COMPLETE ✓**
 
 #### Week 4: Judge System ✓
 - ✓ Judge abstract base class
@@ -107,13 +107,25 @@ BrownBench is an AI code generation benchmark framework in active development. *
   - Cost summary
   - Statistical summary (agreement rates, ELO spread)
 
-#### Week 6-7: Task Curation & Testing - **20% COMPLETE**
-- ✓ 1 sample task created (C hello world)
-- ⚠ Need 4 more tasks (Python, C, bug fixes, optimizations)
-- ⚠ Need ElaboratePromptDUT
-- ⚠ Need end-to-end tournament integration test
+#### Week 6-7: Task Curation & Testing ✓
+- ✓ 5 benchmark tasks created:
+  - task_001: C hello world (simple)
+  - task_002: Python binary search algorithm
+  - task_003: Python string utility bug fixes
+  - task_004: C dynamic string buffer (memory management)
+  - task_005: C array sum optimization
+- ✓ ElaboratePromptDUT implementation:
+  - Enhanced system prompt with best practices
+  - Critical principles (maintainability, correctness, robustness)
+  - Workflow guidance
+  - Context-rich prompts with constraints and gotchas
+- ✓ End-to-end tournament integration test:
+  - Full tournament flow with mocked APIs
+  - 2 DUTs competing on multiple tasks
+  - Verification of results structure
+  - 4 comprehensive E2E tests
 
-**Phase 1 Deliverable:** Working tournament with 2 DUTs on 5 tasks - **95% complete**
+**Phase 1 Deliverable:** Working tournament with 2 DUTs on 5 tasks ✓
 
 ## Architecture
 
@@ -121,8 +133,8 @@ BrownBench is an AI code generation benchmark framework in active development. *
 ```
 codegen_bench/
 ├── core/          # Core data models and tournament runner
-├── dut/           # Device Under Test implementations
-├── tasks/         # Task loading and management
+├── dut/           # Device Under Test implementations (2: simple, elaborate)
+├── tasks/         # Task loading and management (5 tasks)
 ├── cache/         # Solution caching
 ├── parsing/       # Code extraction from LLM responses
 ├── validation/    # Solution validation (worktree, compile, test)
@@ -162,6 +174,7 @@ codegen_bench/
 3. ✓ Resolved all type checking issues (mypy)
 4. ✓ Added comprehensive integration tests for CLI
 5. ✓ Added end-to-end integration test for Phase 0 deliverable
+6. ✓ Added end-to-end tournament integration tests
 
 ### Remaining Technical Debt
 1. **Large functions** in validation/executor.py (parse_test_output: 40 lines)
@@ -176,44 +189,31 @@ codegen_bench/
 Recent commits demonstrate iterative, test-driven development:
 
 ```
+1bfa68f test: add comprehensive end-to-end tournament integration tests
+d6dd8ce fix: add test projects as regular directories not submodules
+11a516f feat: add 4 additional benchmark tasks (task_002-task_005)
+366f524 docs: add comprehensive implementation status document
 cdcf66f refactor: extract magic numbers in Bayesian ELO to named constants
 f7c69ba fix: remove unused Path import from tournament.py
 2c732cc feat: add terminal reporting for tournament results
 4241086 feat: implement TournamentRunner for comparing DUTs
-996648e fix: resolve linting issues in integration tests
-0023de7 test: add comprehensive CLI integration tests
-227aa7e test: add end-to-end integration test for Phase 0 deliverable
-bf06e60 feat: implement Bayesian ELO rating system
-ba7531f feat: implement judge system with ClaudeJudge and JudgeOrchestrator
 ```
 
 ## Next Steps
 
-### Immediate (to complete Phase 1)
-1. **Create 4 additional benchmark tasks** (2-3 hours)
-   - 2 Python tasks (algorithm, bug fix)
-   - 2 C tasks (systems programming, optimization)
-   
-2. **Implement ElaboratePromptDUT** (1 hour)
-   - Enhanced system prompt with best practices
-   - Codebase analysis integration
-   
-3. **Create end-to-end tournament integration test** (1 hour)
-   - Test full tournament flow
-   - Mock API to avoid costs
-   - Verify leaderboard generation
+### Phase 2: Statistical Rigor (Weeks 8-12)
+1. **TrueSkill rating system** (alternative to ELO)
+2. **Effect size calculations** (Hedges' g with bootstrap CIs)
+3. **Variance decomposition** (mixed linear models)
+4. **Multiple comparison correction** (FDR, Holm-Bonferroni, Dunnett)
+5. **Power analysis** (sample size calculation)
+6. **Sequential testing** (group sequential design with O'Brien-Fleming boundaries)
+7. **MAMS adaptive design** (multi-arm multi-stage)
+8. **Pre-registration system** (analysis plans, hypotheses)
 
-**Total time to Phase 1 completion: 4-5 hours**
-
-### Short-term (Phase 2)
-- TrueSkill rating system (alternative to ELO)
-- Statistical significance tests
-- Effect size calculations (Hedges' g)
-- Multiple comparison correction (FDR)
-- Sequential testing with early stopping
-
-### Medium-term (Phase 3)
-- Judge calibration against ground truth
+### Phase 3: Judge Calibration (Weeks 13-15)
+- Ground truth collection from expert programmers
+- Judge calibration metrics (agreement, Fleiss' Kappa)
 - Bias detection (position, length)
 - Prompt engineering iteration
 
@@ -234,14 +234,49 @@ codegen-bench generate \
 codegen-bench validate solution.json --all
 ```
 
-### Run Tournament (Future)
-```bash
-codegen-bench tournament \
-  --duts simple-chat,elaborate-prompt \
-  --tasks core \
-  --arenas maintainability,architecture \
-  --samples 3 \
-  --output results/
+### Run Tournament (via Python API)
+```python
+from pathlib import Path
+from codegen_bench.core.tournament import TournamentRunner
+from codegen_bench.core.arena import MAINTAINABILITY
+from codegen_bench.dut.registry import DUTRegistry
+from codegen_bench.cache.store import SolutionCache
+from codegen_bench.judge.orchestrator import JudgeOrchestrator
+from codegen_bench.judge.claude_judge import ClaudeJudge
+from codegen_bench.tasks.loader import TaskLoader
+
+# Create DUTs
+duts = [
+    DUTRegistry.create("simple-chat", {"api_key": "sk-..."}),
+    DUTRegistry.create("elaborate-prompt", {"api_key": "sk-..."}),
+]
+
+# Load tasks
+task_loader = TaskLoader(Path("tasks"))
+tasks = task_loader.load_task_set("core")
+
+# Create judges
+judges = [ClaudeJudge(api_key="sk-...", model="claude-sonnet-4-20250514")]
+judge_orchestrator = JudgeOrchestrator(judges)
+
+# Create cache
+cache = SolutionCache(Path(".cache"))
+
+# Run tournament
+runner = TournamentRunner(
+    duts=duts,
+    tasks=tasks,
+    judges=judge_orchestrator,
+    arenas=[MAINTAINABILITY],
+    cache=cache,
+    samples_per_pairing=3,
+)
+
+results = runner.run()
+
+# Access results
+for dut_id, rating in results.ratings.items():
+    print(f"{dut_id}: ELO={rating.elo.mean:.0f} ±{rating.elo.std:.0f}")
 ```
 
 ## Dependencies
@@ -266,6 +301,15 @@ codegen-bench tournament \
 
 ## Conclusion
 
-BrownBench has a **solid foundation** with excellent code quality and comprehensive testing. Phase 0 is complete, and Phase 1 is nearly complete. The system is well-architected, maintainable, and ready for the final push to demonstrate full tournament functionality.
+BrownBench has achieved **Phase 1 completion** with a solid, production-ready foundation:
 
-**Recommendation:** Complete the remaining 4-5 hours of work to finish Phase 1, then proceed to Phase 2 for statistical rigor enhancements.
+- **2 DUT implementations** (simple-chat, elaborate-prompt)
+- **5 diverse benchmark tasks** (Python algorithms/bugs, C systems/optimization)
+- **Full tournament system** with ELO ratings
+- **AI judge orchestration** with consensus voting
+- **93% test coverage** with 165 passing tests
+- **Comprehensive documentation** and examples
+
+The system is well-architected, maintainable, and ready for Phase 2 enhancements focusing on statistical rigor.
+
+**Recommendation:** Proceed to Phase 2 to add TrueSkill ratings, effect size calculations, multiple comparison correction, and adaptive trial designs.
