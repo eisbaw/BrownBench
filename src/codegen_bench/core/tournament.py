@@ -28,7 +28,9 @@ class DUTRating:
     total_cost_usd: float = 0.0
     total_time_seconds: float = 0.0
     total_tokens: int = 0
-    _comparisons: list[tuple[str, str, str, JudgmentResult]] = field(default_factory=list, repr=False)
+    _comparisons: list[tuple[str, str, str, JudgmentResult]] = field(
+        default_factory=list, repr=False
+    )
 
     @property
     def elo(self) -> float:
@@ -226,7 +228,11 @@ class TournamentRunner:
         )
 
     def _update_ratings(
-        self, dut_a_id: str, dut_b_id: str, winner: str, comparison: tuple[str, str, str, JudgmentResult]
+        self,
+        dut_a_id: str,
+        dut_b_id: str,
+        winner: str,
+        comparison: tuple[str, str, str, JudgmentResult],
     ) -> None:
         """Update ELO ratings based on comparison result.
 

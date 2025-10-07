@@ -77,17 +77,27 @@ class Task:
         # Check codebase path exists
         if not self.codebase_path.exists():
             logger.error("codebase_not_found", task_id=self.id, path=str(self.codebase_path))
-            raise ValidationError(f"Task {self.id}: codebase path does not exist: {self.codebase_path}")
+            raise ValidationError(
+                f"Task {self.id}: codebase path does not exist: {self.codebase_path}"
+            )
 
         # Check test suite if specified
         if self.test_suite_path and not self.test_suite_path.exists():
             logger.error("test_suite_not_found", task_id=self.id, path=str(self.test_suite_path))
-            raise ValidationError(f"Task {self.id}: test suite path does not exist: {self.test_suite_path}")
+            raise ValidationError(
+                f"Task {self.id}: test suite path does not exist: {self.test_suite_path}"
+            )
 
         # Check reference solution if specified
         if self.reference_solution_path and not self.reference_solution_path.exists():
-            logger.error("reference_solution_not_found", task_id=self.id, path=str(self.reference_solution_path))
-            raise ValidationError(f"Task {self.id}: reference solution path does not exist: {self.reference_solution_path}")
+            logger.error(
+                "reference_solution_not_found",
+                task_id=self.id,
+                path=str(self.reference_solution_path),
+            )
+            raise ValidationError(
+                f"Task {self.id}: reference solution path does not exist: {self.reference_solution_path}"
+            )
 
         # Validate commands can be safely parsed
         if self.compile_command:
@@ -100,7 +110,9 @@ class Task:
                     command=self.compile_command,
                     error=str(e),
                 )
-                raise ValidationError(f"Task {self.id}: invalid compile command '{self.compile_command}': {e}") from e
+                raise ValidationError(
+                    f"Task {self.id}: invalid compile command '{self.compile_command}': {e}"
+                ) from e
 
         if self.test_command:
             try:
@@ -112,7 +124,9 @@ class Task:
                     command=self.test_command,
                     error=str(e),
                 )
-                raise ValidationError(f"Task {self.id}: invalid test command '{self.test_command}': {e}") from e
+                raise ValidationError(
+                    f"Task {self.id}: invalid test command '{self.test_command}': {e}"
+                ) from e
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to dict."""

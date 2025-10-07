@@ -240,7 +240,10 @@ def test_cache_concurrent_writes(solution_cache, mock_dut, simple_task, sample_s
 
     # Write all solutions concurrently
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        futures = [executor.submit(solution_cache.put, mock_dut, simple_task, seed, sol) for seed, sol in solutions]
+        futures = [
+            executor.submit(solution_cache.put, mock_dut, simple_task, seed, sol)
+            for seed, sol in solutions
+        ]
         concurrent.futures.wait(futures)
 
     # All writes should succeed and be readable
@@ -251,7 +254,9 @@ def test_cache_concurrent_writes(solution_cache, mock_dut, simple_task, sample_s
         assert cached.generation_time_seconds == original_sol.generation_time_seconds
 
 
-def test_cache_put_exception_during_write(solution_cache, mock_dut, simple_task, sample_solution, monkeypatch):
+def test_cache_put_exception_during_write(
+    solution_cache, mock_dut, simple_task, sample_solution, monkeypatch
+):
     """Test that temp file is cleaned up when an exception occurs during write."""
     import os
 

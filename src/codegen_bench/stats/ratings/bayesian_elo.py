@@ -6,7 +6,9 @@ from typing import Literal
 # ELO Constants
 # These values are from the original ELO chess rating system (Arpad Elo, 1960)
 DEFAULT_RATING_MEAN = 1500.0  # Standard ELO starting rating (FIDE standard)
-DEFAULT_RATING_STD = 200.0  # Initial uncertainty (chosen to give ~68% of players in 1300-1700 range)
+DEFAULT_RATING_STD = (
+    200.0  # Initial uncertainty (chosen to give ~68% of players in 1300-1700 range)
+)
 
 # ELO Calculation Constants
 # These define the logistic curve mapping rating differences to win probabilities

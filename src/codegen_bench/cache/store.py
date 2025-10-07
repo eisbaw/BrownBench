@@ -97,10 +97,13 @@ class SolutionCache:
             try:
                 cache_file.unlink()
             except OSError as unlink_error:
-                logger.warning("cache_deletion_failed", cache_file=str(cache_file), error=str(unlink_error))
+                logger.warning(
+                    "cache_deletion_failed", cache_file=str(cache_file), error=str(unlink_error)
+                )
 
             # Import CacheError
             from codegen_bench.exceptions import CacheError
+
             raise CacheError(f"Corrupted cache file {cache_file}: {e}") from e
 
     def put(self, dut: CodeGenerationApproach, task: Task, seed: int, solution: Solution) -> None:

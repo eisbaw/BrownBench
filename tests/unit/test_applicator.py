@@ -278,8 +278,9 @@ def test_write_file_permission_denied(workspace, monkeypatch):
 
 def test_delete_file_permission_denied(workspace, monkeypatch):
     """Test that delete_file raises ValidationError on permission denied."""
-    from codegen_bench.exceptions import ValidationError
     from pathlib import Path
+
+    from codegen_bench.exceptions import ValidationError
 
     # Create a file
     test_file = workspace / "test.txt"
@@ -288,8 +289,6 @@ def test_delete_file_permission_denied(workspace, monkeypatch):
     applicator = SolutionApplicator(workspace)
 
     # Mock Path.unlink to raise PermissionError
-    original_unlink = Path.unlink
-
     def mock_unlink(self, *args, **kwargs):
         raise PermissionError("Permission denied")
 
@@ -301,8 +300,9 @@ def test_delete_file_permission_denied(workspace, monkeypatch):
 
 def test_apply_diff_timeout(workspace, monkeypatch):
     """Test that apply_diff raises ValidationError on timeout."""
-    from codegen_bench.exceptions import ValidationError
     import subprocess
+
+    from codegen_bench.exceptions import ValidationError
 
     applicator = SolutionApplicator(workspace)
 

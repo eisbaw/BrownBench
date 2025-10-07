@@ -23,6 +23,7 @@ class Arena:
         # Convert relative path to absolute by resolving from package
         if not self.prompt_template_path.is_absolute():
             import codegen_bench
+
             pkg_dir = Path(codegen_bench.__file__).parent
             template_path = pkg_dir / self.prompt_template_path
         else:

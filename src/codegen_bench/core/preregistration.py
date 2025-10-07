@@ -199,15 +199,11 @@ class PreregistrationPlan:
         primary_outcome_data = data.get("primary_outcome", {})
         primary_outcome = OutcomeMeasure(**primary_outcome_data)
 
-        secondary_outcomes = [
-            OutcomeMeasure(**s) for s in data.get("secondary_outcomes", [])
-        ]
+        secondary_outcomes = [OutcomeMeasure(**s) for s in data.get("secondary_outcomes", [])]
 
         stopping_rules = [StoppingRule(**r) for r in data.get("stopping_rules", [])]
 
-        exclusion_criteria = [
-            ExclusionCriteria(**e) for e in data.get("exclusion_criteria", [])
-        ]
+        exclusion_criteria = [ExclusionCriteria(**e) for e in data.get("exclusion_criteria", [])]
 
         # Create plan
         plan = cls(
@@ -261,53 +257,63 @@ class PreregistrationPlan:
         planned_duts = set(self.duts)
         actual_duts = set(tournament_config.get("duts", []))
         if planned_duts != actual_duts:
-            deviations.append({
-                "field": "duts",
-                "planned": list(planned_duts),
-                "actual": list(actual_duts),
-                "severity": "major",
-            })
+            deviations.append(
+                {
+                    "field": "duts",
+                    "planned": list(planned_duts),
+                    "actual": list(actual_duts),
+                    "severity": "major",
+                }
+            )
 
         # Check sample size
         actual_sample_size = tournament_config.get("sample_size", 0)
         if actual_sample_size < self.sample_size:
-            deviations.append({
-                "field": "sample_size",
-                "planned": [self.sample_size],
-                "actual": [actual_sample_size],
-                "severity": "major",
-            })
+            deviations.append(
+                {
+                    "field": "sample_size",
+                    "planned": [self.sample_size],
+                    "actual": [actual_sample_size],
+                    "severity": "major",
+                }
+            )
 
         # Check alpha
         actual_alpha = tournament_config.get("alpha", 0.05)
         if actual_alpha != self.alpha:
-            deviations.append({
-                "field": "alpha",
-                "planned": [self.alpha],
-                "actual": [actual_alpha],
-                "severity": "major",
-            })
+            deviations.append(
+                {
+                    "field": "alpha",
+                    "planned": [self.alpha],
+                    "actual": [actual_alpha],
+                    "severity": "major",
+                }
+            )
 
         # Check correction method
         actual_correction = tournament_config.get("correction_method", "")
         if actual_correction != self.correction_method:
-            deviations.append({
-                "field": "correction_method",
-                "planned": self.correction_method,
-                "actual": actual_correction,
-                "severity": "minor",
-            })
+            deviations.append(
+                {
+                    "field": "correction_method",
+                    "planned": self.correction_method,
+                    "actual": actual_correction,
+                    "severity": "minor",
+                }
+            )
 
         # Check arenas
         planned_arenas = set(self.arenas)
         actual_arenas = set(tournament_config.get("arenas", []))
         if planned_arenas != actual_arenas:
-            deviations.append({
-                "field": "arenas",
-                "planned": list(planned_arenas),
-                "actual": list(actual_arenas),
-                "severity": "minor",
-            })
+            deviations.append(
+                {
+                    "field": "arenas",
+                    "planned": list(planned_arenas),
+                    "actual": list(actual_arenas),
+                    "severity": "minor",
+                }
+            )
 
         return {
             "adheres": len(deviations) == 0,
@@ -347,35 +353,39 @@ class PreregistrationPlan:
                 lines.append(f"  Variables: {h.variables}")
             lines.append("")
 
-        lines.extend([
-            "OUTCOMES",
-            "-" * 80,
-            f"Primary: {self.primary_outcome.name} ({self.primary_outcome.metric})",
-            "",
-            "Secondary:",
-        ])
+        lines.extend(
+            [
+                "OUTCOMES",
+                "-" * 80,
+                f"Primary: {self.primary_outcome.name} ({self.primary_outcome.metric})",
+                "",
+                "Secondary:",
+            ]
+        )
 
         for outcome in self.secondary_outcomes:
             lines.append(f"  - {outcome.name} ({outcome.metric})")
 
-        lines.extend([
-            "",
-            "DESIGN",
-            "-" * 80,
-            f"DUTs: {', '.join(self.duts)}",
-            f"Tasks: {self.tasks}",
-            f"Arenas: {', '.join(self.arenas)}",
-            f"Sample size: {self.sample_size}",
-            f"Justification: {self.sample_size_justification}",
-            "",
-            "STATISTICAL PLAN",
-            "-" * 80,
-            f"Alpha: {self.alpha}",
-            f"Power: {self.power}",
-            f"Correction: {self.correction_method}",
-            f"Rating system: {self.rating_system}",
-            "",
-        ])
+        lines.extend(
+            [
+                "",
+                "DESIGN",
+                "-" * 80,
+                f"DUTs: {', '.join(self.duts)}",
+                f"Tasks: {self.tasks}",
+                f"Arenas: {', '.join(self.arenas)}",
+                f"Sample size: {self.sample_size}",
+                f"Justification: {self.sample_size_justification}",
+                "",
+                "STATISTICAL PLAN",
+                "-" * 80,
+                f"Alpha: {self.alpha}",
+                f"Power: {self.power}",
+                f"Correction: {self.correction_method}",
+                f"Rating system: {self.rating_system}",
+                "",
+            ]
+        )
 
         if self.stopping_rules:
             lines.extend(["STOPPING RULES", "-" * 80])
@@ -390,20 +400,24 @@ class PreregistrationPlan:
             lines.append("")
 
         if self.osf_url:
-            lines.extend([
-                "REGISTRATION",
-                "-" * 80,
-                f"OSF URL: {self.osf_url}",
-                "",
-            ])
+            lines.extend(
+                [
+                    "REGISTRATION",
+                    "-" * 80,
+                    f"OSF URL: {self.osf_url}",
+                    "",
+                ]
+            )
 
         if self.notes:
-            lines.extend([
-                "NOTES",
-                "-" * 80,
-                self.notes,
-                "",
-            ])
+            lines.extend(
+                [
+                    "NOTES",
+                    "-" * 80,
+                    self.notes,
+                    "",
+                ]
+            )
 
         lines.append("=" * 80)
 

@@ -302,6 +302,7 @@ def test_worktree_context_manager_both_cleanup_fail(git_repo, monkeypatch):
 def test_create_worktree_oserror(git_repo, monkeypatch):
     """Test that create_worktree raises WorktreeError on OSError."""
     import subprocess
+
     from codegen_bench.exceptions import WorktreeError
 
     strategy = GitWorktreeStrategy(git_repo)
@@ -319,6 +320,7 @@ def test_create_worktree_oserror(git_repo, monkeypatch):
 def test_remove_worktree_oserror(git_repo, monkeypatch):
     """Test that remove_worktree raises WorktreeError on OSError."""
     import subprocess
+
     from codegen_bench.exceptions import WorktreeError
 
     strategy = GitWorktreeStrategy(git_repo)

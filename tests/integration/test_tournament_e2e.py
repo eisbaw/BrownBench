@@ -238,9 +238,7 @@ def test_tournament_with_persistent_api_failures(tmp_path):
 
     # Create mock client that always fails
     mock_client = Mock()
-    mock_client.messages.create = Mock(
-        side_effect=RuntimeError("API connection failed")
-    )
+    mock_client.messages.create = Mock(side_effect=RuntimeError("API connection failed"))
 
     with patch("anthropic.Anthropic", return_value=mock_client):
         # Create DUTs

@@ -121,9 +121,7 @@ class MAMSDesign:
         control_data = np.array(results[self.config.control_id], dtype=float)
 
         # Prepare treatment arms
-        treatment_ids = [
-            arm_id for arm_id in results if arm_id != self.config.control_id
-        ]
+        treatment_ids = [arm_id for arm_id in results if arm_id != self.config.control_id]
         treatment_data = [np.array(results[arm_id], dtype=float) for arm_id in treatment_ids]
 
         if len(treatment_ids) == 0:
@@ -244,9 +242,7 @@ class MAMSDesign:
 
         return float(np.sqrt(pooled_var))
 
-    def compute_stage1_sample_size(
-        self, effect_size: float, variance: float = 1.0
-    ) -> int:
+    def compute_stage1_sample_size(self, effect_size: float, variance: float = 1.0) -> int:
         """Compute required sample size for Stage 1.
 
         Uses power calculation for Dunnett's test.

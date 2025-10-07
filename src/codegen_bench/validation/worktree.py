@@ -95,9 +95,7 @@ class GitWorktreeStrategy:
 
             if result.returncode != 0:
                 self._cleanup_temp_dir(temp_dir)
-                raise WorktreeError(
-                    f"Failed to create worktree at {temp_dir}: {result.stderr}"
-                )
+                raise WorktreeError(f"Failed to create worktree at {temp_dir}: {result.stderr}")
 
             return temp_dir
 
@@ -130,7 +128,9 @@ class GitWorktreeStrategy:
             )
 
             if result.returncode != 0:
-                raise WorktreeError(f"Failed to remove worktree at {worktree_path}: {result.stderr}")
+                raise WorktreeError(
+                    f"Failed to remove worktree at {worktree_path}: {result.stderr}"
+                )
 
         except subprocess.TimeoutExpired as e:
             raise WorktreeError(f"Worktree removal timed out after 30s: {e}") from e

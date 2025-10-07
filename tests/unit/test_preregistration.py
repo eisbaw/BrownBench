@@ -233,9 +233,7 @@ def test_preregistration_to_yaml(tmp_path: Path) -> None:
     plan = PreregistrationPlan(
         title="Test Study",
         research_question="Which DUT is better?",
-        hypotheses=[
-            Hypothesis(id="H1", description="DUT1 > baseline", direction="greater")
-        ],
+        hypotheses=[Hypothesis(id="H1", description="DUT1 > baseline", direction="greater")],
         primary_outcome=OutcomeMeasure("correctness", "test_pass_rate", primary=True),
         secondary_outcomes=[OutcomeMeasure("efficiency", "cost_usd")],
         sample_size=100,
@@ -262,9 +260,7 @@ def test_preregistration_from_yaml(tmp_path: Path) -> None:
     original_plan = PreregistrationPlan(
         title="Test Study",
         research_question="Which DUT is better?",
-        hypotheses=[
-            Hypothesis(id="H1", description="DUT1 > baseline", direction="greater")
-        ],
+        hypotheses=[Hypothesis(id="H1", description="DUT1 > baseline", direction="greater")],
         primary_outcome=OutcomeMeasure("correctness", "test_pass_rate", primary=True),
         secondary_outcomes=[OutcomeMeasure("efficiency", "cost_usd")],
         sample_size=100,
