@@ -2,19 +2,19 @@
 
 ## Phase 1: Task Curation (Current Priority)
 
-- [ ] Clone and analyze git repository commit history
-- [ ] Clone and analyze Redis repository commit history
-- [ ] Clone and analyze nginx repository commit history
-- [ ] Clone and analyze SQLite repository commit history
-- [ ] Clone and analyze curl/libcurl repository commit history
-- [ ] Clone and analyze OpenSSH repository commit history
-- [ ] Clone and analyze HAProxy repository commit history
-- [ ] Clone and analyze tmux repository commit history
-- [ ] Clone and analyze jq repository commit history
-- [ ] Clone and analyze zstd repository commit history
-- [ ] Clone and analyze containerd repository commit history
-- [ ] Clone and analyze etcd repository commit history
-- [ ] Clone and analyze ripgrep repository commit history
+- [ ] Add DUT: submodule clone and analyze git repository commit history
+- [ ] Add DUT: submodule clone and analyze Redis repository commit history
+- [ ] Add DUT: submodule clone and analyze nginx repository commit history
+- [ ] Add DUT: submodule clone and analyze SQLite repository commit history
+- [ ] Add DUT: submodule clone and analyze curl/libcurl repository commit history
+- [ ] Add DUT: submodule clone and analyze OpenSSH repository commit history
+- [ ] Add DUT: submodule clone and analyze HAProxy repository commit history
+- [ ] Add DUT: submodule clone and analyze tmux repository commit history
+- [ ] Add DUT: submodule clone and analyze jq repository commit history
+- [ ] Add DUT: submodule clone and analyze zstd repository commit history
+- [ ] Add DUT: submodule clone and analyze containerd repository commit history
+- [ ] Add DUT: submodule clone and analyze etcd repository commit history
+- [ ] Add DUT: submodule clone and analyze ripgrep repository commit history
 - [ ] Identify 20-30 candidate commits (50-500 LoC changes)
 - [ ] Filter commits with passing tests before and after
 - [ ] Filter commits that are self-contained
