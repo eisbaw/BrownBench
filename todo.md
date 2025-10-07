@@ -820,7 +820,7 @@
 
 **Status Summary:**
 ✅ All critical security and robustness issues fixed
-✅ Test coverage at 94% (347 tests passing)
+✅ Test coverage at 94% (348 tests passing - added shell injection test)
 ✅ All linting and type checks passing
 ✅ Codebase is production-ready
 
@@ -831,9 +831,62 @@
 - [ ] Add rate limiting for API calls
 - [ ] Implement graceful shutdown handling
 
+**Code Quality Improvements from Architecture Review (2025-10-07):**
+
+**High Priority:**
+- [ ] **Add comprehensive structured logging** (Impact: High, Effort: Medium)
+  - Add logging to DUT solution generation (SimpleChatDUT, ElaboratePromptDUT)
+  - Add logging to cache operations (hits/misses, invalidations)
+  - Add logging to judge evaluation and consensus
+  - Add logging to validation execution
+  - Add logging to worktree creation/cleanup
+  - Use structlog with JSON output for observability
+
+- [ ] **Fix DUT registry pattern** (Impact: High, Effort: Medium)
+  - Remove dummy instance creation during registration
+  - Make get_metadata() a classmethod or use APPROACH_ID class attribute
+  - Eliminate global mutable state
+  - Improves testability
+
+- [ ] **Eliminate duplicate state in tournament** (Impact: Medium, Effort: Low)
+  - Remove stored cost/time/token fields from DUTRating
+  - Compute metrics on-demand from solution references
+  - Use @property decorators
+  - Prevents inconsistencies
+
+**Medium Priority:**
+- [ ] **Add domain-specific exception hierarchy** (Impact: Medium, Effort: Low)
+  - Create BrownBenchError base class
+  - Define ValidationError, WorktreeError, CacheError
+  - Replace generic RuntimeError/ValueError usage
+  - Improves error handling clarity
+
+- [ ] **Improve error messages with context** (Impact: Medium, Effort: Low)
+  - Include command string in executor error messages
+  - Add file paths to applicator errors
+  - Better debugging experience
+
+- [ ] **Add logging to CodeExtractor conflicts** (Impact: Low, Effort: Low)
+  - Log when multiple extraction strategies find same file
+  - Helps detect LLM output format issues
+
+**Low Priority:**
+- [ ] **Extract magic numbers to configuration** (Impact: Low, Effort: Low)
+  - TournamentConfig dataclass for base_seed, consensus_threshold
+  - TrueSkill defaults to configuration
+
+- [ ] **Memory optimization for large tournaments** (Impact: Low, Effort: Medium)
+  - Consider streaming approach instead of storing all solutions
+  - Store solution IDs and load from cache on demand
+  - Only needed if scaling to hundreds of DUTs
+
 **Next Development Phase:**
 Continue with Phase 0, Week 1 tasks:
 1. ✅ Project scaffolding complete (shell.nix, justfile, pyproject.toml)
 2. ✅ Core data models implemented and tested
 3. ✅ Validation pipeline working
-4. → Continue with Phase 1: Judge system and tournament runner
+4. ✅ All critical security and robustness issues fixed
+5. ✅ Test coverage at 94% with 348 tests passing
+6. ✅ Shell injection protection test added
+7. → Continue with Phase 1: Judge system and tournament runner
+8. → Consider addressing high-priority code quality improvements
