@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from codegen_bench.core.task import Task
+from codegen_bench.exceptions import TaskError
 
 
 class TaskLoader:
@@ -42,7 +43,7 @@ class TaskLoader:
 
         # Validate task
         if not task.validate():
-            raise ValueError(f"Task {task_id} failed validation")
+            raise TaskError(f"Task {task_id} failed validation")
 
         return task
 
@@ -77,13 +78,13 @@ class TaskLoader:
             try:
                 task = Task.from_yaml(path)
                 if not task.validate():
-                    raise ValueError(f"Task {task.id} failed validation")
+                    raise TaskError(f"Task {task.id} failed validation")
                 tasks.append(task)
             except (OSError, ValueError, KeyError) as e:
                 # OSError: file read errors (includes IOError in Python 3.3+)
                 # ValueError: YAML parsing or validation errors
                 # KeyError: missing required fields in YAML
-                raise ValueError(f"Failed to load task from {path}: {e}") from e
+                raise TaskError(f"Failed to load task from {path}: {e}") from e
 
         return tasks
 

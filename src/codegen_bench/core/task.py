@@ -1,10 +1,14 @@
 """Task dataclass with validation."""
 
+import shlex
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
+import structlog
 import yaml
+
+logger = structlog.get_logger(__name__)
 
 
 @dataclass
@@ -71,6 +75,31 @@ class Task:
         # Check reference solution if specified
         if self.reference_solution_path and not self.reference_solution_path.exists():
             return False
+
+        # Validate commands can be safely parsed
+        if self.compile_command:
+            try:
+                shlex.split(self.compile_command)
+            except ValueError as e:
+                logger.error(
+                    "invalid_compile_command",
+                    task_id=self.id,
+                    command=self.compile_command,
+                    error=str(e),
+                )
+                return False
+
+        if self.test_command:
+            try:
+                shlex.split(self.test_command)
+            except ValueError as e:
+                logger.error(
+                    "invalid_test_command",
+                    task_id=self.id,
+                    command=self.test_command,
+                    error=str(e),
+                )
+                return False
 
         return True
 

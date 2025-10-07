@@ -4,6 +4,7 @@ import subprocess
 from pathlib import Path
 
 from codegen_bench.core.solution import Solution
+from codegen_bench.exceptions import ValidationError
 
 
 class SolutionApplicator:
@@ -17,7 +18,7 @@ class SolutionApplicator:
         """
         self.workspace = Path(workspace).resolve()
         if not self.workspace.exists():
-            raise ValueError(f"Workspace does not exist: {self.workspace}")
+            raise ValidationError(f"Workspace does not exist: {self.workspace}")
 
     def apply(self, solution: Solution) -> None:
         """Apply solution changes to workspace.
@@ -63,7 +64,7 @@ class SolutionApplicator:
         except (OSError, PermissionError) as e:
             # OSError: general file system errors (includes IOError in Python 3.3+)
             # PermissionError: insufficient permissions
-            raise RuntimeError(f"Failed to write file {rel_path}: {e}") from e
+            raise ValidationError(f"Failed to write file {rel_path}: {e}") from e
 
     def _delete_file(self, rel_path: str) -> None:
         """Delete file from workspace.
@@ -82,7 +83,7 @@ class SolutionApplicator:
         except (OSError, PermissionError) as e:
             # OSError: file system errors
             # PermissionError: insufficient permissions
-            raise RuntimeError(f"Failed to delete file {rel_path}: {e}") from e
+            raise ValidationError(f"Failed to delete file {rel_path}: {e}") from e
 
     def apply_diff(self, diff_content: str) -> None:
         """Apply a unified diff patch to workspace.
@@ -104,11 +105,11 @@ class SolutionApplicator:
             )
 
             if result.returncode != 0:
-                raise RuntimeError(f"Failed to apply diff: {result.stderr}")
+                raise ValidationError(f"Failed to apply diff: {result.stderr}")
 
         except subprocess.TimeoutExpired as e:
-            raise RuntimeError("Diff application timed out") from e
+            raise ValidationError("Diff application timed out") from e
         except (OSError, subprocess.CalledProcessError) as e:
             # OSError: git not found or execution failed
             # CalledProcessError: git returned non-zero
-            raise RuntimeError(f"Failed to apply diff: {e}") from e
+            raise ValidationError(f"Failed to apply diff: {e}") from e

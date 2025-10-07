@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 import yaml
 
+from codegen_bench.exceptions import TaskError
 from codegen_bench.tasks.loader import TaskLoader
 
 
@@ -119,5 +120,5 @@ def test_load_invalid_task_fails_validation(tmp_path: Path) -> None:
         yaml.dump(invalid_task, f)
 
     loader = TaskLoader(tasks_dir)
-    with pytest.raises(ValueError, match="failed validation"):
+    with pytest.raises(TaskError, match="failed validation"):
         loader.load_task("invalid")

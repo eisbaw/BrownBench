@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 import pytest
 
 from codegen_bench.core.solution import Solution
+from codegen_bench.exceptions import ValidationError
 from codegen_bench.validation.applicator import SolutionApplicator
 
 
@@ -42,7 +43,7 @@ def test_applicator_init(workspace):
 def test_applicator_init_nonexistent(tmp_path):
     """Test applicator initialization with nonexistent workspace."""
     nonexistent = tmp_path / "nonexistent"
-    with pytest.raises(ValueError, match="Workspace does not exist"):
+    with pytest.raises(ValidationError, match="Workspace does not exist"):
         SolutionApplicator(nonexistent)
 
 
@@ -205,5 +206,5 @@ def test_apply_diff_failure(workspace):
     diff_content = "invalid diff content"
 
     applicator = SolutionApplicator(workspace)
-    with pytest.raises(RuntimeError, match="Failed to apply diff"):
+    with pytest.raises(ValidationError, match="Failed to apply diff"):
         applicator.apply_diff(diff_content)

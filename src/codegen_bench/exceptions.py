@@ -11,3 +11,23 @@ class WorktreeError(BrownBenchError):
 
 class DUTError(BrownBenchError):
     """Raised when DUT operations fail."""
+
+
+class ValidationError(BrownBenchError):
+    """Raised when solution validation fails."""
+
+
+class TaskError(BrownBenchError):
+    """Raised when task loading or validation fails."""
+
+
+class CacheError(BrownBenchError):
+    """Raised when cache operations fail."""
+
+
+class JudgeError(BrownBenchError):
+    """Raised when judge evaluation fails."""
+
+
+class TournamentError(BrownBenchError):
+    """Raised when tournament execution fails."""
