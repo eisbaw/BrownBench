@@ -1,11 +1,12 @@
 # BrownBench Development Todo
 
-Pick items from here to implement - when done, mark as DONE [x].
+## Pick items from here to implement - when done, mark as [x] DONE: .
+## Read design from @ai_codegen_bench_prd.md file.
 
+- Check this todo.md file - we may have already implemented stuff.
+- Research mature well-documented open-source projects to use as brownfield DUTs; add as submodules.
+- Pick medium-to-large size commits from these open-source DUTs, inspect the work done. Formulate the commit as a prompt that would implement that very same work. This prompt will be used as eval benchmark.
 
-**Last Updated:** 2025-10-07
-**Timeline:** 24 weeks (6 months)
-**Budget:** $55K-85K total
 
 ## Phase 0: Foundations (Weeks 1-3)
 

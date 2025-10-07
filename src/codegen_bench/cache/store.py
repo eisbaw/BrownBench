@@ -136,13 +136,23 @@ class SolutionCache:
                 seed=seed,
                 cache_key=key,
             )
-        except Exception:
-            # Clean up temp file on error
+        except Exception as e:
+            # Log the specific exception type for observability
+            logger.error(
+                "cache_write_failed",
+                cache_file=str(cache_file),
+                error_type=type(e).__name__,
+                error=str(e),
+            )
+            raise CacheError(f"Failed to write cache file {cache_file}: {e}") from e
+        finally:
+            # Always attempt cleanup of temp file if it still exists
+            # This ensures no temp file leaks even for unexpected exceptions
             try:
-                os.unlink(temp_path)
+                if Path(temp_path).exists():
+                    os.unlink(temp_path)
             except OSError:
                 pass
-            raise
 
     def clear(self) -> None:
         """Clear all cached solutions."""

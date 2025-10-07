@@ -21,7 +21,7 @@ OUTPUT_PATH = Path("/dev/shm/output.brownbench.json")
 
 # Exact prompt text from the original loop3.source script
 PROMPT = (
-    "Read @ai_codegen_bench_prd.md, @design.md and @todo.md first.\n\n"
+    "Read @todo.md first.\n\n"
     "You are an expert in software engineering, code generation, and benchmarking.\n"
     "Always run via nix-shell --run 'foo blah'.\n\n"
     "Fix root causes. Dont make assumptions, be general. Be correct and robust.\n"

@@ -260,14 +260,16 @@ def test_cache_put_exception_during_write(
     """Test that temp file is cleaned up when an exception occurs during write."""
     import os
 
+    from codegen_bench.exceptions import CacheError
+
     # Mock os.replace to raise an exception
     def mock_replace(*args, **kwargs):
         raise OSError("Simulated disk full")
 
     monkeypatch.setattr(os, "replace", mock_replace)
 
-    # Attempt to cache a solution - should raise and clean up temp file
-    with pytest.raises(OSError, match="Simulated disk full"):
+    # Attempt to cache a solution - should raise CacheError (wrapped) and clean up temp file
+    with pytest.raises(CacheError, match="Failed to write cache file"):
         solution_cache.put(mock_dut, simple_task, 42, sample_solution)
 
     # Verify temp file was cleaned up (no .tmp files left)
