@@ -1015,29 +1015,25 @@ Ready to proceed with Phase 1: Judge system and tournament runner
 
 ### High Priority (Fix During Phase 1)
 
-- [ ] **ISSUE 1.1: Remove duplicated win/loss state** (Impact: High, Effort: Medium)
-  - Location: src/codegen_bench/core/tournament.py:22-54
-  - Problem: wins/losses/ties duplicates data from comparisons
-  - Fix: Compute on-demand from comparison history
-  - Test: Verify stats match across implementations
+- [x] **DONE: ISSUE 1.1: Remove duplicated win/loss state** (Impact: High, Effort: Medium)
+  - Fixed: DUTRating now computes wins/losses/ties from _comparisons
+  - Test: test_dut_rating_properties verifies correctness
+  - Commit: 04a8bb1, b4cf06a
 
-- [ ] **ISSUE 3.2: Add cache concurrency protection** (Impact: High, Effort: Medium)
-  - Location: src/codegen_bench/cache/store.py:47-93
-  - Problem: No locking, race conditions possible
-  - Fix: Use atomic writes with temp file + rename
-  - Test: Add concurrent write test
+- [x] **DONE: ISSUE 3.2: Add cache concurrency protection** (Impact: High, Effort: Medium)
+  - Fixed: Atomic writes using temp file + os.replace()
+  - Test: test_cache_concurrent_writes with 10 concurrent writers
+  - Commit: c774fd1
 
-- [ ] **ISSUE 3.1: Make solution application idempotent** (Impact: High, Effort: Medium)
-  - Location: src/codegen_bench/validation/applicator.py:23-43
-  - Problem: Applying solutions is not idempotent
-  - Fix: Merge changed_files and new_files, add reset operation
-  - Test: Verify A→B→A produces same result as A
+- [x] **DONE: ISSUE 3.1: Make solution application idempotent** (Impact: High, Effort: Medium)
+  - Fixed: Merged changed_files and new_files (both are write operations)
+  - Test: test_apply_idempotent verifies A→B→A = A
+  - Commit: 4dea77e
 
-- [ ] **ISSUE 4.2: Fix silent worktree cleanup failures** (Impact: High, Effort: Low)
-  - Location: src/codegen_bench/validation/worktree.py:186-204
-  - Problem: Cleanup failures in finally block are logged but not tracked
-  - Fix: Track failed cleanups, add list_orphaned_worktrees()
-  - Test: Verify orphaned worktrees are detected
+- [x] **DONE: ISSUE 4.2: Fix silent worktree cleanup failures** (Impact: High, Effort: Low)
+  - Fixed: Raise WorktreeError when both git and manual cleanup fail
+  - Test: test_worktree_context_manager_both_cleanup_fail
+  - Commit: ec85513
 
 ### Medium Priority (Phase 2 or Later)
 
