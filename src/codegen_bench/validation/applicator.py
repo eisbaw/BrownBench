@@ -60,9 +60,8 @@ class SolutionApplicator:
             with open(file_path, "w") as f:
                 f.write(content)
 
-        except (OSError, IOError, PermissionError) as e:
-            # OSError: general file system errors
-            # IOError: input/output errors
+        except (OSError, PermissionError) as e:
+            # OSError: general file system errors (includes IOError in Python 3.3+)
             # PermissionError: insufficient permissions
             raise RuntimeError(f"Failed to write file {rel_path}: {e}") from e
 
