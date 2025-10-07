@@ -6,11 +6,14 @@ from datetime import UTC, datetime
 from typing import Any
 
 import anthropic
+import structlog
 
 from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
 from codegen_bench.dut.base import ApproachMetadata, CodeGenerationApproach
 from codegen_bench.parsing.extractor import CodeExtractor
+
+logger = structlog.get_logger(__name__)
 
 
 class SimpleChatDUT(CodeGenerationApproach):
@@ -45,6 +48,14 @@ class SimpleChatDUT(CodeGenerationApproach):
         Returns:
             Solution with generated code
         """
+        logger.info(
+            "starting_solution_generation",
+            dut=self.get_metadata().id,
+            task_id=task.id,
+            seed=seed,
+            model=self.model,
+        )
+
         # Initialize client if needed
         if self.client is None:
             if not self.api_key:
@@ -55,6 +66,7 @@ class SimpleChatDUT(CodeGenerationApproach):
 
         # Build simple prompt
         prompt = self._build_prompt(task)
+        logger.debug("prompt_built", task_id=task.id, prompt_length=len(prompt))
 
         # Single API call
         response = self.client.messages.create(
@@ -68,9 +80,27 @@ class SimpleChatDUT(CodeGenerationApproach):
 
         # Parse response to extract code changes
         changed_files = self._parse_code_changes(response.content[0].text)
+        logger.debug(
+            "code_extracted",
+            task_id=task.id,
+            num_files=len(changed_files),
+            files=list(changed_files.keys()),
+        )
 
         # Calculate cost
         cost = self._calculate_cost(response.usage.input_tokens, response.usage.output_tokens)
+
+        logger.info(
+            "solution_generated",
+            dut=self.get_metadata().id,
+            task_id=task.id,
+            seed=seed,
+            elapsed_seconds=elapsed,
+            input_tokens=response.usage.input_tokens,
+            output_tokens=response.usage.output_tokens,
+            cost_usd=cost,
+            num_files=len(changed_files),
+        )
 
         return Solution(
             approach_id=self.get_metadata().id,

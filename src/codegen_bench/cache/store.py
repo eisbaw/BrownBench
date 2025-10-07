@@ -4,9 +4,13 @@ import hashlib
 import json
 from pathlib import Path
 
+import structlog
+
 from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
 from codegen_bench.dut.base import CodeGenerationApproach
+
+logger = structlog.get_logger(__name__)
 
 
 class SolutionCache:
@@ -55,14 +59,37 @@ class SolutionCache:
         cache_file = self.cache_dir / f"{key}.json"
 
         if not cache_file.exists():
+            logger.debug(
+                "cache_miss",
+                dut=dut.get_metadata().id,
+                task_id=task.id,
+                seed=seed,
+                cache_key=key,
+            )
             return None
 
         try:
             with open(cache_file) as f:
                 data = json.load(f)
-            return Solution.from_dict(data)
-        except (json.JSONDecodeError, KeyError, ValueError):
+            solution = Solution.from_dict(data)
+            logger.info(
+                "cache_hit",
+                dut=dut.get_metadata().id,
+                task_id=task.id,
+                seed=seed,
+                cache_key=key,
+            )
+            return solution
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
             # Cache file corrupted, return None
+            logger.warning(
+                "cache_corrupted",
+                dut=dut.get_metadata().id,
+                task_id=task.id,
+                seed=seed,
+                cache_key=key,
+                error=str(e),
+            )
             return None
 
     def put(self, dut: CodeGenerationApproach, task: Task, seed: int, solution: Solution) -> None:
@@ -79,6 +106,14 @@ class SolutionCache:
 
         with open(cache_file, "w") as f:
             json.dump(solution.to_dict(), f, indent=2)
+
+        logger.debug(
+            "cache_store",
+            dut=dut.get_metadata().id,
+            task_id=task.id,
+            seed=seed,
+            cache_key=key,
+        )
 
     def clear(self) -> None:
         """Clear all cached solutions."""
@@ -109,5 +144,12 @@ class SolutionCache:
 
         if cache_file.exists():
             cache_file.unlink()
+            logger.info(
+                "cache_invalidated",
+                dut=dut.get_metadata().id,
+                task_id=task.id,
+                seed=seed,
+                cache_key=key,
+            )
             return True
         return False

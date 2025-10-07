@@ -6,6 +6,8 @@ import random
 from collections import Counter
 from typing import TYPE_CHECKING
 
+import structlog
+
 from codegen_bench.core.arena import Arena
 from codegen_bench.core.judgment import JudgeVote, JudgmentResult
 from codegen_bench.core.solution import Solution
@@ -14,6 +16,8 @@ from codegen_bench.judge.base import Judge
 
 if TYPE_CHECKING:
     from codegen_bench.judge.base import Vote
+
+logger = structlog.get_logger(__name__)
 
 
 class JudgeOrchestrator:
@@ -41,16 +45,33 @@ class JudgeOrchestrator:
         Returns:
             JudgmentResult with consensus winner and metadata
         """
+        logger.info(
+            "judge_comparison_starting",
+            solution_a_id=solution_a.approach_id,
+            solution_b_id=solution_b.approach_id,
+            arena=arena.name,
+            task_id=task.id,
+            num_judges=len(self.judges),
+        )
+
         # Randomize position to avoid position bias
         swap = random.random() < 0.5
         if swap:
             solution_a, solution_b = solution_b, solution_a
+            logger.debug("position_swapped", arena=arena.name)
 
         # Collect votes from all judges
         votes: list[JudgeVote] = []
-        for judge in self.judges:
+        for i, judge in enumerate(self.judges):
             vote = judge.evaluate(solution_a, solution_b, arena, task)
             votes.append(vote)
+            logger.debug(
+                "judge_vote",
+                judge_index=i,
+                vote=vote.vote,
+                confidence=vote.confidence,
+                arena=arena.name,
+            )
 
         # Compute consensus
         consensus_vote = self._compute_consensus(votes)
@@ -66,6 +87,17 @@ class JudgeOrchestrator:
         # Calculate agreement and confidence
         agreement = self._agreement_rate(votes, consensus_vote)
         confidence = self._compute_confidence(votes)
+
+        logger.info(
+            "judge_comparison_complete",
+            solution_a_id=solution_a.approach_id,
+            solution_b_id=solution_b.approach_id,
+            arena=arena.name,
+            task_id=task.id,
+            winner=consensus_vote,
+            agreement_rate=agreement,
+            confidence=confidence,
+        )
 
         return JudgmentResult(
             winner=consensus_vote,

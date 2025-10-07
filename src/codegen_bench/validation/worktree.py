@@ -7,6 +7,10 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
+import structlog
+
+logger = structlog.get_logger(__name__)
+
 
 class GitWorktreeStrategy:
     """Create isolated git worktrees for testing solutions.
