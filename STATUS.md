@@ -6,14 +6,14 @@
 
 ## Executive Summary
 
-BrownBench is an AI code generation benchmark framework in active development. **Phase 0 is 100% complete** and **Phase 1 is 100% complete** with excellent code quality (93% test coverage, 165 passing tests). The system can now run full tournaments comparing multiple DUTs across multiple tasks and quality dimensions.
+BrownBench is an AI code generation benchmark framework in active development. **Phase 0 is 100% complete**, **Phase 1 is 100% complete**, and **Phase 2 is 37.5% complete (3/8 items)** with excellent code quality (94% test coverage, 229 passing tests). The system now includes advanced statistical methods: TrueSkill ratings, effect sizes with CIs, and multiple comparison correction.
 
 ## Implementation Metrics
 
-- **Source Code:** 2,726 lines (33 Python modules)
-- **Test Code:** 3,432 lines (test/code ratio: 1.26:1)
-- **Test Coverage:** 93%
-- **Tests Passing:** 165/165 ✓
+- **Source Code:** 3,532 lines (38 Python modules)
+- **Test Code:** 5,076 lines (test/code ratio: 1.44:1)
+- **Test Coverage:** 94%
+- **Tests Passing:** 229/229 ✓
 - **Linting:** All checks passing ✓
 - **Type Checking:** All checks passing (mypy) ✓
 
@@ -201,15 +201,35 @@ f7c69ba fix: remove unused Path import from tournament.py
 
 ## Next Steps
 
-### Phase 2: Statistical Rigor (Weeks 8-12)
-1. **TrueSkill rating system** (alternative to ELO)
-2. **Effect size calculations** (Hedges' g with bootstrap CIs)
-3. **Variance decomposition** (mixed linear models)
-4. **Multiple comparison correction** (FDR, Holm-Bonferroni, Dunnett)
-5. **Power analysis** (sample size calculation)
-6. **Sequential testing** (group sequential design with O'Brien-Fleming boundaries)
-7. **MAMS adaptive design** (multi-arm multi-stage)
-8. **Pre-registration system** (analysis plans, hypotheses)
+### Phase 2: Statistical Rigor (Weeks 8-12) - **37.5% COMPLETE (3/8)**
+
+#### Week 8: Core Statistical Methods ✓ (3/5 complete)
+- ✓ **TrueSkill rating system** (alternative to ELO):
+  - TrueSkillRating class with uncertainty tracking (μ, σ)
+  - Conservative estimates (μ - 2σ)
+  - Match quality prediction
+  - ELO conversion
+  - 16 comprehensive tests
+- ✓ **Effect size calculations** (Hedges' g with bootstrap CIs):
+  - Paired and independent Hedges' g
+  - Bootstrap confidence intervals (10,000 resamples)
+  - CLES (Common Language Effect Size)
+  - Cohen's h for proportions
+  - Software engineering interpretation norms
+  - 24 comprehensive tests
+- ✓ **Multiple comparison correction** (FDR, Holm-Bonferroni, Dunnett):
+  - FDR control (Benjamini-Hochberg, Benjamini-Yekutieli)
+  - FWER control (Bonferroni, Holm)
+  - Dunnett's test (many-to-one comparisons)
+  - FDR estimation (Storey-Tibshirani)
+  - 24 comprehensive tests
+- ⏳ **Variance decomposition** (mixed linear models)
+- ⏳ **Power analysis** (sample size calculation)
+
+#### Week 9-12: Advanced Methods (Not started)
+- ⏳ **Sequential testing** (group sequential design with O'Brien-Fleming boundaries)
+- ⏳ **MAMS adaptive design** (multi-arm multi-stage)
+- ⏳ **Pre-registration system** (analysis plans, hypotheses)
 
 ### Phase 3: Judge Calibration (Weeks 13-15)
 - Ground truth collection from expert programmers
@@ -291,8 +311,8 @@ for dut_id, rating in results.ratings.items():
 
 ### Statistical
 - numpy, scipy
-- statsmodels (planned for Phase 2)
-- trueskill (planned for Phase 2)
+- statsmodels (Phase 2)
+- trueskill (Phase 2)
 
 ### Development
 - pytest, pytest-cov
