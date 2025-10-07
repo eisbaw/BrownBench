@@ -256,3 +256,61 @@ def test_apply_idempotent(workspace):
 
     # file3 from B should still exist (A doesn't delete it)
     assert (workspace / "file3.txt").exists()
+
+
+def test_write_file_permission_denied(workspace, monkeypatch):
+    """Test that write_file raises ValidationError on permission denied."""
+    from codegen_bench.exceptions import ValidationError
+
+    applicator = SolutionApplicator(workspace)
+
+    # Mock open to raise PermissionError
+    def mock_open(*args, **kwargs):
+        raise PermissionError("Permission denied")
+
+    import builtins
+
+    monkeypatch.setattr(builtins, "open", mock_open)
+
+    with pytest.raises(ValidationError, match="Failed to write file"):
+        applicator._write_file("test.txt", "content")
+
+
+def test_delete_file_permission_denied(workspace, monkeypatch):
+    """Test that delete_file raises ValidationError on permission denied."""
+    from codegen_bench.exceptions import ValidationError
+    from pathlib import Path
+
+    # Create a file
+    test_file = workspace / "test.txt"
+    test_file.write_text("content")
+
+    applicator = SolutionApplicator(workspace)
+
+    # Mock Path.unlink to raise PermissionError
+    original_unlink = Path.unlink
+
+    def mock_unlink(self, *args, **kwargs):
+        raise PermissionError("Permission denied")
+
+    monkeypatch.setattr(Path, "unlink", mock_unlink)
+
+    with pytest.raises(ValidationError, match="Failed to delete file"):
+        applicator._delete_file("test.txt")
+
+
+def test_apply_diff_timeout(workspace, monkeypatch):
+    """Test that apply_diff raises ValidationError on timeout."""
+    from codegen_bench.exceptions import ValidationError
+    import subprocess
+
+    applicator = SolutionApplicator(workspace)
+
+    # Mock subprocess.run to raise TimeoutExpired
+    def mock_run(*args, **kwargs):
+        raise subprocess.TimeoutExpired(cmd=["git", "apply"], timeout=30)
+
+    monkeypatch.setattr(subprocess, "run", mock_run)
+
+    with pytest.raises(ValidationError, match="Diff application timed out"):
+        applicator.apply_diff("fake diff")
