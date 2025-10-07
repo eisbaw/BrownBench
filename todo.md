@@ -1,5 +1,8 @@
 # BrownBench Development Todo
 
+Pick items from here to implement - when done, mark as DONE [x].
+
+
 **Last Updated:** 2025-10-07
 **Timeline:** 24 weeks (6 months)
 **Budget:** $55K-85K total
