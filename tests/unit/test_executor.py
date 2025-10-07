@@ -214,3 +214,33 @@ def test_shell_injection_protection(workspace):
     assert result.success is True
     # No pipe happens - the string is echoed literally
     assert "dangerous | cat" in result.output or "|" in result.output
+
+
+def test_parse_test_output_unknown_framework():
+    """Test parse_test_output with unknown test framework."""
+    executor = ValidationExecutor(Path("/tmp"))
+    output = "Test output from custom framework"
+
+    metrics = executor.parse_test_output(output, "nose")
+
+    assert metrics["framework"] == "nose"
+    assert metrics["raw_output"] == output
+
+
+def test_parse_pytest_output_with_errors():
+    """Test parsing pytest output with error status."""
+    executor = ValidationExecutor(Path("/tmp"))
+    output = """
+============================== test session starts ==============================
+collected 10 items
+
+tests/test_example.py .....E..                                           [100%]
+
+==================== 7 passed, 2 failed, 1 error in 0.5s ====================
+"""
+    metrics = executor.parse_test_output(output, "pytest")
+
+    assert metrics["framework"] == "pytest"
+    assert metrics["passed"] == 7
+    assert metrics["failed"] == 2
+    assert metrics["errors"] == 1

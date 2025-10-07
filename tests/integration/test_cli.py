@@ -283,3 +283,140 @@ def test_validate_command(runner, tmp_path, mock_anthropic_response):
     # Should succeed (may fail compilation if gcc not available, but CLI should work)
     assert val_result.exit_code == 0 or "Error" in val_result.output
     assert "Validating solution" in val_result.output
+
+
+def test_generate_command_invalid_dut(runner):
+    """Test generate command with invalid DUT identifier."""
+    result = runner.invoke(
+        cli,
+        [
+            "generate",
+            "--dut",
+            "nonexistent-dut-12345",
+            "--task-id",
+            "task_001",
+        ],
+    )
+
+    assert result.exit_code != 0
+    assert "Error" in result.output or isinstance(result.exception, SystemExit)
+
+
+def test_validate_command_invalid_task_id(runner, tmp_path):
+    """Test validate command with solution referencing invalid task."""
+    solution_file = tmp_path / "solution.json"
+
+    # Create solution with invalid task_id
+    solution_data = {
+        "task_id": "nonexistent-task-99999",
+        "approach_id": "simple-chat",
+        "seed": 42,
+        "timestamp": "2024-01-01T00:00:00+00:00",
+        "changed_files": {},
+        "new_files": {},
+        "deleted_files": [],
+        "total_tokens": 100,
+        "cost_usd": 0.01,
+        "generation_time_seconds": 1.0,
+    }
+
+    with open(solution_file, "w") as f:
+        json.dump(solution_data, f)
+
+    result = runner.invoke(cli, ["validate", str(solution_file)])
+
+    assert result.exit_code != 0
+    assert "not found" in result.output.lower() or isinstance(result.exception, SystemExit)
+
+
+def test_validate_command_missing_codebase(runner, tmp_path, monkeypatch):
+    """Test validate command when task codebase path doesn't exist."""
+    solution_file = tmp_path / "solution.json"
+
+    # Create solution with valid task_id
+    solution_data = {
+        "task_id": "task_001",
+        "approach_id": "simple-chat",
+        "seed": 42,
+        "timestamp": "2024-01-01T00:00:00+00:00",
+        "changed_files": {},
+        "new_files": {},
+        "deleted_files": [],
+        "total_tokens": 100,
+        "cost_usd": 0.01,
+        "generation_time_seconds": 1.0,
+    }
+
+    with open(solution_file, "w") as f:
+        json.dump(solution_data, f)
+
+    # Mock the task loader to return a task with non-existent codebase
+    from pathlib import Path
+
+    from codegen_bench.core.task import Task
+
+    def mock_load_task(task_id):
+        return Task(
+            id="task_001",
+            name="Test Task",
+            project="test-project",
+            domain="testing",
+            difficulty="easy",
+            codebase_path=Path("/nonexistent/codebase"),
+            specification="Test spec",
+            compile_command="echo compile",
+            test_command="echo test",
+        )
+
+    with patch("codegen_bench.tasks.loader.TaskLoader.load_task", side_effect=mock_load_task):
+        result = runner.invoke(cli, ["validate", str(solution_file)])
+
+    assert result.exit_code != 0
+    assert "Codebase not found" in result.output or "not found" in result.output.lower()
+
+
+def test_validate_command_worktree_creation_fails(runner, tmp_path):
+    """Test validate command when git worktree creation fails (non-git repo)."""
+    solution_file = tmp_path / "solution.json"
+    fake_codebase = tmp_path / "fake_codebase"
+    fake_codebase.mkdir()
+
+    # Create solution
+    solution_data = {
+        "task_id": "task_001",
+        "approach_id": "simple-chat",
+        "seed": 42,
+        "timestamp": "2024-01-01T00:00:00+00:00",
+        "changed_files": {"test.txt": "content"},
+        "new_files": {},
+        "deleted_files": [],
+        "total_tokens": 100,
+        "cost_usd": 0.01,
+        "generation_time_seconds": 1.0,
+    }
+
+    with open(solution_file, "w") as f:
+        json.dump(solution_data, f)
+
+    # Mock task loader to return task with non-git codebase
+    from codegen_bench.core.task import Task
+
+    def mock_load_task(task_id):
+        return Task(
+            id="task_001",
+            name="Test Task",
+            project="test-project",
+            domain="testing",
+            difficulty="easy",
+            codebase_path=fake_codebase,
+            specification="Test spec",
+            compile_command="echo compile",
+            test_command="echo test",
+        )
+
+    with patch("codegen_bench.tasks.loader.TaskLoader.load_task", side_effect=mock_load_task):
+        result = runner.invoke(cli, ["validate", str(solution_file)])
+
+    # Should fail with worktree error
+    assert result.exit_code != 0
+    assert "Error" in result.output

@@ -94,10 +94,12 @@ def generate(
 
     # Get DUT
     try:
+        from codegen_bench.exceptions import DUTError
+
         dut_class = DUTRegistry.get(dut)
         dut_config = {"api_key": os.getenv("ANTHROPIC_API_KEY")}
         dut_instance = dut_class(dut_config)
-    except (ValueError, KeyError) as e:
+    except (ValueError, KeyError, DUTError) as e:
         console.print(f"[red]Error: {e}[/red]")
         raise click.Abort() from e
 
@@ -177,10 +179,12 @@ def validate(
         raise click.Abort()
 
     try:
+        from codegen_bench.exceptions import WorktreeError
+
         worktree_strategy = GitWorktreeStrategy(task.codebase_path)
         worktree_path = worktree_strategy.create_worktree()
         console.print(f"Created worktree at: {worktree_path}")
-    except ValueError as e:
+    except (ValueError, WorktreeError) as e:
         console.print(f"[red]Error: {e}[/red]")
         raise click.Abort() from e
 
