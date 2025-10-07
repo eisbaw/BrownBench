@@ -3,8 +3,10 @@
 from datetime import datetime
 from unittest.mock import Mock
 
+import httpx
 import pytest
-from anthropic.types import TextBlock
+from anthropic import APIError
+from anthropic.types import TextBlock, ToolUseBlock
 
 from codegen_bench.core.task import Task
 from codegen_bench.dut.simple_chat import SimpleChatDUT
@@ -197,3 +199,75 @@ def test_simple_chat_string_representation():
     """Test string representation."""
     dut = SimpleChatDUT(config={"api_key": "test-key"})
     assert str(dut) == "Simple Chat (v1.0.0)"
+
+
+def test_simple_chat_solve_unexpected_content_type(monkeypatch, simple_task):
+    """Test SimpleChatDUT handles unexpected response content type."""
+    # Mock client with non-TextBlock response
+    mock_client = Mock()
+    mock_response = Mock()
+
+    # Create a ToolUseBlock instead of TextBlock (simulating unexpected response)
+    tool_block = ToolUseBlock(type="tool_use", id="test", name="test_tool", input={})
+    mock_response.content = [tool_block]
+    mock_response.usage = Mock(input_tokens=100, output_tokens=200)
+    mock_client.messages.create = Mock(return_value=mock_response)
+
+    # Patch Anthropic class
+    mock_anthropic_class = Mock(return_value=mock_client)
+    monkeypatch.setattr("codegen_bench.dut.simple_chat.anthropic.Anthropic", mock_anthropic_class)
+
+    dut = SimpleChatDUT(config={"api_key": "test-key"})
+
+    # Should raise DUTError when encountering unexpected content type
+    with pytest.raises(DUTError, match="Unexpected response type"):
+        dut.solve(simple_task, seed=42)
+
+
+def test_simple_chat_solve_api_error(monkeypatch, simple_task):
+    """Test SimpleChatDUT handles Anthropic API errors."""
+    # Mock client that raises APIError
+    mock_client = Mock()
+
+    # Create a mock request object
+    mock_request = httpx.Request("POST", "https://api.anthropic.com/v1/messages")
+
+    api_error = APIError(
+        message="Rate limit exceeded",
+        request=mock_request,
+        body={"error": {"type": "rate_limit_error", "message": "Rate limit exceeded"}},
+    )
+    mock_client.messages.create = Mock(side_effect=api_error)
+
+    # Patch Anthropic class
+    mock_anthropic_class = Mock(return_value=mock_client)
+    monkeypatch.setattr("codegen_bench.dut.simple_chat.anthropic.Anthropic", mock_anthropic_class)
+
+    dut = SimpleChatDUT(config={"api_key": "test-key"})
+
+    # Should wrap APIError in DUTError with context
+    with pytest.raises(DUTError, match="API call failed for task test_task_001"):
+        dut.solve(simple_task, seed=42)
+
+
+def test_simple_chat_solve_parsing_error(monkeypatch, simple_task):
+    """Test SimpleChatDUT handles response parsing errors."""
+    # Mock client with malformed response (missing usage field)
+    mock_client = Mock()
+    mock_response = Mock()
+
+    text_block = TextBlock(type="text", text="Some response")
+    mock_response.content = [text_block]
+    # Delete usage attribute to trigger AttributeError during parsing
+    del mock_response.usage
+    mock_client.messages.create = Mock(return_value=mock_response)
+
+    # Patch Anthropic class
+    mock_anthropic_class = Mock(return_value=mock_client)
+    monkeypatch.setattr("codegen_bench.dut.simple_chat.anthropic.Anthropic", mock_anthropic_class)
+
+    dut = SimpleChatDUT(config={"api_key": "test-key"})
+
+    # Should wrap parsing error in DUTError with context
+    with pytest.raises(DUTError, match="Failed to parse API response for task test_task_001"):
+        dut.solve(simple_task, seed=42)
