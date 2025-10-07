@@ -272,10 +272,10 @@
 - [ ] Store solution IDs and load from cache on demand
 - [ ] Troubleshooting guide for worktree issues
 - [ ] Manual cleanup commands documentation
-- [ ] Rate limiter: Single-lock design for atomic acquire() operations
-- [ ] Rate limiter: Add release() method for failed request idempotency
+- [x] Rate limiter: Single-lock design for atomic acquire() operations
+- [x] Rate limiter: Add release() method for failed request idempotency
 - [ ] Rate limiter: Consider bucket-based O(1) implementation
-- [ ] Rate limiter: Add observability logging when limits hit
+- [x] Rate limiter: Add observability logging when limits hit
 
 ## Milestones
 
