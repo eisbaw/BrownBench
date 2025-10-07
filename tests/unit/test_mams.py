@@ -396,7 +396,6 @@ def test_mams_stage1_sample_size_power() -> None:
 
 def test_mams_dunnett_fallback_to_bonferroni(monkeypatch: pytest.MonkeyPatch) -> None:
     """Test fallback to Bonferroni when scipy.stats.dunnett unavailable."""
-    import sys
     from unittest import mock
 
     np.random.seed(42)

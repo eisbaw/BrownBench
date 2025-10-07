@@ -580,12 +580,13 @@ def test_preregistration_from_yaml_nonexistent_file() -> None:
 def test_preregistration_from_yaml_corrupted_yaml(tmp_path: Path) -> None:
     """Test that corrupted YAML content raises error."""
     import pytest
+    import yaml
 
     corrupted_yaml = tmp_path / "corrupted.yaml"
     with open(corrupted_yaml, "w") as f:
         f.write("this is not valid YAML: {{{]]]")
 
-    with pytest.raises(Exception):  # yaml.YAMLError or similar
+    with pytest.raises(yaml.YAMLError):
         PreregistrationPlan.from_yaml(corrupted_yaml)
 
 
