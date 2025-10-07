@@ -3,9 +3,12 @@
 import itertools
 import time
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import structlog
+import yaml
 
 from codegen_bench.cache.store import SolutionCache
 from codegen_bench.core.arena import Arena
@@ -17,6 +20,15 @@ from codegen_bench.judge.orchestrator import JudgeOrchestrator
 from codegen_bench.stats.ratings.bayesian_elo import BayesianELO
 
 logger = structlog.get_logger()
+
+
+@dataclass
+class SolutionMetrics:
+    """Metrics collected during solution generation."""
+
+    cost_usd: float = 0.0
+    time_seconds: float = 0.0
+    tokens: int = 0
 
 
 @dataclass
@@ -83,6 +95,26 @@ class DUTRating:
                 count += 1
         return count
 
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for serialization.
+
+        Returns:
+            Dictionary representation
+        """
+        return {
+            "dut_id": self.dut_id,
+            "elo": self.elo,
+            "elo_std": self.elo_std,
+            "elo_lower_bound": self.elo_lower_bound,
+            "elo_upper_bound": self.elo_upper_bound,
+            "wins": self.wins,
+            "losses": self.losses,
+            "ties": self.ties,
+            "total_cost_usd": self.total_cost_usd,
+            "total_time_seconds": self.total_time_seconds,
+            "total_tokens": self.total_tokens,
+        }
+
 
 @dataclass
 class TournamentResult:
@@ -105,6 +137,60 @@ class TournamentResult:
     def get_leaderboard(self) -> list[DUTRating]:
         """Get DUTs sorted by ELO rating."""
         return sorted(self.ratings.values(), key=lambda r: r.elo, reverse=True)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for serialization.
+
+        Returns:
+            Dictionary representation suitable for YAML/JSON
+        """
+        return {
+            "tournament_metadata": {
+                "start_time": self.start_time,
+                "end_time": self.end_time,
+                "duration_seconds": self.duration_seconds,
+                "total_comparisons": self.total_comparisons,
+                "total_cost_usd": self.total_cost_usd,
+            },
+            "tasks_evaluated": self.tasks_evaluated,
+            "arenas": self.arenas,
+            "ratings": {
+                dut_id: rating.to_dict()
+                for dut_id, rating in self.ratings.items()
+            },
+            "leaderboard": [
+                rating.to_dict() for rating in self.get_leaderboard()
+            ],
+            "comparisons": [
+                {
+                    "dut_a": dut_a,
+                    "dut_b": dut_b,
+                    "arena": arena,
+                    "winner": judgment.winner,
+                    "agreement_rate": judgment.agreement_rate,
+                    "confidence": judgment.confidence,
+                }
+                for dut_a, dut_b, arena, judgment in self.comparisons
+            ],
+        }
+
+    def save(self, output_dir: Path) -> Path:
+        """Save tournament results to YAML file.
+
+        Args:
+            output_dir: Directory to save results (will be created if needed)
+
+        Returns:
+            Path to the saved tournament.yaml file
+        """
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_file = output_dir / "tournament.yaml"
+
+        with open(output_file, "w") as f:
+            yaml.dump(self.to_dict(), f, default_flow_style=False, sort_keys=False)
+
+        logger.info("tournament_results_saved", output_file=str(output_file))
+        return output_file
 
 
 class TournamentRunner:
@@ -145,29 +231,23 @@ class TournamentRunner:
                 rating=BayesianELO(),
             )
 
-    def run(self, progress_callback: Any = None) -> TournamentResult:
-        """Run full tournament.
-
-        Args:
-            progress_callback: Optional callback for progress updates
+    def generate_solutions(
+        self,
+    ) -> tuple[dict[tuple[str, str, int], Solution], dict[str, SolutionMetrics]]:
+        """Generate all solutions for DUT-task-seed combinations.
 
         Returns:
-            TournamentResult with all comparisons and ratings
+            Tuple of (solutions dict, metrics dict) where:
+            - solutions: mapping (dut_id, task_id, sample_index) to Solution
+            - metrics: mapping dut_id to aggregated SolutionMetrics
         """
-        logger.info(
-            "tournament_start",
-            num_duts=len(self.duts),
-            num_tasks=len(self.tasks),
-            num_arenas=len(self.arenas),
-            samples_per_pairing=self.samples_per_pairing,
-        )
-
-        comparisons: list[tuple[str, str, str, JudgmentResult]] = []
-        start_time = time.time()
-
-        # Generate all solutions first
         solutions: dict[tuple[str, str, int], Solution] = {}
+        metrics: dict[str, SolutionMetrics] = {}
+
         for dut in self.duts:
+            dut_id = dut.get_metadata().id
+            metrics[dut_id] = SolutionMetrics()
+
             for task in self.tasks:
                 for i in range(self.samples_per_pairing):
                     seed = 42 + i  # Deterministic seeds
@@ -176,18 +256,33 @@ class TournamentRunner:
                         sol = dut.solve(task, seed)
                         self.cache.put(dut, task, seed, sol)
 
-                    solutions[(dut.get_metadata().id, task.id, i)] = sol
+                    solutions[(dut_id, task.id, i)] = sol
 
-                    # Update cost metrics
-                    dut_id = dut.get_metadata().id
-                    self.ratings[dut_id].total_cost_usd += sol.cost_usd
-                    self.ratings[dut_id].total_time_seconds += sol.generation_time_seconds
-                    self.ratings[dut_id].total_tokens += sol.total_tokens
+                    # Collect metrics (no mutation of self.ratings)
+                    metrics[dut_id].cost_usd += sol.cost_usd
+                    metrics[dut_id].time_seconds += sol.generation_time_seconds
+                    metrics[dut_id].tokens += sol.total_tokens
 
         logger.info("solutions_generated", total_solutions=len(solutions))
+        return solutions, metrics
 
-        # Compare all pairs
+    def compare_solutions(
+        self,
+        solutions: dict[tuple[str, str, int], Solution],
+        progress_callback: Any = None,
+    ) -> list[tuple[str, str, str, JudgmentResult]]:
+        """Compare all solution pairs across arenas.
+
+        Args:
+            solutions: Dictionary mapping (dut_id, task_id, sample_index) to Solution
+            progress_callback: Optional callback for progress updates
+
+        Returns:
+            List of comparisons: (dut_a_id, dut_b_id, arena_name, judgment)
+        """
+        comparisons: list[tuple[str, str, str, JudgmentResult]] = []
         total_comparisons = 0
+
         for arena in self.arenas:
             for task in self.tasks:
                 # Get all DUT pairs
@@ -206,26 +301,109 @@ class TournamentRunner:
                         # Record comparison
                         comparison = (dut_a_id, dut_b_id, arena.name, judgment)
                         comparisons.append(comparison)
-
-                        # Update ratings and add to comparison history
-                        self._update_ratings(dut_a_id, dut_b_id, judgment.winner, comparison)
                         total_comparisons += 1
 
                         if progress_callback:
                             progress_callback(total_comparisons)
 
-        logger.info("tournament_complete", total_comparisons=total_comparisons)
+        logger.info("comparisons_complete", total_comparisons=total_comparisons)
+        return comparisons
 
-        return TournamentResult(
+    def update_ratings(
+        self,
+        comparisons: list[tuple[str, str, str, JudgmentResult]],
+    ) -> None:
+        """Update ratings based on all comparisons.
+
+        Args:
+            comparisons: List of (dut_a_id, dut_b_id, arena_name, judgment) tuples
+        """
+        for comparison in comparisons:
+            dut_a_id, dut_b_id, _, judgment = comparison
+            self._update_ratings(dut_a_id, dut_b_id, judgment.winner, comparison)
+
+    def run(
+        self,
+        progress_callback: Any = None,
+        output_dir: Path | None = None,
+    ) -> TournamentResult:
+        """Run full tournament.
+
+        Args:
+            progress_callback: Optional callback for progress updates
+            output_dir: Optional directory to save results. If provided, results will be
+                       saved to {output_dir}/tournament-{timestamp}/tournament.yaml
+
+        Returns:
+            TournamentResult with all comparisons and ratings
+
+        Raises:
+            ValueError: If duts, tasks, or arenas lists are empty, or if samples_per_pairing < 1
+        """
+        # Validate inputs
+        if not self.duts:
+            raise ValueError("Cannot run tournament with zero DUTs")
+        if not self.tasks:
+            raise ValueError("Cannot run tournament with zero tasks")
+        if not self.arenas:
+            raise ValueError("Cannot run tournament with zero arenas")
+        if self.samples_per_pairing < 1:
+            raise ValueError(f"samples_per_pairing must be >= 1, got {self.samples_per_pairing}")
+
+        logger.info(
+            "tournament_start",
+            num_duts=len(self.duts),
+            num_tasks=len(self.tasks),
+            num_arenas=len(self.arenas),
+            samples_per_pairing=self.samples_per_pairing,
+        )
+
+        start_time = time.time()
+
+        # Step 1: Generate all solutions and collect metrics
+        solutions, metrics = self.generate_solutions()
+
+        # Apply metrics to ratings
+        for dut_id, m in metrics.items():
+            self.ratings[dut_id].total_cost_usd += m.cost_usd
+            self.ratings[dut_id].total_time_seconds += m.time_seconds
+            self.ratings[dut_id].total_tokens += m.tokens
+
+        # Step 2: Compare all solution pairs
+        comparisons = self.compare_solutions(solutions, progress_callback)
+
+        # Step 3: Update ratings
+        self.update_ratings(comparisons)
+
+        logger.info("tournament_complete", total_comparisons=len(comparisons))
+
+        result = TournamentResult(
             ratings=self.ratings,
             comparisons=comparisons,
             tasks_evaluated=[t.id for t in self.tasks],
             arenas=[a.name for a in self.arenas],
-            total_comparisons=total_comparisons,
+            total_comparisons=len(comparisons),
             total_cost_usd=sum(r.total_cost_usd for r in self.ratings.values()),
             start_time=start_time,
             end_time=time.time(),
         )
+
+        # Save results if output directory provided
+        if output_dir is not None:
+            timestamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
+            result_dir = output_dir / f"tournament-{timestamp}"
+            try:
+                result.save(result_dir)
+            except Exception as e:
+                logger.error(
+                    "failed_to_save_results",
+                    error=str(e),
+                    error_type=type(e).__name__,
+                    result_dir=str(result_dir),
+                )
+                # Don't raise - tournament succeeded, just save failed
+
+        return result
 
     def _update_ratings(
         self,

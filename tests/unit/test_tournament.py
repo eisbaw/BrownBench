@@ -356,3 +356,242 @@ def test_dut_rating_properties():
     assert rating.wins == 10
     assert rating.losses == 5
     assert rating.ties == 2
+
+
+def test_dut_rating_to_dict():
+    """Test DUTRating serialization."""
+    from codegen_bench.core.tournament import DUTRating
+    from codegen_bench.stats.ratings.bayesian_elo import BayesianELO
+
+    rating = DUTRating(
+        dut_id="test",
+        rating=BayesianELO(prior_mean=1500, prior_std=200),
+        total_cost_usd=1.5,
+        total_time_seconds=30.0,
+        total_tokens=1000,
+    )
+
+    data = rating.to_dict()
+
+    assert data["dut_id"] == "test"
+    assert data["elo"] == 1500
+    assert data["elo_std"] == 200
+    assert data["total_cost_usd"] == 1.5
+    assert data["total_time_seconds"] == 30.0
+    assert data["total_tokens"] == 1000
+
+
+def test_tournament_result_to_dict(tmp_path, mock_task, mock_arena, mock_judge_orchestrator):
+    """Test TournamentResult serialization."""
+    dut1 = MockDUT("dut_a", {})
+    dut2 = MockDUT("dut_b", {})
+
+    cache = SolutionCache(tmp_path / "cache")
+
+    runner = TournamentRunner(
+        duts=[dut1, dut2],
+        tasks=[mock_task],
+        judges=mock_judge_orchestrator,
+        arenas=[mock_arena],
+        cache=cache,
+        samples_per_pairing=1,
+    )
+
+    result = runner.run()
+    data = result.to_dict()
+
+    # Verify structure
+    assert "tournament_metadata" in data
+    assert "ratings" in data
+    assert "leaderboard" in data
+    assert "comparisons" in data
+    assert "tasks_evaluated" in data
+    assert "arenas" in data
+
+    # Verify metadata
+    assert data["tournament_metadata"]["total_comparisons"] == 1
+    assert data["tournament_metadata"]["total_cost_usd"] > 0
+
+    # Verify ratings
+    assert "dut_a" in data["ratings"]
+    assert "dut_b" in data["ratings"]
+
+    # Verify leaderboard is sorted
+    assert len(data["leaderboard"]) == 2
+
+
+def test_tournament_result_save(tmp_path, mock_task, mock_arena, mock_judge_orchestrator):
+    """Test TournamentResult persistence to YAML."""
+    import yaml
+
+    dut1 = MockDUT("dut_a", {})
+    dut2 = MockDUT("dut_b", {})
+
+    cache = SolutionCache(tmp_path / "cache")
+
+    runner = TournamentRunner(
+        duts=[dut1, dut2],
+        tasks=[mock_task],
+        judges=mock_judge_orchestrator,
+        arenas=[mock_arena],
+        cache=cache,
+        samples_per_pairing=1,
+    )
+
+    result = runner.run()
+
+    # Save to directory
+    output_dir = tmp_path / "results"
+    saved_file = result.save(output_dir)
+
+    # Verify file exists
+    assert saved_file.exists()
+    assert saved_file.name == "tournament.yaml"
+
+    # Verify content can be loaded
+    with open(saved_file) as f:
+        loaded_data = yaml.safe_load(f)
+
+    assert "tournament_metadata" in loaded_data
+    assert "ratings" in loaded_data
+    assert loaded_data["tournament_metadata"]["total_comparisons"] == 1
+
+
+def test_tournament_run_with_output_dir(tmp_path, mock_task, mock_arena, mock_judge_orchestrator):
+    """Test tournament run with automatic result saving."""
+    dut1 = MockDUT("dut_a", {})
+    dut2 = MockDUT("dut_b", {})
+
+    cache = SolutionCache(tmp_path / "cache")
+
+    runner = TournamentRunner(
+        duts=[dut1, dut2],
+        tasks=[mock_task],
+        judges=mock_judge_orchestrator,
+        arenas=[mock_arena],
+        cache=cache,
+        samples_per_pairing=1,
+    )
+
+    # Run with output directory
+    output_dir = tmp_path / "results"
+    result = runner.run(output_dir=output_dir)
+
+    # Verify result returned successfully
+    assert result is not None
+    assert result.total_comparisons == 1
+
+    # Verify directory was created with timestamp
+    assert output_dir.exists()
+    tournament_dirs = list(output_dir.glob("tournament-*"))
+    assert len(tournament_dirs) == 1
+
+    # Verify tournament.yaml exists
+    tournament_file = tournament_dirs[0] / "tournament.yaml"
+    assert tournament_file.exists()
+
+
+def test_tournament_composable_methods(tmp_path, mock_task, mock_arena, mock_judge_orchestrator):
+    """Test that tournament steps can be used independently."""
+    dut1 = MockDUT("dut_a", {})
+    dut2 = MockDUT("dut_b", {})
+
+    cache = SolutionCache(tmp_path / "cache")
+
+    runner = TournamentRunner(
+        duts=[dut1, dut2],
+        tasks=[mock_task],
+        judges=mock_judge_orchestrator,
+        arenas=[mock_arena],
+        cache=cache,
+        samples_per_pairing=1,
+    )
+
+    # Step 1: Generate solutions independently
+    solutions, metrics = runner.generate_solutions()
+    assert len(solutions) == 2  # 2 DUTs × 1 task × 1 sample
+    assert len(metrics) == 2  # Metrics for both DUTs
+    assert "dut_a" in metrics
+    assert "dut_b" in metrics
+
+    # Step 2: Compare solutions independently
+    comparisons = runner.compare_solutions(solutions)
+    assert len(comparisons) == 1  # 1 pair × 1 arena × 1 sample
+
+    # Step 3: Update ratings independently
+    runner.update_ratings(comparisons)
+
+    # Verify ratings were updated
+    assert runner.ratings["dut_a"].wins + runner.ratings["dut_a"].losses + runner.ratings["dut_a"].ties == 1
+    assert runner.ratings["dut_b"].wins + runner.ratings["dut_b"].losses + runner.ratings["dut_b"].ties == 1
+
+
+def test_tournament_run_with_zero_duts(tmp_path, mock_task, mock_arena, mock_judge_orchestrator):
+    """Test that running tournament with zero DUTs raises ValueError."""
+    cache = SolutionCache(tmp_path / "cache")
+
+    runner = TournamentRunner(
+        duts=[],  # Empty list
+        tasks=[mock_task],
+        judges=mock_judge_orchestrator,
+        arenas=[mock_arena],
+        cache=cache,
+        samples_per_pairing=1,
+    )
+
+    with pytest.raises(ValueError, match="Cannot run tournament with zero DUTs"):
+        runner.run()
+
+
+def test_tournament_run_with_zero_tasks(tmp_path, mock_arena, mock_judge_orchestrator):
+    """Test that running tournament with zero tasks raises ValueError."""
+    dut = MockDUT("dut1", {})
+    cache = SolutionCache(tmp_path / "cache")
+
+    runner = TournamentRunner(
+        duts=[dut],
+        tasks=[],  # Empty list
+        judges=mock_judge_orchestrator,
+        arenas=[mock_arena],
+        cache=cache,
+        samples_per_pairing=1,
+    )
+
+    with pytest.raises(ValueError, match="Cannot run tournament with zero tasks"):
+        runner.run()
+
+
+def test_tournament_run_with_zero_arenas(tmp_path, mock_task, mock_judge_orchestrator):
+    """Test that running tournament with zero arenas raises ValueError."""
+    dut = MockDUT("dut1", {})
+    cache = SolutionCache(tmp_path / "cache")
+
+    runner = TournamentRunner(
+        duts=[dut],
+        tasks=[mock_task],
+        judges=mock_judge_orchestrator,
+        arenas=[],  # Empty list
+        cache=cache,
+        samples_per_pairing=1,
+    )
+
+    with pytest.raises(ValueError, match="Cannot run tournament with zero arenas"):
+        runner.run()
+
+
+def test_tournament_run_with_zero_samples(tmp_path, mock_task, mock_arena, mock_judge_orchestrator):
+    """Test that running tournament with samples_per_pairing=0 raises ValueError."""
+    dut = MockDUT("dut1", {})
+    cache = SolutionCache(tmp_path / "cache")
+
+    runner = TournamentRunner(
+        duts=[dut],
+        tasks=[mock_task],
+        judges=mock_judge_orchestrator,
+        arenas=[mock_arena],
+        cache=cache,
+        samples_per_pairing=0,  # Invalid value
+    )
+
+    with pytest.raises(ValueError, match="samples_per_pairing must be >= 1"):
+        runner.run()
