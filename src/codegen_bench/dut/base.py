@@ -24,6 +24,9 @@ class ApproachMetadata:
 class CodeGenerationApproach(ABC):
     """Abstract base for all DUT implementations."""
 
+    # Subclasses should define this class attribute
+    APPROACH_ID: str = ""
+
     def __init__(self, config: dict[str, Any]):
         """Initialize approach with configuration.
 

@@ -19,6 +19,7 @@ logger = structlog.get_logger(__name__)
 class SimpleChatDUT(CodeGenerationApproach):
     """Single-turn chat with minimal prompting using Claude."""
 
+    APPROACH_ID = "simple-chat"
     client: anthropic.Anthropic | None
 
     def __init__(self, config: dict[str, Any]):

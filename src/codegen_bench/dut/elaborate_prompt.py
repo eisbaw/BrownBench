@@ -8,6 +8,8 @@ from codegen_bench.dut.simple_chat import SimpleChatDUT
 class ElaboratePromptDUT(SimpleChatDUT):
     """Code generation with enhanced system prompt and best practices."""
 
+    APPROACH_ID = "elaborate-prompt"
+
     def _build_prompt(self, task: Task) -> str:
         """Build elaborate prompt with architectural analysis.
 

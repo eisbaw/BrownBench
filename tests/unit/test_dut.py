@@ -11,6 +11,8 @@ from codegen_bench.dut.registry import DUTRegistry
 class MockDUT(CodeGenerationApproach):
     """Mock DUT for testing."""
 
+    APPROACH_ID = "mock-dut"
+
     def solve(self, task: Task, seed: int) -> Solution:
         """Generate mock solution."""
         return Solution(
@@ -74,6 +76,8 @@ def test_registry_register_decorator() -> None:
 
     @DUTRegistry.register
     class DecoratorDUT(CodeGenerationApproach):
+        APPROACH_ID = "decorator-dut"
+
         def solve(self, task: Task, seed: int) -> Solution:
             return Solution(
                 approach_id="decorator-dut",

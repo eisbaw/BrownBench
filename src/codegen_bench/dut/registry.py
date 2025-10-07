@@ -19,10 +19,14 @@ class DUTRegistry:
 
         Returns:
             The same class (for use as decorator)
+
+        Raises:
+            ValueError: If DUT class doesn't define APPROACH_ID
         """
-        # Get ID from metadata (need dummy instance)
-        dummy = dut_class(config={})
-        dut_id = dummy.get_metadata().id
+        # Get ID from class attribute (no instance needed)
+        dut_id = dut_class.APPROACH_ID
+        if not dut_id:
+            raise ValueError(f"{dut_class.__name__} must define APPROACH_ID class attribute")
         cls._registry[dut_id] = dut_class
         return dut_class
 
