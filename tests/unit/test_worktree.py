@@ -319,6 +319,7 @@ def test_create_worktree_oserror(git_repo, monkeypatch):
 
 def test_remove_worktree_oserror(git_repo, monkeypatch):
     """Test that remove_worktree raises WorktreeError on OSError."""
+    import shutil
     import subprocess
 
     from codegen_bench.exceptions import WorktreeError
@@ -334,5 +335,16 @@ def test_remove_worktree_oserror(git_repo, monkeypatch):
 
     monkeypatch.setattr(subprocess, "run", mock_run)
 
-    with pytest.raises(WorktreeError, match="Failed to remove worktree due to system error"):
-        strategy.remove_worktree(worktree_path)
+    try:
+        with pytest.raises(WorktreeError, match="Failed to remove worktree due to system error"):
+            strategy.remove_worktree(worktree_path)
+    finally:
+        # Clean up the worktree manually since remove_worktree was mocked
+        monkeypatch.undo()
+        if worktree_path.exists():
+            # Try git cleanup first
+            try:
+                strategy.remove_worktree(worktree_path)
+            except WorktreeError:
+                # If git fails, use manual cleanup
+                shutil.rmtree(worktree_path, ignore_errors=True)

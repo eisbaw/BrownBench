@@ -11,6 +11,7 @@ import structlog
 from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
 from codegen_bench.dut.base import CodeGenerationApproach
+from codegen_bench.exceptions import CacheError
 
 logger = structlog.get_logger(__name__)
 
@@ -100,9 +101,6 @@ class SolutionCache:
                 logger.warning(
                     "cache_deletion_failed", cache_file=str(cache_file), error=str(unlink_error)
                 )
-
-            # Import CacheError
-            from codegen_bench.exceptions import CacheError
 
             raise CacheError(f"Corrupted cache file {cache_file}: {e}") from e
 
