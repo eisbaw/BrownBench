@@ -654,8 +654,165 @@
 
 ---
 
+## Code Quality Review (2025-10-07)
+
+### Code Smells & Issues Found
+
+**Security Issues:**
+- [ ] **Shell injection risk in ValidationExecutor** (executor.py:69)
+  - Uses `shell=True` with user-controlled command
+  - RISK: Task YAML could contain malicious compile/test commands
+  - FIX: Either validate/sanitize commands OR use subprocess.run with list args
+  - PRIORITY: HIGH
+
+**Broad Exception Handling:**
+- [ ] **Overly broad exception handlers** (8 locations)
+  - worktree.py:84, 114 - catching `Exception` in cleanup paths
+  - applicator.py:63, 80, 107 - catching `Exception` in file operations
+  - executor.py:93 - catching `Exception` in command execution
+  - tasks/loader.py:82, 98 - catching `Exception` in YAML parsing
+  - RISK: Silently swallowing unexpected errors, harder to debug
+  - FIX: Catch specific exceptions (IOError, OSError, etc.)
+  - PRIORITY: MEDIUM
+
+**Resource Management Issues:**
+- [ ] **Worktree cleanup may fail** (worktree.py:68-88)
+  - Creates temp directory before git worktree command
+  - If worktree fails, temp_dir.rmdir() called but may not be empty
+  - RISK: Leaves orphaned directories on disk
+  - FIX: Use shutil.rmtree() instead of rmdir()
+  - PRIORITY: MEDIUM
+
+- [ ] **No context manager for worktrees**
+  - Worktrees created but no automatic cleanup on exception
+  - RISK: Leaked worktrees on crash/interruption
+  - FIX: Implement `__enter__`/`__exit__` or use @contextmanager
+  - PRIORITY: MEDIUM
+
+**Numerical Issues:**
+- [ ] **Division by zero in variance.py** (line 126)
+  - `icc = variance_between / (variance_between + variance_within)`
+  - No check if denominator is 0 (though unlikely in practice)
+  - Already has test coverage but should add explicit check
+  - PRIORITY: LOW
+
+- [ ] **NaN handling in variance decomposition**
+  - Mixed model convergence warnings in tests (acceptable)
+  - RuntimeWarning for divide by zero in edge cases
+  - Already has test for no_variance_case
+  - PRIORITY: LOW (cosmetic)
+
+**Type Safety Issues:**
+- [ ] **Incomplete type coverage in MAMS** (mams.py:137, 171, 208-220)
+  - Some branches unreachable or not tested
+  - Decision logic at line 169 uses magic number (3.0)
+  - FIX: Add named constant for threshold
+  - PRIORITY: LOW
+
+### Missing Tests
+
+**Integration Tests:**
+- [ ] **No test for worktree context manager pattern**
+  - Should add test that verifies cleanup on exception
+  - Test: Create worktree, raise exception, verify removed
+
+- [ ] **No test for shell injection in executor**
+  - Should verify malicious commands are blocked
+  - Test: Pass command with `;rm -rf /`, verify it's rejected
+
+- [ ] **No test for file handle exhaustion**
+  - Cache operations open many files
+  - Test: Verify proper cleanup of file handles
+
+**Edge Case Tests:**
+- [ ] **Tournament runner with API failures**
+  - What happens if all judge calls fail?
+  - Test: Mock persistent API errors, verify graceful degradation
+
+- [ ] **MAMS with scipy.stats.dunnett unavailable**
+  - Fallback to Bonferroni tested but not thoroughly
+  - Test: Mock AttributeError, verify fallback works correctly
+
+- [ ] **Preregistration with malformed YAML**
+  - Test: Load YAML with missing required fields
+  - Test: Load YAML with invalid hash
+
+**Coverage Gaps (94% overall, but some modules lower):**
+- [ ] **cli/main.py: 88% coverage** (17 missed lines)
+  - Missing: Error paths in generate/validate commands
+  - Lines 100-102, 170-172, 176-177, 183-185, 204-205, 220-221, 230
+
+- [ ] **tasks/loader.py: 87% coverage** (6 missed lines)
+  - Missing: Error handling in load_task_set
+  - Lines 64, 80, 82-83, 98-100
+
+- [ ] **validation/worktree.py: 81% coverage** (9 missed lines)
+  - Missing: Error paths in create/remove worktree
+  - Lines 68, 79-80, 84-88, 141-142
+
+- [ ] **validation/applicator.py: 87% coverage** (5 missed lines)
+  - Missing: Exception paths
+  - Lines 63-64, 80-81, 106
+
+**Performance Tests:**
+- [ ] **Large tournament performance**
+  - Test: 100 DUTs × 100 tasks, measure time/memory
+  - Identify bottlenecks
+
+- [ ] **Cache performance with 10K+ entries**
+  - Test: Verify cache lookups stay fast
+  - Test: Measure disk I/O patterns
+
+### Refactoring Opportunities
+
+**Code Structure:**
+- [ ] **Extract magic numbers in MAMS** (mams.py:169, 282-284)
+  - Line 169: `3.0` threshold for stop_efficacy
+  - Line 282-284: Stage cost ratios (0.2, 1.0)
+  - FIX: Define as named constants with documentation
+
+- [ ] **Large function in executor.py** (parse_test_output: 40 lines)
+  - Complex regex parsing logic
+  - FIX: Extract _parse_pytest_output and _parse_unittest_output to separate module
+
+**Documentation:**
+- [ ] **Add security notes to Task schema**
+  - Document that compile/test commands run with shell=True
+  - Warn users to validate task sources
+  - Add example of safe command patterns
+
+- [ ] **Add troubleshooting guide for worktree issues**
+  - Common error: worktree already exists
+  - Common error: git repository not found
+  - Solution: Manual cleanup commands
+
+### Technical Debt
+
+**Low Priority:**
+- [ ] **No async support for API calls**
+  - Could parallelize judge evaluations
+  - Potential 3-5x speedup for tournaments
+  - EFFORT: 2-3 days
+
+- [ ] **No rate limiting implementation**
+  - Relies on API provider rate limits
+  - Could hit limits in large tournaments
+  - EFFORT: 1 day
+
+- [ ] **No graceful shutdown handling**
+  - SIGINT/SIGTERM not handled
+  - May leave worktrees/containers running
+  - EFFORT: 1 day
+
+---
+
 **Next Steps:**
-1. Set up development environment (shell.nix, uv, justfile)
-2. Start Phase 0, Week 1: Project scaffolding
-3. Create first task definition
-4. Begin SimpleChatDUT implementation
+1. **URGENT:** Fix shell injection vulnerability in ValidationExecutor
+2. Narrow exception handling to specific types
+3. Add worktree context manager for automatic cleanup
+4. Add missing test coverage for error paths
+5. Extract magic numbers to named constants
+6. Set up development environment (shell.nix, uv, justfile)
+7. Start Phase 0, Week 1: Project scaffolding
+8. Create first task definition
+9. Begin SimpleChatDUT implementation
