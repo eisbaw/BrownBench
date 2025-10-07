@@ -55,6 +55,15 @@ class GitWorktreeStrategy:
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
             return False
 
+    def _cleanup_temp_dir(self, temp_dir: Path) -> None:
+        """Clean up temporary directory, ignoring errors.
+
+        Args:
+            temp_dir: Path to temporary directory to remove
+        """
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
     def create_worktree(self, branch: str | None = None) -> Path:
         """Create a new git worktree.
 
@@ -85,9 +94,7 @@ class GitWorktreeStrategy:
             )
 
             if result.returncode != 0:
-                # Use shutil.rmtree to handle non-empty directories
-                if temp_dir.exists():
-                    shutil.rmtree(temp_dir, ignore_errors=True)
+                self._cleanup_temp_dir(temp_dir)
                 raise WorktreeError(
                     f"Failed to create worktree at {temp_dir}: {result.stderr}"
                 )
@@ -95,14 +102,10 @@ class GitWorktreeStrategy:
             return temp_dir
 
         except subprocess.TimeoutExpired as e:
-            # Clean up temp directory on timeout
-            if temp_dir.exists():
-                shutil.rmtree(temp_dir, ignore_errors=True)
+            self._cleanup_temp_dir(temp_dir)
             raise WorktreeError(f"Worktree creation timed out after 30s: {e}") from e
         except (OSError, subprocess.CalledProcessError) as e:
-            # Clean up temp directory on failure
-            if temp_dir.exists():
-                shutil.rmtree(temp_dir, ignore_errors=True)
+            self._cleanup_temp_dir(temp_dir)
             raise WorktreeError(f"Failed to create worktree due to system error: {e}") from e
 
     def remove_worktree(self, worktree_path: Path) -> None:
