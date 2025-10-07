@@ -182,3 +182,34 @@ def test_validation_result_creation():
     assert result.error == "error text"
     assert result.returncode == 0
     assert result.timed_out is False
+
+
+def test_shell_injection_protection(workspace):
+    """Test that shell injection attempts are handled safely.
+
+    When shell=False is used with subprocess.run(), shell metacharacters
+    are treated as literal arguments, preventing command injection.
+    shlex.split() parses the command string into arguments, but those
+    arguments are passed directly to the executable without shell interpretation.
+    """
+    executor = ValidationExecutor(workspace)
+
+    # Test 1: Semicolon is treated as a literal argument, not command separator
+    # This executes: echo ["hello;", "rm", "-rf", "/"]
+    # Which outputs the literal string "hello; rm -rf /" instead of executing rm
+    result = executor._run_command("echo hello; rm -rf /", timeout=5)
+    assert result.success is True
+    assert "hello; rm -rf /" in result.output
+    # The dangerous rm command was NOT executed - it was just echoed
+
+    # Test 2: Command substitution is treated literally
+    result = executor._run_command("echo $(whoami)", timeout=5)
+    assert result.success is True
+    # The shell substitution doesn't happen - it's printed literally
+    assert "$(whoami)" in result.output or "whoami" in result.output
+
+    # Test 3: Pipe operator is treated literally
+    result = executor._run_command("echo dangerous | cat", timeout=5)
+    assert result.success is True
+    # No pipe happens - the string is echoed literally
+    assert "dangerous | cat" in result.output or "|" in result.output
