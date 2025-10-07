@@ -859,7 +859,7 @@
 ✅ Proper resource cleanup with context managers and finally blocks
 
 **Remaining Optional Improvements (LOW PRIORITY):**
-- [ ] Add error path tests for CLI commands (to reach 95%+ coverage on CLI)
+- [x] DONE: Add error path tests for CLI commands (issues 8.1, 8.2, 9.1 - 7 tests added)
 - [ ] Add performance benchmarks for large tournaments
 - [ ] Implement async support for parallel judge evaluations - FUTURE
 - [ ] Add rate limiting for API calls - FUTURE
@@ -867,18 +867,14 @@
 
 **New Issues Found (2025-10-07 Final Review):**
 
-### Missing Tests (Medium Priority)
-- [ ] **ISSUE 8.1: Task validation error paths uncovered** (Impact: Medium, Effort: Low)
-  - Location: src/codegen_bench/core/task.py:83-102
-  - Problem: shlex.split() error paths not tested (lines 83-90, 95-102)
-  - Test: test_task_validate_invalid_compile_command, test_task_validate_invalid_test_command
-  - Coverage: 83% → expected 95%+
+### Missing Tests (Medium Priority) - RESOLVED
+- [x] **DONE: ISSUE 8.1: Task validation error paths uncovered**
+  - Fixed: Added test_task_validate_invalid_compile_command, test_task_validate_invalid_test_command
+  - Commit: 325bdbc
 
-- [ ] **ISSUE 8.2: TaskLoader error paths uncovered** (Impact: Medium, Effort: Low)
-  - Location: src/codegen_bench/tasks/loader.py:64-87, 102-107
-  - Problem: OSError/ValueError/KeyError handling not tested
-  - Test: test_load_task_set_missing_pattern, test_load_task_set_corrupted_yaml
-  - Coverage: 87% → expected 95%+
+- [x] **DONE: ISSUE 8.2: TaskLoader error paths uncovered**
+  - Fixed: Added yaml.YAMLError, TypeError handling + 3 tests
+  - Commit: b8af470
 
 - [ ] **ISSUE 8.3: Cache concurrent corruption handling** (Impact: Low, Effort: Low)
   - Location: src/codegen_bench/cache/store.py:138-144
@@ -892,12 +888,10 @@
   - Test: test_apply_write_permission_denied, test_apply_delete_permission_denied, test_apply_diff_timeout
   - Coverage: 85% → expected 95%+
 
-### Potential Bugs (Low Priority)
-- [ ] **ISSUE 9.1: __main__.py never tested or executed** (Impact: Low, Effort: Low)
-  - Location: src/codegen_bench/__main__.py:3-6
-  - Problem: 0% coverage, CLI entry point not tested
-  - Test: test_main_entry_point (integration test)
-  - Coverage: 0% → expected 100%
+### Potential Bugs (Low Priority) - RESOLVED
+- [x] **DONE: ISSUE 9.1: __main__.py never tested or executed**
+  - Fixed: Added integration tests for CLI entry point
+  - Commit: 0792328
 
 - [ ] **ISSUE 9.2: Worktree error logging incomplete** (Impact: Low, Effort: Low)
   - Location: src/codegen_bench/validation/worktree.py:86, 97-98, 107-109, 138
@@ -1046,7 +1040,40 @@ Ready to proceed with Phase 1: Judge system and tournament runner
 
 ---
 
-## Architectural Improvements from MPED Review (2025-10-07)
+## Architectural Improvements from MPED Review - Second Pass (2025-10-07 Evening)
+
+### High Priority (Affects Maintainability)
+- [ ] **ISSUE 11.1: Refactor Task.validate() to raise exceptions instead of returning bool**
+  - Location: src/codegen_bench/core/task.py:64-104
+  - Problem: Boolean blindness - validation failures lose specificity
+  - Impact: Callers get generic "failed validation" instead of specific errors
+  - Fix: Raise ValidationError with specific messages (e.g., "Codebase path does not exist: {path}")
+  - Violates MPED fail-fast principle
+  - Effort: Medium (affects TaskLoader and all validate() callers)
+
+### Medium Priority (Code Quality)
+- [ ] **ISSUE 11.2: Inconsistent logging in Task.validate()**
+  - Location: src/codegen_bench/core/task.py:68-77 (path checks), 84-102 (command checks)
+  - Problem: Command validation logs errors, path validation doesn't
+  - Fix: Log all validation failures consistently
+  - Effort: Low
+
+### Low Priority (Test Quality)
+- [ ] **ISSUE 11.3: Uncertain behavior in test_main_entry_point_version**
+  - Location: tests/unit/test_main_entry.py:30
+  - Problem: Accepts returncode in (0, 2) - suggests uncertainty about correct behavior
+  - Fix: Determine actual expected behavior, test specifically
+  - Effort: Low
+
+- [ ] **ISSUE 11.4: Test error message quality**
+  - Location: tests/unit/test_task_loader.py:123, 137, 159
+  - Problem: Tests only match "failed validation" / "Failed to load" without verifying specifics
+  - Fix: Verify specific error messages to ensure quality debugging info
+  - Effort: Low
+
+---
+
+## Architectural Improvements from MPED Review - First Pass (2025-10-07)
 
 ### Critical Priority (Fix Before Phase 1)
 
