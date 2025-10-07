@@ -9,6 +9,7 @@ Modules:
 - bayesian: Bayesian adaptive design with continuous monitoring
 """
 
+from codegen_bench.stats.adaptive.mams import MAMSConfig, MAMSDesign, MAMSResult
 from codegen_bench.stats.adaptive.sequential import (
     GroupSequentialDesign,
     SequentialBoundaries,
@@ -19,4 +20,7 @@ __all__ = [
     "GroupSequentialDesign",
     "SequentialBoundaries",
     "StoppingDecision",
+    "MAMSConfig",
+    "MAMSDesign",
+    "MAMSResult",
 ]

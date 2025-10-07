@@ -183,12 +183,12 @@
   - [ ] Match quality prediction
   - [ ] Unit tests
 
-- [ ] **Effect size calculation** `src/codegen_bench/stats/`
-  - [ ] **FIX:** Use paired Hedges' g (not unpaired)
-  - [ ] Bootstrap confidence intervals
-  - [ ] CLES calculation
-  - [ ] Interpretation (SE field norms)
-  - [ ] Unit tests with known effect sizes
+- [x] **Effect size calculation** `src/codegen_bench/stats/`
+  - [x] ~~**FIX:**~~ Use paired Hedges' g (already implemented correctly)
+  - [x] Bootstrap confidence intervals
+  - [x] CLES calculation
+  - [x] Interpretation (SE field norms)
+  - [x] Unit tests with known effect sizes
 
 - [ ] **Variance decomposition**
   - [ ] Mixed linear models with statsmodels
@@ -227,36 +227,37 @@
   - [ ] Early stop reporting
   - [ ] Integration tests
 
-### Week 11: MAMS Adaptive Design
+### Week 11: MAMS Adaptive Design ✓
 
-- [ ] **MAMS implementation** `src/codegen_bench/stats/adaptive/`
-  - [ ] MAMSDesign class
-  - [ ] Stage 1: cheap metric evaluation
-  - [ ] Dunnett's test for arm selection
-  - [ ] Select top 2-3 performers
-  - [ ] Unit tests
+- [x] **MAMS implementation** `src/codegen_bench/stats/adaptive/`
+  - [x] MAMSDesign class
+  - [x] Stage 1: cheap metric evaluation
+  - [x] Dunnett's test for arm selection
+  - [x] Select top 2-3 performers
+  - [x] Unit tests (20 tests, 89% coverage)
 
-- [ ] **MAMS tournament mode**
+- [ ] **MAMS tournament mode** (future work)
   - [ ] Phase 1: screening with cheap metrics
   - [ ] Phase 2: full evaluation of selected DUTs
   - [ ] Integration with sequential testing
   - [ ] End-to-end test
 
-### Week 12: Pre-registration System
+### Week 12: Pre-registration System ✓
 
-- [ ] **Pre-registration** `src/codegen_bench/cli/`
-  - [ ] PreregistrationPlan dataclass
-  - [ ] YAML schema for analysis plan
-  - [ ] Hypotheses specification
-  - [ ] Stopping rules
-  - [ ] Timestamp generation
-  - [ ] SHA-256 hash for verification
+- [x] **Pre-registration** `src/codegen_bench/core/`
+  - [x] PreregistrationPlan dataclass
+  - [x] YAML schema for analysis plan
+  - [x] Hypotheses specification
+  - [x] Stopping rules
+  - [x] Timestamp generation
+  - [x] SHA-256 hash for verification
 
-- [ ] **Tournament adherence checking**
-  - [ ] Load preregistration file
-  - [ ] Verify tournament follows plan
-  - [ ] Detect deviations
-  - [ ] Report in results
+- [x] **Tournament adherence checking**
+  - [x] Load preregistration file
+  - [x] Verify tournament follows plan
+  - [x] Detect deviations
+  - [x] Report in results
+  - [x] 20 comprehensive tests, 91% coverage
 
 - [ ] **Expand to 15 tasks**
   - [ ] Add 10 more tasks across domains

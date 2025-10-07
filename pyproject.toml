@@ -104,9 +104,11 @@ module = [
     "pandas",
     "rich.*",
     "scipy",
+    "scipy.stats",
     "statsmodels.*",
     "structlog",
     "trueskill",
+    "yaml",
 ]
 ignore_missing_imports = true
 
