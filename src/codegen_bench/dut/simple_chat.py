@@ -17,6 +17,11 @@ from codegen_bench.parsing.extractor import CodeExtractor
 
 logger = structlog.get_logger(__name__)
 
+# Pricing for Claude Sonnet 4.5 (as of January 2025)
+# Source: https://www.anthropic.com/pricing
+CLAUDE_SONNET_4_5_INPUT_COST_PER_1K_TOKENS = 0.003  # $3.00 per million tokens
+CLAUDE_SONNET_4_5_OUTPUT_COST_PER_1K_TOKENS = 0.015  # $15.00 per million tokens
+
 
 class SimpleChatDUT(CodeGenerationApproach):
     """Single-turn chat with minimal prompting using Claude."""
@@ -124,16 +129,26 @@ class SimpleChatDUT(CodeGenerationApproach):
                 api_calls=1,
                 cost_usd=cost,
             )
-        except Exception as e:
+        except anthropic.APIError as e:
             logger.error(
-                "solution_generation_failed",
+                "api_error",
                 dut=self.get_metadata().id,
                 task_id=task.id,
                 seed=seed,
                 error=str(e),
                 error_type=type(e).__name__,
             )
-            raise
+            raise DUTError(f"API call failed for task {task.id}: {e}") from e
+        except (KeyError, AttributeError, ValueError) as e:
+            logger.error(
+                "response_parsing_failed",
+                dut=self.get_metadata().id,
+                task_id=task.id,
+                seed=seed,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            raise DUTError(f"Failed to parse API response for task {task.id}: {e}") from e
 
     def _build_prompt(self, task: Task) -> str:
         """Build minimal prompt for task.
@@ -199,12 +214,8 @@ int main() {{
         Returns:
             Cost in USD
         """
-        # Default pricing for Claude Sonnet 4.5
-        input_cost_per_1k = 0.003
-        output_cost_per_1k = 0.015
-
-        input_cost = (input_tokens / 1000) * input_cost_per_1k
-        output_cost = (output_tokens / 1000) * output_cost_per_1k
+        input_cost = (input_tokens / 1000) * CLAUDE_SONNET_4_5_INPUT_COST_PER_1K_TOKENS
+        output_cost = (output_tokens / 1000) * CLAUDE_SONNET_4_5_OUTPUT_COST_PER_1K_TOKENS
 
         return input_cost + output_cost
 
