@@ -154,13 +154,8 @@ class TournamentResult:
             },
             "tasks_evaluated": self.tasks_evaluated,
             "arenas": self.arenas,
-            "ratings": {
-                dut_id: rating.to_dict()
-                for dut_id, rating in self.ratings.items()
-            },
-            "leaderboard": [
-                rating.to_dict() for rating in self.get_leaderboard()
-            ],
+            "ratings": {dut_id: rating.to_dict() for dut_id, rating in self.ratings.items()},
+            "leaderboard": [rating.to_dict() for rating in self.get_leaderboard()],
             "comparisons": [
                 {
                     "dut_a": dut_a,

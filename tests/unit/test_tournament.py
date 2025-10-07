@@ -522,8 +522,14 @@ def test_tournament_composable_methods(tmp_path, mock_task, mock_arena, mock_jud
     runner.update_ratings(comparisons)
 
     # Verify ratings were updated
-    assert runner.ratings["dut_a"].wins + runner.ratings["dut_a"].losses + runner.ratings["dut_a"].ties == 1
-    assert runner.ratings["dut_b"].wins + runner.ratings["dut_b"].losses + runner.ratings["dut_b"].ties == 1
+    assert (
+        runner.ratings["dut_a"].wins + runner.ratings["dut_a"].losses + runner.ratings["dut_a"].ties
+        == 1
+    )
+    assert (
+        runner.ratings["dut_b"].wins + runner.ratings["dut_b"].losses + runner.ratings["dut_b"].ties
+        == 1
+    )
 
 
 def test_tournament_run_with_zero_duts(tmp_path, mock_task, mock_arena, mock_judge_orchestrator):
