@@ -123,6 +123,15 @@ class CodeExtractor:
     def extract_all(text: str) -> dict[str, str]:
         """Try all extraction strategies and merge results.
 
+        Extraction Strategy Precedence (highest to lowest):
+        1. Markdown blocks (```language:path/to/file)
+        2. XML tags (<file path="...">content</file>)
+        3. Comment markers (# FILE: path/to/file)
+
+        Rationale: Markdown blocks are most explicit and structured, so they
+        override other formats. XML tags are second-most structured. Comment
+        markers are least structured and most likely to be false positives.
+
         Args:
             text: Text containing code changes
 
@@ -134,13 +143,15 @@ class CodeExtractor:
         xml = CodeExtractor.extract_xml_tags(text)
         comments = CodeExtractor.extract_comment_markers(text)
 
-        # Merge results (markdown takes precedence)
+        # Merge results in reverse precedence order (lowest to highest)
+        # Later assignments overwrite earlier ones for the same path
         files = {}
 
-        # Track conflicts for debugging LLM output issues
+        # 1. Apply comment markers (lowest precedence)
         for path, content in comments.items():
             files[path] = content
 
+        # 2. Apply XML tags (medium precedence, overwrites comments)
         for path, content in xml.items():
             if path in files:
                 logger.warning(
@@ -152,6 +163,7 @@ class CodeExtractor:
                 )
             files[path] = content
 
+        # 3. Apply markdown blocks (highest precedence, overwrites everything)
         for path, content in markdown.items():
             if path in files:
                 previous = "xml_tags" if path in xml else "comment_markers"
