@@ -15,7 +15,6 @@ from dataclasses import dataclass
 from typing import Literal
 
 import numpy as np
-from scipy import stats
 
 
 @dataclass
@@ -162,7 +161,7 @@ def cohens_h(p1: float, p2: float) -> float:
     phi1 = 2 * np.arcsin(np.sqrt(p1))
     phi2 = 2 * np.arcsin(np.sqrt(p2))
 
-    return phi1 - phi2
+    return float(phi1 - phi2)
 
 
 def _pooled_std(group_a: np.ndarray, group_b: np.ndarray) -> float:
@@ -174,7 +173,7 @@ def _pooled_std(group_a: np.ndarray, group_b: np.ndarray) -> float:
 
     pooled_var = ((n_a - 1) * var_a + (n_b - 1) * var_b) / (n_a + n_b - 2)
 
-    return np.sqrt(pooled_var)
+    return float(np.sqrt(pooled_var))
 
 
 def _bootstrap_ci(
@@ -196,14 +195,14 @@ def _bootstrap_ci(
                 return 0.0
             d_z = mean_diff / sd_diff
             correction = 1 - (3 / (4 * len(a) - 5))
-            return d_z * correction
+            return float(d_z * correction)
         else:
             pooled_sd = _pooled_std(a, b)
             if pooled_sd == 0:
                 return 0.0
             d = (np.mean(a) - np.mean(b)) / pooled_sd
             correction = 1 - (3 / (4 * (len(a) + len(b)) - 9))
-            return d * correction
+            return float(d * correction)
 
     # Bootstrap resampling
     bootstrap_gs = []

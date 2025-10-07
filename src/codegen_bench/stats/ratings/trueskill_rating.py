@@ -14,7 +14,7 @@ References:
 
 from typing import Literal
 
-from trueskill import Rating, rate, quality
+from trueskill import Rating, quality, rate
 
 
 class TrueSkillRating:
@@ -65,7 +65,7 @@ class TrueSkillRating:
         Returns:
             μ - 2σ (approximately 95% confidence interval lower bound)
         """
-        return self.rating.mu - 2 * self.rating.sigma
+        return float(self.rating.mu - 2 * self.rating.sigma)
 
     def match_quality(self, opponent: "TrueSkillRating") -> float:
         """Predict match quality (0-1, higher = more informative).
@@ -79,17 +79,17 @@ class TrueSkillRating:
         Returns:
             Match quality between 0 and 1
         """
-        return quality([[self.rating], [opponent.rating]])
+        return float(quality([[self.rating], [opponent.rating]]))
 
     @property
     def mu(self) -> float:
         """Mean skill estimate."""
-        return self.rating.mu
+        return float(self.rating.mu)
 
     @property
     def sigma(self) -> float:
         """Skill uncertainty."""
-        return self.rating.sigma
+        return float(self.rating.sigma)
 
     @property
     def elo_equivalent(self) -> float:

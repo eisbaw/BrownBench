@@ -21,7 +21,6 @@ import numpy as np
 from scipy import stats
 from statsmodels.stats.multitest import multipletests
 
-
 CorrectionMethod = Literal["fdr_bh", "fdr_by", "bonferroni", "holm", "holm_bonferroni"]
 
 
@@ -62,7 +61,7 @@ def correct_pvalues(
 
     # Handle alias
     if method == "holm_bonferroni":
-        method = "holm"  # type: ignore
+        method = "holm"
 
     # statsmodels naming
     method_map: dict[str, str] = {
@@ -72,7 +71,7 @@ def correct_pvalues(
         "holm": "holm",
     }
 
-    statsmodels_method = method_map.get(method, method)  # type: ignore
+    statsmodels_method = method_map.get(method, method)
 
     rejected, p_adjusted, _, _ = multipletests(
         p_values, alpha=alpha, method=statsmodels_method

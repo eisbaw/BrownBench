@@ -26,8 +26,8 @@ def test_correct_pvalues_fdr_bh() -> None:
     rejected, p_adjusted = correct_pvalues(p_values, method="fdr_bh", alpha=0.05)
 
     # Should reject the small p-values
-    assert rejected[0] == True  # 0.001
-    assert rejected[4] == True  # 0.002
+    assert rejected[0] is True  # 0.001
+    assert rejected[4] is True  # 0.002
     # May or may not reject borderline cases
     assert isinstance(rejected, np.ndarray)
     assert len(rejected) == 5
@@ -41,11 +41,11 @@ def test_correct_pvalues_bonferroni() -> None:
 
     # Bonferroni: α_adj = α / n = 0.05 / 5 = 0.01
     # Should only reject p < 0.01
-    assert rejected[0] == True  # 0.001 < 0.01
-    assert rejected[1] == True  # 0.01 ≤ 0.01
-    assert rejected[2] == False  # 0.02 > 0.01
-    assert rejected[3] == False  # 0.03 > 0.01
-    assert rejected[4] == False  # 0.04 > 0.01
+    assert rejected[0] is True  # 0.001 < 0.01
+    assert rejected[1] is True  # 0.01 ≤ 0.01
+    assert rejected[2] is False  # 0.02 > 0.01
+    assert rejected[3] is False  # 0.03 > 0.01
+    assert rejected[4] is False  # 0.04 > 0.01
 
 
 def test_correct_pvalues_holm() -> None:
@@ -55,7 +55,7 @@ def test_correct_pvalues_holm() -> None:
 
     # Holm is more powerful than Bonferroni
     # Should reject more than Bonferroni but less than uncorrected
-    assert rejected[0] == True  # Smallest p-value
+    assert rejected[0] is True  # Smallest p-value
     assert isinstance(rejected, np.ndarray)
 
 
@@ -121,9 +121,9 @@ def test_dunnett_test_basic() -> None:
     result = dunnett_test([treatment1, treatment2], control, alpha=0.05)
 
     # Treatment 1 should be significant
-    assert result["significant"][0] == True
+    assert result["significant"][0] is True
     # Treatment 2 should not be significant
-    assert result["significant"][1] == False
+    assert result["significant"][1] is False
 
     assert len(result["statistics"]) == 2
     assert len(result["pvalues"]) == 2
@@ -146,9 +146,9 @@ def test_dunnett_test_one_sided() -> None:
     result_less = dunnett_test([treatment], control, alternative="less")
 
     # Should be significant for 'greater'
-    assert result_greater["significant"][0] == True
+    assert result_greater["significant"][0] is True
     # Should not be significant for 'less'
-    assert result_less["significant"][0] == False
+    assert result_less["significant"][0] is False
 
 
 def test_dunnett_test_power_gain() -> None:
