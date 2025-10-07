@@ -269,3 +269,33 @@ def test_worktree_context_manager_fallback_cleanup(git_repo, monkeypatch):
     assert remove_called[0]
     # Path should still be cleaned up (via shutil.rmtree fallback)
     assert not tracked_path.exists()
+
+
+def test_worktree_context_manager_both_cleanup_fail(git_repo, monkeypatch):
+    """Test context manager raises error when both git remove and manual cleanup fail."""
+    import shutil
+
+    strategy = GitWorktreeStrategy(git_repo)
+    tracked_path = None
+
+    # Mock remove_worktree to fail
+    def mock_remove(path):
+        from codegen_bench.exceptions import WorktreeError
+
+        raise WorktreeError("Git worktree remove failed")
+
+    # Mock shutil.rmtree to fail
+    original_rmtree = shutil.rmtree
+
+    def mock_rmtree(path, **kwargs):
+        if "brownbench_worktree_" in str(path):
+            raise OSError("Manual cleanup failed")
+        return original_rmtree(path, **kwargs)
+
+    with pytest.raises(WorktreeError, match="Failed to cleanup worktree"):
+        with strategy.worktree() as worktree_path:
+            tracked_path = worktree_path
+            assert worktree_path.exists()
+            # Patch both cleanup methods to fail
+            monkeypatch.setattr(strategy, "remove_worktree", mock_remove)
+            monkeypatch.setattr(shutil, "rmtree", mock_rmtree)

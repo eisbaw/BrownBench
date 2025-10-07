@@ -202,3 +202,8 @@ class GitWorktreeStrategy:
                             worktree_path=str(worktree_path),
                             error=str(cleanup_error),
                         )
+                        # Both git and manual cleanup failed - raise error
+                        raise WorktreeError(
+                            f"Failed to cleanup worktree at {worktree_path}. "
+                            f"Git remove failed: {e}. Manual cleanup failed: {cleanup_error}"
+                        ) from cleanup_error
