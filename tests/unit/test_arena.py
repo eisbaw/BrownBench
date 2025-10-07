@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-import pytest
-
 from codegen_bench.core.arena import (
     ALL_ARENAS,
     ARCHITECTURAL_INTEGRITY,
