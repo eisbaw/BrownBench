@@ -6,9 +6,8 @@
 - Check this todo.md file - we may have already implemented stuff.
 - Research mature well-documented open-source projects to use as brownfield DUTs; add as submodules.
 - Pick medium-to-large size commits from these open-source DUTs, inspect the work done. Formulate the commit as a prompt that would implement that very same work. This prompt will be used as eval benchmark.
-- Remove done items from this todo.md file.
 
-## Phase 0: Foundations (Weeks 1-3)
+## Phase 0: Foundations (Weeks 1-3) ✓ COMPLETE
 
 ### Week 1: Project Setup & Core Models
 
@@ -92,11 +91,9 @@
   - [ ] Rich terminal output
   - [ ] Basic error handling
 
-**Phase 0 Deliverable:** Generate and validate solution for 1 sample task
-
 ---
 
-## Phase 1: Minimal Viable Benchmark (Weeks 4-7)
+## Phase 1: Minimal Viable Benchmark (Weeks 4-7) - IN PROGRESS
 
 ### Week 4: Judge System
 
@@ -172,8 +169,6 @@
   - [ ] Fix bugs discovered
   - [ ] Document edge cases
 
-**Phase 1 Deliverable:** Working tournament with 2 DUTs on 5 tasks
-
 ---
 
 ## Phase 2: Statistical Rigor (Weeks 8-12)
@@ -186,13 +181,6 @@
   - [ ] Conservative estimate (mu - 2*sigma)
   - [ ] Match quality prediction
   - [ ] Unit tests
-
-- [x] **Effect size calculation** `src/codegen_bench/stats/`
-  - [x] ~~**FIX:**~~ Use paired Hedges' g (already implemented correctly)
-  - [x] Bootstrap confidence intervals
-  - [x] CLES calculation
-  - [x] Interpretation (SE field norms)
-  - [x] Unit tests with known effect sizes
 
 - [ ] **Variance decomposition**
   - [ ] Mixed linear models with statsmodels
@@ -231,14 +219,7 @@
   - [ ] Early stop reporting
   - [ ] Integration tests
 
-### Week 11: MAMS Adaptive Design ✓
-
-- [x] **MAMS implementation** `src/codegen_bench/stats/adaptive/`
-  - [x] MAMSDesign class
-  - [x] Stage 1: cheap metric evaluation
-  - [x] Dunnett's test for arm selection
-  - [x] Select top 2-3 performers
-  - [x] Unit tests (20 tests, 89% coverage)
+### Week 11: MAMS Adaptive Design
 
 - [ ] **MAMS tournament mode** (future work)
   - [ ] Phase 1: screening with cheap metrics
@@ -246,22 +227,7 @@
   - [ ] Integration with sequential testing
   - [ ] End-to-end test
 
-### Week 12: Pre-registration System ✓
-
-- [x] **Pre-registration** `src/codegen_bench/core/`
-  - [x] PreregistrationPlan dataclass
-  - [x] YAML schema for analysis plan
-  - [x] Hypotheses specification
-  - [x] Stopping rules
-  - [x] Timestamp generation
-  - [x] SHA-256 hash for verification
-
-- [x] **Tournament adherence checking**
-  - [x] Load preregistration file
-  - [x] Verify tournament follows plan
-  - [x] Detect deviations
-  - [x] Report in results
-  - [x] 20 comprehensive tests, 91% coverage
+### Week 12: Pre-registration System
 
 - [ ] **Expand to 15 tasks**
   - [ ] Add 10 more tasks across domains
@@ -658,7 +624,7 @@
 
 ---
 
-## Code Quality Review - Updated 2025-10-07
+## Critical Milestones & Decision Points
 
 ### ✅ All Critical Issues Resolved
 
