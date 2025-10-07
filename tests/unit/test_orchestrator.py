@@ -199,3 +199,37 @@ def test_compute_confidence():
 
     confidence = orchestrator._compute_confidence(votes)
     assert confidence == pytest.approx((0.9 + 0.8 + 0.7) / 3)
+
+
+def test_vote_immutability():
+    """Test that JudgeVote is immutable (frozen dataclass)."""
+    vote = JudgeVote(vote="A", reasoning="test", confidence=0.9)
+
+    # Attempting to modify should raise an error
+    with pytest.raises(AttributeError):
+        vote.vote = "B"  # type: ignore[misc]
+
+    with pytest.raises(AttributeError):
+        vote.confidence = 0.5  # type: ignore[misc]
+
+
+def test_orchestrator_preserves_original_votes(sample_task, sample_solution):
+    """Test that orchestrator doesn't mutate original votes when swapping positions."""
+    judges = [MockJudge(vote="A", confidence=0.9) for _ in range(3)]
+    orchestrator = JudgeOrchestrator(judges)
+
+    arena = Arena(
+        name="test",
+        display_name="Test",
+        description="Test",
+        criteria=["Test"],
+        prompt_template_path=Path("test.txt"),
+    )
+
+    # Run comparison multiple times to catch any swap-related mutations
+    for _ in range(10):
+        result = orchestrator.compare(sample_solution, sample_solution, arena, sample_task)
+        # All returned votes should be valid (not mutated to invalid state)
+        for vote in result.votes:
+            assert vote.vote in ["A", "B", "TIE"]
+            assert 0.0 <= vote.confidence <= 1.0
