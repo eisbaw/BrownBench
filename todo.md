@@ -34,9 +34,9 @@
 - [ ] Validate tournament outputs
 - [ ] Fix bugs discovered in tournament
 - [ ] Document edge cases from tournament
-- [ ] Retry logic with tenacity
-- [ ] Rate limiting implementation
-- [ ] Prompt versioning with SHA-256
+- [x] Retry logic with tenacity
+- [x] Rate limiting implementation
+- [x] Prompt versioning with SHA-256
 
 ## Phase 2: Statistical Rigor
 
