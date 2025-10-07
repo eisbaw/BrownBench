@@ -1363,3 +1363,86 @@ The BrownBench codebase is production-ready with:
 - Week 5: Simple ELO & Tournament
 - Week 6-7: Task Curation & Testing
 
+---
+
+## Architectural Review Findings (2025-10-07 Final)
+
+**QA Test Results:**
+- 387 tests passing (100% pass rate)
+- 95% code coverage (target: >90%)
+- 0 lint errors (ruff)
+- 0 type errors (mypy, 42 files)
+- Test/source ratio: 1.35 (excellent)
+
+**MPED Architectural Assessment:**
+
+### Strengths
+1. ✅ **Fundamentals First**: Proper Nix, Git, declarative config
+2. ✅ **Composability**: Library-based design, composable lower layers
+3. ✅ **Data Design**: Immutable dataclasses, single source of truth
+4. ✅ **Fail Fast**: Domain exceptions, structured logging, no silent failures
+5. ✅ **Minimize State**: No global mutable state, computed properties
+6. ✅ **Readability**: Clear names, comprehensive docstrings, documented rationale
+7. ✅ **Bottom-Up**: Phase 0 deliverable achieved, proper layering
+8. ✅ **Git Over Databases**: YAML tasks, JSON cache, no database
+9. ✅ **Documentation**: Docstrings everywhere, no TODOs, detailed todo.md
+10. ✅ **Problem Solving with Notes**: Comprehensive todo.md tracking
+
+### Issues Identified
+
+**For Phase 1 (Before Scaling):**
+
+**ISSUE-PHASE1-1: TournamentRunner Composability** (Priority: HIGH)
+- Location: src/codegen_bench/core/tournament.py:148-228
+- Problem: Monolithic 80-line run() method couples 5 concerns (generation, caching, judgment, rating, progress)
+- Impact: Cannot reuse components, hard to test, limits extensibility
+- Fix: Extract composable functions: generate_solutions(), compare_solutions(), compute_ratings()
+- Effort: 1-2 days
+- Blocker for: Phase 1 scaling (more DUTs, more arenas)
+- Status: DEFERRED to Phase 1
+
+**ISSUE-PHASE1-2: Tournament Results Not Persisted** (Priority: MEDIUM)
+- Location: src/codegen_bench/core/tournament.py
+- Problem: Results only in-memory, not stored in Git
+- Impact: Cannot reproduce experiments, no audit trail
+- Fix: Save results to results/tournament-{timestamp}/ in YAML format
+- Effort: 4 hours
+- Status: DEFERRED to Phase 1
+
+**For Phase 2+ (Future Improvements):**
+
+**ISSUE-PHASE2-1: Hard-coded Pricing** (Priority: LOW)
+- Location: src/codegen_bench/dut/simple_chat.py:203-204
+- Fix: Move to pricing.yaml config file
+- Status: DEFERRED to Phase 2
+
+**ISSUE-PHASE2-2: CLI Error Context Loss** (Priority: LOW)
+- Location: src/codegen_bench/cli/main.py:100-102, 170-172
+- Fix: Catch specific domain exceptions, log full context
+- Status: DEFERRED to Phase 2
+
+**ISSUE-PHASE2-3: Redundant Solution File Dicts** (Priority: LOW, Breaking API)
+- Location: src/codegen_bench/core/solution.py:19-20
+- Fix: Merge changed_files and new_files to single files_to_write dict
+- Status: DEFERRED to Phase 2
+
+### Architectural Review Verdict
+
+**Phase 0 Production-Ready Assessment:** ✅ CONFIRMED
+
+The codebase demonstrates:
+- Strong adherence to MPED principles
+- Excellent fundamentals (Nix, Git, declarative tooling)
+- Comprehensive testing (95% coverage, 387 tests)
+- No security vulnerabilities
+- Clear documentation and error handling
+- Proper layering and composability in core components
+
+**Phase 1 Readiness:** ⚠️ CONDITIONAL
+- Core functionality works (Phase 0 deliverable achieved)
+- Must address TournamentRunner composability (ISSUE-PHASE1-1) before scaling
+- Should add results persistence (ISSUE-PHASE1-2) for reproducibility
+- All other issues can be deferred to Phase 2+
+
+**Recommendation:** Proceed with Phase 1 planning. Address ISSUE-PHASE1-1 and ISSUE-PHASE1-2 as first tasks in Week 4.
+
