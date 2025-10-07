@@ -180,9 +180,15 @@ Be objective and focus on the quality dimensions specified in the criteria.
         confidence_match = re.search(r"CONFIDENCE:\s*([0-9.]+)", response, re.IGNORECASE)
         confidence = float(confidence_match.group(1)) if confidence_match else 0.5
 
-        # Validate winner and cast to Vote type
-        if winner_str not in ["A", "B", "TIE"]:
+        # Validate winner and cast to Vote type (type narrowing for mypy)
+        winner: Vote
+        if winner_str == "A":
+            winner = "A"
+        elif winner_str == "B":
+            winner = "B"
+        elif winner_str == "TIE":
+            winner = "TIE"
+        else:
             raise JudgeError(f"Invalid winner: {winner_str}")
-        winner: Vote = winner_str  # type: ignore[assignment]
 
         return JudgeVote(vote=winner, reasoning=reasoning, confidence=confidence)
