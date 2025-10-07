@@ -2,6 +2,8 @@
 
 import hashlib
 import json
+import os
+import tempfile
 from pathlib import Path
 
 import structlog
@@ -102,7 +104,10 @@ class SolutionCache:
             raise CacheError(f"Corrupted cache file {cache_file}: {e}") from e
 
     def put(self, dut: CodeGenerationApproach, task: Task, seed: int, solution: Solution) -> None:
-        """Store solution in cache.
+        """Store solution in cache using atomic write.
+
+        Uses atomic write with temp file + rename to prevent race conditions
+        and corruption from concurrent writes.
 
         Args:
             dut: Device under test
@@ -113,16 +118,30 @@ class SolutionCache:
         key = self._cache_key(dut, task, seed)
         cache_file = self.cache_dir / f"{key}.json"
 
-        with open(cache_file, "w") as f:
-            json.dump(solution.to_dict(), f, indent=2)
+        # Atomic write: write to temp file, then rename
+        # This ensures that concurrent processes don't corrupt the cache
+        fd, temp_path = tempfile.mkstemp(dir=self.cache_dir, suffix=".tmp", text=True)
+        try:
+            with os.fdopen(fd, "w") as f:
+                json.dump(solution.to_dict(), f, indent=2)
 
-        logger.debug(
-            "cache_store",
-            dut=dut.get_metadata().id,
-            task_id=task.id,
-            seed=seed,
-            cache_key=key,
-        )
+            # Atomic rename (POSIX guarantees atomicity)
+            os.replace(temp_path, cache_file)
+
+            logger.debug(
+                "cache_store",
+                dut=dut.get_metadata().id,
+                task_id=task.id,
+                seed=seed,
+                cache_key=key,
+            )
+        except Exception:
+            # Clean up temp file on error
+            try:
+                os.unlink(temp_path)
+            except OSError:
+                pass
+            raise
 
     def clear(self) -> None:
         """Clear all cached solutions."""

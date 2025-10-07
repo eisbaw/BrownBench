@@ -214,3 +214,38 @@ def test_cache_file_format(solution_cache, mock_dut, simple_task, sample_solutio
     assert "task_id" in data
     assert "seed" in data
     assert data["seed"] == 42
+
+
+def test_cache_concurrent_writes(solution_cache, mock_dut, simple_task, sample_solution):
+    """Test that concurrent writes don't corrupt the cache using atomic writes."""
+    import concurrent.futures
+
+    # Create multiple solutions with different data
+    solutions = []
+    for i in range(10):
+        sol = Solution(
+            approach_id="test-dut",
+            task_id=simple_task.id,
+            seed=100 + i,
+            timestamp=datetime.now(UTC),
+            changed_files={"main.c": f"int main() {{ return {i}; }}"},
+            generation_time_seconds=float(i),
+            total_tokens=100 + i,
+            prompt_tokens=50 + i,
+            completion_tokens=50,
+            api_calls=1,
+            cost_usd=0.001 * i,
+        )
+        solutions.append((100 + i, sol))
+
+    # Write all solutions concurrently
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        futures = [executor.submit(solution_cache.put, mock_dut, simple_task, seed, sol) for seed, sol in solutions]
+        concurrent.futures.wait(futures)
+
+    # All writes should succeed and be readable
+    for seed, original_sol in solutions:
+        cached = solution_cache.get(mock_dut, simple_task, seed)
+        assert cached is not None
+        assert cached.seed == seed
+        assert cached.generation_time_seconds == original_sol.generation_time_seconds
