@@ -1,7 +1,6 @@
 """ElaboratePromptDUT - Enhanced prompting with best practices."""
 
 from codegen_bench.core.task import Task
-from codegen_bench.core.solution import Solution
 from codegen_bench.dut.base import ApproachMetadata
 from codegen_bench.dut.simple_chat import SimpleChatDUT
 

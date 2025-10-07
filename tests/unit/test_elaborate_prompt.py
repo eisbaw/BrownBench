@@ -1,7 +1,9 @@
 """Tests for ElaboratePromptDUT."""
 
+from unittest.mock import Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
+
 from codegen_bench.core.task import Task
 from codegen_bench.dut.elaborate_prompt import ElaboratePromptDUT
 

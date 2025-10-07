@@ -1,10 +1,12 @@
 """End-to-end tournament integration test."""
 
-import pytest
 from pathlib import Path
-from unittest.mock import Mock, MagicMock, patch
-from codegen_bench.core.tournament import TournamentRunner
+from unittest.mock import Mock, patch
+
+import pytest
+
 from codegen_bench.core.arena import MAINTAINABILITY
+from codegen_bench.core.tournament import TournamentRunner
 from codegen_bench.dut.registry import DUTRegistry
 
 
@@ -81,12 +83,11 @@ def test_tournament_end_to_end_mocked(mock_anthropic_client, tmp_path):
     5. Leaderboard is generated
     """
     from codegen_bench.cache.store import SolutionCache
-    from codegen_bench.judge.orchestrator import JudgeOrchestrator
     from codegen_bench.judge.claude_judge import ClaudeJudge
+    from codegen_bench.judge.orchestrator import JudgeOrchestrator
     from codegen_bench.tasks.loader import TaskLoader
 
-    # Create temporary output directory
-    output_dir = tmp_path / "tournament_results"
+    # Create temporary cache directory
     cache_dir = tmp_path / "cache"
 
     # Patch Anthropic client in both DUTs and judges
@@ -137,7 +138,7 @@ def test_tournament_end_to_end_mocked(mock_anthropic_client, tmp_path):
         assert "elaborate-prompt" in ratings
 
         # Check each rating has ELO data
-        for dut_id, rating in ratings.items():
+        for _, rating in ratings.items():
             assert hasattr(rating, "elo")
             assert hasattr(rating, "wins")
             assert hasattr(rating, "losses")
@@ -181,8 +182,8 @@ def test_tournament_can_create_duts():
 def test_tournament_runner_initialization(tmp_path):
     """Test TournamentRunner can be initialized with both DUTs."""
     from codegen_bench.cache.store import SolutionCache
-    from codegen_bench.judge.orchestrator import JudgeOrchestrator
     from codegen_bench.judge.claude_judge import ClaudeJudge
+    from codegen_bench.judge.orchestrator import JudgeOrchestrator
     from codegen_bench.tasks.loader import TaskLoader
 
     # Create DUTs
