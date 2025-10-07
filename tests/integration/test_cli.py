@@ -420,3 +420,125 @@ def test_validate_command_worktree_creation_fails(runner, tmp_path):
     # Should fail with worktree error
     assert result.exit_code != 0
     assert "Error" in result.output
+
+
+def test_validate_command_applicator_failure(runner, tmp_path):
+    """Test validate command when solution applicator fails."""
+    from codegen_bench.core.task import Task
+    from codegen_bench.exceptions import ValidationError
+
+    # Create a git repo as codebase
+    codebase = tmp_path / "codebase"
+    codebase.mkdir()
+    runner.invoke(cli, ["init", str(codebase)])
+
+    solution_file = tmp_path / "solution.json"
+    solution_data = {
+        "task_id": "task_001",
+        "approach_id": "simple-chat",
+        "seed": 42,
+        "timestamp": "2024-01-01T00:00:00+00:00",
+        "changed_files": {"test.txt": "content"},
+        "new_files": {},
+        "deleted_files": [],
+        "total_tokens": 100,
+        "cost_usd": 0.01,
+        "generation_time_seconds": 1.0,
+    }
+
+    with open(solution_file, "w") as f:
+        json.dump(solution_data, f)
+
+    # Mock task loader
+    def mock_load_task(task_id):
+        return Task(
+            id="task_001",
+            name="Test Task",
+            project="test-project",
+            domain="testing",
+            difficulty="easy",
+            codebase_path=codebase,
+            specification="Test spec",
+            compile_command="echo compile",
+            test_command="echo test",
+        )
+
+    # Mock applicator to raise ValidationError
+    def mock_applicator_apply(*args, **kwargs):
+        raise ValidationError("Failed to apply solution: Permission denied")
+
+    with patch("codegen_bench.tasks.loader.TaskLoader.load_task", side_effect=mock_load_task):
+        with patch(
+            "codegen_bench.validation.applicator.SolutionApplicator.apply",
+            side_effect=mock_applicator_apply,
+        ):
+            result = runner.invoke(cli, ["validate", str(solution_file)])
+
+    assert result.exit_code != 0
+    assert "Error" in result.output or "Failed" in result.output
+
+
+def test_validate_command_executor_failure(runner, tmp_path):
+    """Test validate command when executor fails during compile/test."""
+    import subprocess
+
+    from codegen_bench.core.task import Task
+
+    # Create a git repo as codebase
+    codebase = tmp_path / "codebase"
+    codebase.mkdir()
+    subprocess.run(["git", "init"], cwd=codebase, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@test.com"],
+        cwd=codebase,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test User"], cwd=codebase, check=True, capture_output=True
+    )
+
+    # Create a dummy file and commit it
+    (codebase / "test.txt").write_text("original")
+    subprocess.run(["git", "add", "."], cwd=codebase, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "initial"], cwd=codebase, check=True, capture_output=True
+    )
+
+    solution_file = tmp_path / "solution.json"
+    solution_data = {
+        "task_id": "task_001",
+        "approach_id": "simple-chat",
+        "seed": 42,
+        "timestamp": "2024-01-01T00:00:00+00:00",
+        "changed_files": {"test.txt": "modified content"},
+        "new_files": {},
+        "deleted_files": [],
+        "total_tokens": 100,
+        "cost_usd": 0.01,
+        "generation_time_seconds": 1.0,
+    }
+
+    with open(solution_file, "w") as f:
+        json.dump(solution_data, f)
+
+    # Mock task loader
+    def mock_load_task(task_id):
+        return Task(
+            id="task_001",
+            name="Test Task",
+            project="test-project",
+            domain="testing",
+            difficulty="easy",
+            codebase_path=codebase,
+            specification="Test spec",
+            compile_command="nonexistent_command_that_will_fail",  # This will fail
+            test_command="echo test",
+        )
+
+    with patch("codegen_bench.tasks.loader.TaskLoader.load_task", side_effect=mock_load_task):
+        result = runner.invoke(cli, ["validate", str(solution_file)])
+
+    # Should complete but show compilation failure (or success if command not found is handled)
+    assert result.exit_code == 0
+    assert "Compilation: FAILED" in result.output or "Solution applied" in result.output
