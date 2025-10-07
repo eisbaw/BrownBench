@@ -276,7 +276,6 @@ def test_worktree_context_manager_both_cleanup_fail(git_repo, monkeypatch):
     import shutil
 
     strategy = GitWorktreeStrategy(git_repo)
-    tracked_path = None
 
     # Mock remove_worktree to fail
     def mock_remove(path):
@@ -294,7 +293,6 @@ def test_worktree_context_manager_both_cleanup_fail(git_repo, monkeypatch):
 
     with pytest.raises(WorktreeError, match="Failed to cleanup worktree"):
         with strategy.worktree() as worktree_path:
-            tracked_path = worktree_path
             assert worktree_path.exists()
             # Patch both cleanup methods to fail
             monkeypatch.setattr(strategy, "remove_worktree", mock_remove)
