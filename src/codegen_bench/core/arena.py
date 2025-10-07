@@ -15,8 +15,20 @@ class Arena:
     prompt_template_path: Path
 
     def load_prompt(self, **kwargs: str) -> str:
-        """Load and format prompt template."""
-        with open(self.prompt_template_path) as f:
+        """Load and format prompt template.
+
+        Loads the prompt template from the package resources,
+        resolving the path relative to the codegen_bench package.
+        """
+        # Convert relative path to absolute by resolving from package
+        if not self.prompt_template_path.is_absolute():
+            import codegen_bench
+            pkg_dir = Path(codegen_bench.__file__).parent
+            template_path = pkg_dir / self.prompt_template_path
+        else:
+            template_path = self.prompt_template_path
+
+        with open(template_path) as f:
             template = f.read()
         return template.format(**kwargs)
 
@@ -58,7 +70,7 @@ SURGICAL_PRECISION = Arena(
         "Low side effects",
         "Minimal blast radius",
     ],
-    prompt_template_path=Path("judge/prompts/surgical.txt"),
+    prompt_template_path=Path("judge/prompts/surgical_precision.txt"),
 )
 
 TESTABILITY = Arena(
