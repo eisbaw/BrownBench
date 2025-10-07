@@ -17,14 +17,15 @@ def test_main_entry_point_help():
     assert "AI Code Generation Benchmark" in result.stdout
 
 
-def test_main_entry_point_version():
-    """Test that python -m codegen_bench --version works."""
+def test_main_entry_point_invalid_option():
+    """Test that python -m codegen_bench with invalid option fails gracefully."""
     result = subprocess.run(
-        [sys.executable, "-m", "codegen_bench", "--version"],
+        [sys.executable, "-m", "codegen_bench", "--nonexistent"],
         capture_output=True,
         text=True,
         timeout=5,
     )
 
-    # Click may exit with 0 or show version in help
-    assert result.returncode in (0, 2)  # Click may use exit code 2 for --help-like flags
+    # Click exits with 2 for invalid options
+    assert result.returncode == 2
+    assert "No such option" in result.stdout or "No such option" in result.stderr
