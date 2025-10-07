@@ -727,29 +727,36 @@
   - test_worktree_context_manager_with_exception
   - test_worktree_context_manager_multiple
 
-- [ ] **Test for shell injection in executor**
-  - Should verify malicious commands are handled safely
-  - NOTE: Now uses shlex.split() which will fail on shell metacharacters
-  - Test: Pass command with shell features, verify it's parsed correctly
+- [x] **DONE: Test for shell injection in executor**
+  - FIXED: Test exists in test_executor.py::test_executor_shell_injection_protection
+  - Verifies that shell metacharacters are handled safely with shlex.split()
+  - Commit: (existing test)
 
 - [ ] **No test for file handle exhaustion**
   - Cache operations open many files
   - Test: Verify proper cleanup of file handles
+  - NOTE: Low priority - not a known issue
 
 **Edge Case Tests:**
 - [ ] **Tournament runner with API failures**
   - What happens if all judge calls fail?
   - Test: Mock persistent API errors, verify graceful degradation
+  - NOTE: Medium priority
 
-- [ ] **MAMS with scipy.stats.dunnett unavailable**
-  - Fallback to Bonferroni tested but not thoroughly
-  - Test: Mock AttributeError, verify fallback works correctly
+- [x] **DONE: MAMS with scipy.stats.dunnett unavailable**
+  - FIXED: test_mams_dunnett_fallback_to_bonferroni added
+  - Mocks scipy.stats.dunnett to trigger Bonferroni fallback
+  - Commit: aee46b7
 
-- [ ] **Preregistration with malformed YAML**
-  - Test: Load YAML with missing required fields
-  - Test: Load YAML with invalid hash
+- [x] **DONE: Preregistration with malformed YAML**
+  - FIXED: Added 4 tests for malformed YAML handling
+  - test_preregistration_from_yaml_missing_required_field
+  - test_preregistration_from_yaml_nonexistent_file
+  - test_preregistration_from_yaml_corrupted_yaml
+  - test_preregistration_from_yaml_empty_file
+  - Commit: aee46b7
 
-**Coverage Gaps (93% overall maintained):**
+**Coverage Gaps (94% overall achieved, up from 93%):**
 - [ ] **cli/main.py: 88% coverage** (17 missed lines)
   - Missing: Error paths in generate/validate commands
   - Lines 100-102, 170-172, 176-177, 183-185, 204-205, 220-221, 230
@@ -818,11 +825,16 @@
 
 ---
 
-**Status Summary:**
+**Status Summary (Updated 2025-10-07):**
 ✅ All critical security and robustness issues fixed
-✅ Test coverage at 94% (348 tests passing - added shell injection test)
+✅ Test coverage at 94% (354 tests passing, up from 348)
 ✅ All linting and type checks passing
 ✅ Codebase is production-ready
+✅ New tests added:
+  - MAMS dunnett fallback to Bonferroni
+  - Preregistration malformed YAML handling (4 tests)
+  - CodeExtractor conflict logging
+✅ All commits made with conventional commit messages
 
 **Remaining Optional Improvements:**
 - [ ] Add error path tests for CLI commands (to reach 90%+ coverage)
@@ -873,9 +885,12 @@
   - Better debugging experience
   - Commit: dd3dc08
 
-- [ ] **Add logging to CodeExtractor conflicts** (Impact: Low, Effort: Low)
-  - Log when multiple extraction strategies find same file
+- [x] **DONE: Add logging to CodeExtractor conflicts** (Impact: Low, Effort: Low)
+  - FIXED: Added structlog warnings when multiple strategies find same file
+  - Logs file_path, previous_strategy, current_strategy
   - Helps detect LLM output format issues
+  - Added test: test_extract_all_logs_conflicts
+  - Commit: e239450
 
 **Low Priority:**
 - [ ] **Extract magic numbers to configuration** (Impact: Low, Effort: Low)
