@@ -99,6 +99,7 @@ exclude = [
 [[tool.mypy.overrides]]
 module = [
     "anthropic",
+    "anthropic.*",
     "click",
     "numpy",
     "pandas",
@@ -107,6 +108,8 @@ module = [
     "scipy.stats",
     "statsmodels.*",
     "structlog",
+    "tenacity",
+    "tenacity.*",
     "trueskill",
     "yaml",
 ]
