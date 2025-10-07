@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from codegen_bench.exceptions import ValidationError
 from codegen_bench.validation.executor import ValidationExecutor, ValidationResult
 
 
@@ -24,7 +25,7 @@ def test_executor_init(workspace):
 def test_executor_init_nonexistent(tmp_path):
     """Test executor initialization with nonexistent workspace."""
     nonexistent = tmp_path / "nonexistent"
-    with pytest.raises(ValueError, match="Workspace does not exist"):
+    with pytest.raises(ValidationError, match="Workspace does not exist"):
         ValidationExecutor(nonexistent)
 
 

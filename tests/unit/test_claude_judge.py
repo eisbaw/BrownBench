@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from codegen_bench.core.arena import Arena
+from codegen_bench.exceptions import JudgeError
 from codegen_bench.judge.claude_judge import ClaudeJudge
 
 
@@ -56,8 +57,8 @@ def test_claude_judge_evaluate_no_api_key(sample_task, sample_solution):
             prompt_template_path=Path("test.txt"),
         )
 
-        # The retry decorator wraps the ValueError in RetryError
-        with pytest.raises((ValueError, RetryError)):
+        # The retry decorator wraps the JudgeError in RetryError
+        with pytest.raises((JudgeError, RetryError)):
             judge.evaluate(sample_solution, sample_solution, arena, sample_task)
 
 
@@ -128,7 +129,7 @@ REASONING: This is a good solution.
 CONFIDENCE: 0.8
 """
 
-    with pytest.raises(ValueError, match="Could not parse WINNER"):
+    with pytest.raises(JudgeError, match="Could not parse WINNER"):
         judge._parse_vote(response)
 
 

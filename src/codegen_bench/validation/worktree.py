@@ -184,6 +184,18 @@ class GitWorktreeStrategy:
             if worktree_path and worktree_path.exists():
                 try:
                     self.remove_worktree(worktree_path)
-                except RuntimeError:
+                except WorktreeError as e:
                     # If git worktree remove fails, try manual cleanup
-                    shutil.rmtree(worktree_path, ignore_errors=True)
+                    logger.warning(
+                        "worktree_remove_failed_fallback_to_manual",
+                        worktree_path=str(worktree_path),
+                        error=str(e),
+                    )
+                    try:
+                        shutil.rmtree(worktree_path)
+                    except OSError as cleanup_error:
+                        logger.error(
+                            "worktree_manual_cleanup_failed",
+                            worktree_path=str(worktree_path),
+                            error=str(cleanup_error),
+                        )

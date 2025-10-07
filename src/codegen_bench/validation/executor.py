@@ -5,6 +5,8 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+from codegen_bench.exceptions import ValidationError
+
 
 @dataclass
 class ValidationResult:
@@ -28,7 +30,7 @@ class ValidationExecutor:
         """
         self.workspace = Path(workspace).resolve()
         if not self.workspace.exists():
-            raise ValueError(f"Workspace does not exist: {self.workspace}")
+            raise ValidationError(f"Workspace does not exist: {self.workspace}")
 
     def run_compile(self, compile_command: str, timeout: int = 300) -> ValidationResult:
         """Run compile command.

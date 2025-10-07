@@ -10,6 +10,7 @@ from codegen_bench.core.arena import Arena
 from codegen_bench.core.judgment import JudgeVote
 from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
+from codegen_bench.exceptions import JudgeError
 from codegen_bench.judge.base import Judge
 
 
@@ -58,7 +59,7 @@ class ClaudeJudge(Judge):
         # Initialize client if needed
         if self.client is None:
             if not self.api_key:
-                raise ValueError("ANTHROPIC_API_KEY not found in environment")
+                raise JudgeError("ANTHROPIC_API_KEY not found in environment")
             self.client = anthropic.Anthropic(api_key=self.api_key)
 
         # Build prompt
@@ -163,7 +164,7 @@ Be objective and focus on the quality dimensions specified in the criteria.
         # Extract WINNER
         winner_match = re.search(r"WINNER:\s*(A|B|TIE)", response, re.IGNORECASE)
         if not winner_match:
-            raise ValueError(f"Could not parse WINNER from response: {response}")
+            raise JudgeError(f"Could not parse WINNER from response: {response}")
         winner = winner_match.group(1).upper()
 
         # Extract REASONING
@@ -178,6 +179,6 @@ Be objective and focus on the quality dimensions specified in the criteria.
 
         # Validate winner
         if winner not in ["A", "B", "TIE"]:
-            raise ValueError(f"Invalid winner: {winner}")
+            raise JudgeError(f"Invalid winner: {winner}")
 
         return JudgeVote(vote=winner, reasoning=reasoning, confidence=confidence)  # type: ignore[arg-type]

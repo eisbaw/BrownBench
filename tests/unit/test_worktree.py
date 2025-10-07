@@ -255,7 +255,9 @@ def test_worktree_context_manager_fallback_cleanup(git_repo, monkeypatch):
 
     def mock_remove(path):
         remove_called[0] = True
-        raise RuntimeError("Git worktree remove failed")
+        from codegen_bench.exceptions import WorktreeError
+
+        raise WorktreeError("Git worktree remove failed")
 
     with strategy.worktree() as worktree_path:
         tracked_path = worktree_path
