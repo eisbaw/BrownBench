@@ -3,6 +3,7 @@
 from unittest.mock import Mock
 
 import pytest
+from anthropic.types import TextBlock
 
 from codegen_bench.core.task import Task
 from codegen_bench.dut.elaborate_prompt import ElaboratePromptDUT
@@ -13,7 +14,9 @@ def mock_anthropic_client():
     """Mock Anthropic client."""
     client = Mock()
     message = Mock()
-    message.content = [Mock(text='```python:test.py\nprint("hello")\n```')]
+    text_content = '```python:test.py\nprint("hello")\n```'
+    text_block = TextBlock(type="text", text=text_content)
+    message.content = [text_block]
     message.usage = Mock(input_tokens=100, output_tokens=50)
     client.messages.create = Mock(return_value=message)
     return client

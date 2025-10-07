@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from anthropic.types import TextBlock
 
 from codegen_bench.cache.store import SolutionCache
 from codegen_bench.core.solution import Solution
@@ -21,9 +22,7 @@ from codegen_bench.validation.worktree import GitWorktreeStrategy
 def mock_anthropic_response():
     """Create a mock Anthropic API response."""
     mock_response = Mock()
-    mock_response.content = [
-        Mock(
-            text="""Here is the implementation:
+    text_content = """Here is the implementation:
 
 ```c:src/hello.c
 #include "hello.h"
@@ -44,8 +43,8 @@ int hello_world(void);
 #endif // HELLO_H
 ```
 """
-        )
-    ]
+    text_block = TextBlock(type="text", text=text_content)
+    mock_response.content = [text_block]
     mock_response.usage = Mock(input_tokens=100, output_tokens=50)
     return mock_response
 

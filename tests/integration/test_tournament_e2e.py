@@ -4,6 +4,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
+from anthropic.types import TextBlock
 
 from codegen_bench.core.arena import MAINTAINABILITY
 from codegen_bench.core.tournament import TournamentRunner
@@ -59,13 +60,15 @@ def mock_anthropic_client(mock_solution_response, mock_judge_response):
 
         # First few calls are solution generation
         if call_count[0] <= 10:  # Enough for multiple solutions
-            message.content = [Mock(text=mock_solution_response)]
+            text_block = TextBlock(type="text", text=mock_solution_response)
+            message.content = [text_block]
             message.usage = Mock(input_tokens=1000, output_tokens=500)
         else:
             # Later calls are judging
             # Alternate winners to create interesting ELO results
             winner = "A" if (call_count[0] % 3) == 0 else "B"
-            message.content = [Mock(text=mock_judge_response(winner))]
+            text_block = TextBlock(type="text", text=mock_judge_response(winner))
+            message.content = [text_block]
             message.usage = Mock(input_tokens=2000, output_tokens=200)
 
         return message

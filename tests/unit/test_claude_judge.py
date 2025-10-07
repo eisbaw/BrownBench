@@ -4,6 +4,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from anthropic.types import TextBlock
 
 from codegen_bench.core.arena import Arena
 from codegen_bench.exceptions import JudgeError
@@ -14,15 +15,13 @@ from codegen_bench.judge.claude_judge import ClaudeJudge
 def mock_anthropic_response():
     """Mock Anthropic API response."""
     response = MagicMock()
-    response.content = [
-        MagicMock(
-            text="""
+    text_content = """
 WINNER: A
 REASONING: Solution A has better error handling and follows conventions more closely.
 CONFIDENCE: 0.85
 """
-        )
-    ]
+    text_block = TextBlock(type="text", text=text_content)
+    response.content = [text_block]
     return response
 
 

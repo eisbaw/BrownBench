@@ -173,8 +173,8 @@ def estimate_fdr(
     # Estimate proportion of true nulls (π₀)
     # Storey-Tibshirani estimator
     lambda_threshold = 0.5
-    pi0 = np.sum(p_values > lambda_threshold) / ((1 - lambda_threshold) * num_tests)
-    pi0 = min(pi0, 1.0)  # Cannot exceed 1
+    pi0_raw = np.sum(p_values > lambda_threshold) / ((1 - lambda_threshold) * num_tests)
+    pi0 = float(min(pi0_raw, 1.0))  # Cannot exceed 1
 
     # Estimate FDR
     if num_rejected == 0:

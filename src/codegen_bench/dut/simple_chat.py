@@ -7,6 +7,7 @@ from typing import Any
 
 import anthropic
 import structlog
+from anthropic.types import TextBlock
 
 from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
@@ -81,8 +82,14 @@ class SimpleChatDUT(CodeGenerationApproach):
 
             elapsed = time.time() - start_time
 
-            # Parse response to extract code changes
-            changed_files = self._parse_code_changes(response.content[0].text)
+            # Parse response to extract code changes - extract text from first content block
+            first_block = response.content[0]
+            if isinstance(first_block, TextBlock):
+                response_text = first_block.text
+            else:
+                raise DUTError(f"Unexpected response type: {type(first_block)}")
+
+            changed_files = self._parse_code_changes(response_text)
             logger.debug(
                 "code_extracted",
                 task_id=task.id,

@@ -4,10 +4,11 @@ import os
 import re
 
 import anthropic
-from tenacity import retry, stop_after_attempt, wait_exponential  # type: ignore[import-not-found]
+from anthropic.types import TextBlock
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 from codegen_bench.core.arena import Arena
-from codegen_bench.core.judgment import JudgeVote
+from codegen_bench.core.judgment import JudgeVote, Vote
 from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
 from codegen_bench.exceptions import JudgeError
@@ -38,7 +39,7 @@ class ClaudeJudge(Judge):
         self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
         self.client = None  # Lazy initialization
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))  # type: ignore[misc]
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))
     def evaluate(
         self, solution_a: Solution, solution_b: Solution, arena: Arena, task: Task
     ) -> JudgeVote:
@@ -73,8 +74,14 @@ class ClaudeJudge(Judge):
             messages=[{"role": "user", "content": prompt}],
         )
 
-        # Parse response
-        return self._parse_vote(response.content[0].text)
+        # Parse response - extract text from first content block
+        first_block = response.content[0]
+        if isinstance(first_block, TextBlock):
+            response_text = first_block.text
+        else:
+            raise JudgeError(f"Unexpected response type: {type(first_block)}")
+
+        return self._parse_vote(response_text)
 
     def _build_prompt(
         self, solution_a: Solution, solution_b: Solution, arena: Arena, task: Task
@@ -165,7 +172,7 @@ Be objective and focus on the quality dimensions specified in the criteria.
         winner_match = re.search(r"WINNER:\s*(A|B|TIE)", response, re.IGNORECASE)
         if not winner_match:
             raise JudgeError(f"Could not parse WINNER from response: {response}")
-        winner = winner_match.group(1).upper()
+        winner_str = winner_match.group(1).upper()
 
         # Extract REASONING
         reasoning_match = re.search(
@@ -177,8 +184,9 @@ Be objective and focus on the quality dimensions specified in the criteria.
         confidence_match = re.search(r"CONFIDENCE:\s*([0-9.]+)", response, re.IGNORECASE)
         confidence = float(confidence_match.group(1)) if confidence_match else 0.5
 
-        # Validate winner
-        if winner not in ["A", "B", "TIE"]:
-            raise JudgeError(f"Invalid winner: {winner}")
+        # Validate winner and cast to Vote type
+        if winner_str not in ["A", "B", "TIE"]:
+            raise JudgeError(f"Invalid winner: {winner_str}")
+        winner: Vote = winner_str  # type: ignore[assignment]
 
-        return JudgeVote(vote=winner, reasoning=reasoning, confidence=confidence)  # type: ignore[arg-type]
+        return JudgeVote(vote=winner, reasoning=reasoning, confidence=confidence)

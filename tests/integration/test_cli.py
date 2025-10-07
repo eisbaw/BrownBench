@@ -4,6 +4,7 @@ import json
 from unittest.mock import Mock, patch
 
 import pytest
+from anthropic.types import TextBlock
 from click.testing import CliRunner
 
 from codegen_bench.cli.main import cli
@@ -19,9 +20,7 @@ def runner():
 def mock_anthropic_response():
     """Create a mock Anthropic API response."""
     mock_response = Mock()
-    mock_response.content = [
-        Mock(
-            text="""```c:src/hello.c
+    text_content = """```c:src/hello.c
 #include "hello.h"
 #include <stdio.h>
 
@@ -40,8 +39,8 @@ int hello_world(void);
 #endif
 ```
 """
-        )
-    ]
+    text_block = TextBlock(type="text", text=text_content)
+    mock_response.content = [text_block]
     mock_response.usage = Mock(input_tokens=100, output_tokens=50)
     return mock_response
 
