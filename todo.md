@@ -990,3 +990,100 @@ Phase 0 COMPLETE - All Week 1-3 tasks done:
 ✅ No bugs found in comprehensive analysis
 
 Ready to proceed with Phase 1: Judge system and tournament runner
+
+---
+
+## Architectural Improvements from MPED Review (2025-10-07)
+
+### Critical Priority (Fix Before Phase 1)
+
+- [ ] **ISSUE 4.1: Fix silent cache corruption handling** (Impact: Critical, Effort: Low)
+  - Location: src/codegen_bench/cache/store.py:71-93
+  - Problem: Corrupted cache returns None instead of failing fast
+  - Fix: Raise CacheError and delete corrupt cache file
+  - Test: Add test for corrupted JSON in cache
+
+- [ ] **ISSUE 5.1: Fix lazy client initialization** (Impact: Critical, Effort: Low)
+  - Location: src/codegen_bench/judge/claude_judge.py:21, src/codegen_bench/dut/simple_chat.py:25
+  - Problem: API key errors discovered at first use, not construction
+  - Fix: Initialize client in __init__, fail immediately if API key missing
+  - Test: Add test for missing API key at construction time
+
+- [ ] **ISSUE 1.2: Remove mutable vote modification** (Impact: Critical, Effort: Medium)
+  - Location: src/codegen_bench/judge/orchestrator.py:79-85
+  - Problem: JudgeVote objects mutated after creation
+  - Fix: Create normalized_votes instead of mutating
+  - Test: Verify vote immutability
+
+### High Priority (Fix During Phase 1)
+
+- [ ] **ISSUE 1.1: Remove duplicated win/loss state** (Impact: High, Effort: Medium)
+  - Location: src/codegen_bench/core/tournament.py:22-54
+  - Problem: wins/losses/ties duplicates data from comparisons
+  - Fix: Compute on-demand from comparison history
+  - Test: Verify stats match across implementations
+
+- [ ] **ISSUE 3.2: Add cache concurrency protection** (Impact: High, Effort: Medium)
+  - Location: src/codegen_bench/cache/store.py:47-93
+  - Problem: No locking, race conditions possible
+  - Fix: Use atomic writes with temp file + rename
+  - Test: Add concurrent write test
+
+- [ ] **ISSUE 3.1: Make solution application idempotent** (Impact: High, Effort: Medium)
+  - Location: src/codegen_bench/validation/applicator.py:23-43
+  - Problem: Applying solutions is not idempotent
+  - Fix: Merge changed_files and new_files, add reset operation
+  - Test: Verify A→B→A produces same result as A
+
+- [ ] **ISSUE 4.2: Fix silent worktree cleanup failures** (Impact: High, Effort: Low)
+  - Location: src/codegen_bench/validation/worktree.py:186-204
+  - Problem: Cleanup failures in finally block are logged but not tracked
+  - Fix: Track failed cleanups, add list_orphaned_worktrees()
+  - Test: Verify orphaned worktrees are detected
+
+### Medium Priority (Phase 2 or Later)
+
+- [ ] **ISSUE 2.1: Refactor tournament runner for composability** (Impact: Medium, Effort: High)
+  - Location: src/codegen_bench/core/tournament.py:79-221
+  - Problem: Framework-style runner limits composability
+  - Fix: Break into composable functions (generate_solutions, compare_solutions, compute_ratings)
+  - Test: Verify functions compose correctly
+
+- [ ] **ISSUE 5.2: Move pricing to configuration** (Impact: Medium, Effort: Medium)
+  - Location: src/codegen_bench/dut/simple_chat.py:190-210
+  - Problem: Hard-coded pricing values
+  - Fix: Create pricing.yaml, load from config
+  - Test: Verify pricing updates work
+
+- [ ] **ISSUE 6.1: Add Git storage for tournament results** (Impact: Medium, Effort: Medium)
+  - Location: src/codegen_bench/core/tournament.py
+  - Problem: Results not persisted to Git for reproducibility
+  - Fix: Save results as YAML in results/tournament-{timestamp}/
+  - Test: Verify results can be loaded from Git
+
+### Low Priority (Nice to Have)
+
+- [ ] **ISSUE 2.2: Remove empty directories** (Impact: Low, Effort: Low)
+  - Location: src/codegen_bench/isolation/, src/codegen_bench/config/
+  - Problem: Premature abstraction
+  - Fix: Delete empty directories
+  - Test: N/A
+
+- [ ] **ISSUE 7.1: Document magic numbers** (Impact: Low, Effort: Low)
+  - Location: src/codegen_bench/stats/ratings/bayesian_elo.py:6-18
+  - Problem: No explanation of WHY these values chosen
+  - Fix: Add explanatory comments with sources
+  - Test: N/A
+
+- [ ] **ISSUE 7.2: Clarify code extraction precedence** (Impact: Low, Effort: Low)
+  - Location: src/codegen_bench/parsing/extractor.py:122-167
+  - Problem: Merge order unclear
+  - Fix: Make precedence explicit with clear comments
+  - Test: Verify precedence order
+
+---
+
+**Next Steps:**
+1. Fix critical issues before proceeding to Phase 1
+2. Fix high-priority issues during Phase 1 development
+3. Address medium/low priority issues in future phases
