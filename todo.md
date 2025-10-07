@@ -785,20 +785,24 @@
 ### Refactoring Opportunities
 
 **Code Structure:**
-- [ ] **Extract magic numbers in MAMS** (mams.py:169, 282-284)
-  - Line 169: `3.0` threshold for stop_efficacy
-  - Line 282-284: Stage cost ratios (0.2, 1.0)
-  - FIX: Define as named constants with documentation
+- [x] **DONE: Extract magic numbers in MAMS**
+  - FIXED: Constants EFFICACY_Z_THRESHOLD, STAGE1_COST_RATIO, STAGE2_COST_RATIO defined
+  - All magic numbers replaced with named constants with documentation
 
-- [ ] **Large function in executor.py** (parse_test_output: 40 lines)
-  - Complex regex parsing logic
-  - FIX: Extract _parse_pytest_output and _parse_unittest_output to separate module
+- [x] **DONE: Large function in executor.py**
+  - Already well-factored: parse_test_output delegates to _parse_pytest_output and _parse_unittest_output
+  - Main method is only 5 lines, not a code smell
+
+- [x] **DONE: Extract duplicate cleanup code in worktree**
+  - FIXED: _cleanup_temp_dir method extracts duplicate code
+  - Commit: aea85ae
 
 **Documentation:**
-- [ ] **Add security notes to Task schema**
-  - Document that compile/test commands run with shell=True
-  - Warn users to validate task sources
-  - Add example of safe command patterns
+- [x] **DONE: Add security notes to Task schema**
+  - FIXED: Security notes added at task.py:31-35
+  - Documents shlex.split() + shell=False usage
+  - Warns about shell features not being supported
+  - Provides examples of safe command syntax
 
 - [ ] **Add troubleshooting guide for worktree issues**
   - Common error: worktree already exists
