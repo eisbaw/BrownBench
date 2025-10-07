@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import yaml
+
 from codegen_bench.core.task import Task
 from codegen_bench.exceptions import TaskError
 
@@ -80,10 +82,12 @@ class TaskLoader:
                 if not task.validate():
                     raise TaskError(f"Task {task.id} failed validation")
                 tasks.append(task)
-            except (OSError, ValueError, KeyError) as e:
+            except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError) as e:
                 # OSError: file read errors (includes IOError in Python 3.3+)
-                # ValueError: YAML parsing or validation errors
-                # KeyError: missing required fields in YAML
+                # ValueError: validation errors
+                # KeyError: missing required fields in dict
+                # TypeError: missing required __init__ arguments
+                # yaml.YAMLError: YAML parsing errors (includes ParserError)
                 raise TaskError(f"Failed to load task from {path}: {e}") from e
 
         return tasks
@@ -99,10 +103,12 @@ class TaskLoader:
             try:
                 task = Task.from_yaml(path)
                 tasks.append(task.id)
-            except (OSError, ValueError, KeyError):
+            except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError):
                 # Skip invalid tasks
                 # OSError: file read errors (includes IOError in Python 3.3+)
-                # ValueError: YAML parsing errors
-                # KeyError: missing required fields
+                # ValueError: validation errors
+                # KeyError: missing required fields in dict
+                # TypeError: missing required __init__ arguments
+                # yaml.YAMLError: YAML parsing errors (includes ParserError)
                 continue
         return sorted(tasks)

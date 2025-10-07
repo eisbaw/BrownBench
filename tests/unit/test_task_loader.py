@@ -122,3 +122,68 @@ def test_load_invalid_task_fails_validation(tmp_path: Path) -> None:
     loader = TaskLoader(tasks_dir)
     with pytest.raises(TaskError, match="failed validation"):
         loader.load_task("invalid")
+
+
+def test_load_task_set_corrupted_yaml(tmp_path: Path) -> None:
+    """Test that corrupted YAML raises TaskError."""
+    tasks_dir = tmp_path / "tasks"
+    tasks_dir.mkdir()
+
+    # Create corrupted YAML file
+    (tasks_dir / "corrupted.yaml").write_text("{ invalid yaml: [")
+
+    loader = TaskLoader(tasks_dir)
+    with pytest.raises(TaskError, match="Failed to load task"):
+        loader.load_task_set("*.yaml")
+
+
+def test_load_task_set_missing_required_field(tmp_path: Path) -> None:
+    """Test that YAML with missing required field raises TaskError."""
+    tasks_dir = tmp_path / "tasks"
+    tasks_dir.mkdir()
+
+    # Create YAML missing required 'id' field
+    incomplete_task = {
+        "name": "Incomplete Task",
+        "project": "test",
+        "domain": "testing",
+        "difficulty": "easy",
+        "codebase_path": "/tmp",
+        "specification": "Test spec",
+    }
+    with open(tasks_dir / "incomplete.yaml", "w") as f:
+        yaml.dump(incomplete_task, f)
+
+    loader = TaskLoader(tasks_dir)
+    with pytest.raises(TaskError, match="Failed to load task"):
+        loader.load_task_set("*.yaml")
+
+
+def test_list_available_tasks_skips_invalid(tmp_path: Path) -> None:
+    """Test that list_available_tasks skips invalid tasks."""
+    tasks_dir = tmp_path / "tasks"
+    tasks_dir.mkdir()
+
+    # Create valid codebase
+    codebase = tmp_path / "codebase"
+    codebase.mkdir()
+
+    # Create valid task
+    valid_task = {
+        "id": "valid",
+        "name": "Valid Task",
+        "project": "test",
+        "domain": "testing",
+        "difficulty": "easy",
+        "codebase_path": str(codebase),
+        "specification": "Test spec",
+    }
+    with open(tasks_dir / "valid.yaml", "w") as f:
+        yaml.dump(valid_task, f)
+
+    # Create corrupted task
+    (tasks_dir / "corrupted.yaml").write_text("{ invalid yaml: [")
+
+    loader = TaskLoader(tasks_dir)
+    tasks = loader.list_available_tasks()
+    assert tasks == ["valid"]  # Corrupted task skipped
