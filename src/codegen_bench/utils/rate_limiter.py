@@ -88,7 +88,7 @@ class RateLimiter:
                         self._request_times.popleft()
 
             # Record this request
-            self._request_times.append(time.time())
+            self._request_times.append(now)
 
         # Token-based rate limiting (if enabled)
         if self.max_tokens_per_minute is not None and tokens > 0:
@@ -127,7 +127,7 @@ class RateLimiter:
                             self._token_times.popleft()
 
                 # Record this token usage
-                self._token_times.append((time.time(), tokens))
+                self._token_times.append((now, tokens))
 
     def reset(self) -> None:
         """Reset all rate limit counters.

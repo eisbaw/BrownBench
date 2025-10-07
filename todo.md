@@ -264,7 +264,7 @@
 ## Technical Debt
 
 - [ ] Async support for API calls (3-5x speedup potential)
-- [ ] Rate limiting implementation
+- [x] Rate limiting implementation
 - [ ] Graceful shutdown handling (SIGINT/SIGTERM)
 - [ ] TournamentConfig dataclass for base_seed, consensus_threshold
 - [ ] TrueSkill defaults to configuration
@@ -272,6 +272,10 @@
 - [ ] Store solution IDs and load from cache on demand
 - [ ] Troubleshooting guide for worktree issues
 - [ ] Manual cleanup commands documentation
+- [ ] Rate limiter: Single-lock design for atomic acquire() operations
+- [ ] Rate limiter: Add release() method for failed request idempotency
+- [ ] Rate limiter: Consider bucket-based O(1) implementation
+- [ ] Rate limiter: Add observability logging when limits hit
 
 ## Milestones
 

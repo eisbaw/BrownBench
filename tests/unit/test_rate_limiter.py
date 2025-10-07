@@ -158,3 +158,28 @@ def test_rate_limiter_invalid_tokens() -> None:
     # Negative tokens
     with pytest.raises(ValueError, match="Token count must be non-negative"):
         limiter.acquire(tokens=-1)
+
+
+def test_rate_limiter_timestamp_consistency() -> None:
+    """Test that timestamps are consistent after sleeping."""
+    limiter = RateLimiter(max_requests_per_minute=2, max_tokens_per_minute=100)
+
+    # Fill up both rate limits
+    limiter.acquire(tokens=50)
+    limiter.acquire(tokens=50)
+
+    # This should trigger a sleep for request limit
+    start = time.time()
+    limiter.acquire(tokens=1)
+    elapsed = time.time() - start
+
+    # Verify we actually slept
+    assert elapsed > 58, f"Expected wait of ~60s, got {elapsed}s"
+
+    # Check that the timestamp recorded is consistent (within the minute window)
+    stats = limiter.get_stats()
+    # After sleeping ~60s, old requests should have aged out
+    # We should see exactly 1 request in the last minute (the one just made)
+    assert stats["requests_in_last_minute"] == 1, (
+        f"Expected 1 request after sleep, got {stats['requests_in_last_minute']}"
+    )
