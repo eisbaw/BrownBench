@@ -297,3 +297,40 @@ def test_worktree_context_manager_both_cleanup_fail(git_repo, monkeypatch):
             # Patch both cleanup methods to fail
             monkeypatch.setattr(strategy, "remove_worktree", mock_remove)
             monkeypatch.setattr(shutil, "rmtree", mock_rmtree)
+
+
+def test_create_worktree_oserror(git_repo, monkeypatch):
+    """Test that create_worktree raises WorktreeError on OSError."""
+    import subprocess
+    from codegen_bench.exceptions import WorktreeError
+
+    strategy = GitWorktreeStrategy(git_repo)
+
+    # Mock subprocess.run to raise OSError
+    def mock_run(*args, **kwargs):
+        raise OSError("Git command not found")
+
+    monkeypatch.setattr(subprocess, "run", mock_run)
+
+    with pytest.raises(WorktreeError, match="Failed to create worktree due to system error"):
+        strategy.create_worktree()
+
+
+def test_remove_worktree_oserror(git_repo, monkeypatch):
+    """Test that remove_worktree raises WorktreeError on OSError."""
+    import subprocess
+    from codegen_bench.exceptions import WorktreeError
+
+    strategy = GitWorktreeStrategy(git_repo)
+
+    # Create a worktree first
+    worktree_path = strategy.create_worktree()
+
+    # Mock subprocess.run to raise OSError
+    def mock_run(*args, **kwargs):
+        raise OSError("Git command not found")
+
+    monkeypatch.setattr(subprocess, "run", mock_run)
+
+    with pytest.raises(WorktreeError, match="Failed to remove worktree due to system error"):
+        strategy.remove_worktree(worktree_path)
