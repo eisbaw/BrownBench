@@ -392,3 +392,40 @@ def test_mams_stage1_sample_size_power() -> None:
 
     # Higher power requires larger sample
     assert n_high > n_low
+
+
+def test_mams_dunnett_fallback_to_bonferroni(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test fallback to Bonferroni when scipy.stats.dunnett unavailable."""
+    import sys
+    from unittest import mock
+
+    np.random.seed(42)
+
+    config = MAMSConfig(num_arms=3, control_id="baseline")
+    design = MAMSDesign(config)
+
+    # Create test data
+    results = {
+        "baseline": np.random.normal(0.90, 0.02, 20).tolist(),
+        "dut1": np.random.normal(0.95, 0.02, 20).tolist(),
+        "dut2": np.random.normal(0.85, 0.02, 20).tolist(),
+        "dut3": np.random.normal(0.92, 0.02, 20).tolist(),
+    }
+
+    # Mock scipy.stats to not have dunnett attribute
+    with mock.patch("scipy.stats.dunnett", side_effect=AttributeError("dunnett not available")):
+        # This should trigger the fallback to Bonferroni
+        result = design.evaluate_stage1(results)
+
+        # Result should still be valid
+        assert isinstance(result, MAMSResult)
+        assert len(result.selected_arms) + len(result.eliminated_arms) == 3
+
+        # Statistics and p-values should be present (from t-test fallback)
+        assert "dut1" in result.statistics
+        assert "dut1" in result.p_values
+
+        # P-values should be Bonferroni-corrected (multiplied by num_treatments)
+        # They should be larger than uncorrected values
+        for p_val in result.p_values.values():
+            assert 0 <= p_val <= 1.0

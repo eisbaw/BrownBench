@@ -544,3 +544,57 @@ def test_preregistration_roundtrip(tmp_path: Path) -> None:
     assert len(loaded.stopping_rules) == 2
     assert len(loaded.exclusion_criteria) == 2
     assert loaded.notes == original.notes
+
+
+def test_preregistration_from_yaml_missing_required_field(tmp_path: Path) -> None:
+    """Test that missing required fields raise appropriate errors."""
+    import pytest
+    import yaml
+
+    # YAML with missing title (required field)
+    malformed_yaml = tmp_path / "malformed.yaml"
+    with open(malformed_yaml, "w") as f:
+        yaml.dump(
+            {
+                "research_question": "Which DUT is best?",
+                "hypotheses": [{"id": "H1", "description": "Test", "direction": "greater"}],
+                "sample_size": 100,
+            },
+            f,
+        )
+
+    with pytest.raises((KeyError, TypeError, ValueError)):
+        PreregistrationPlan.from_yaml(malformed_yaml)
+
+
+def test_preregistration_from_yaml_nonexistent_file() -> None:
+    """Test that loading from nonexistent file raises error."""
+    import pytest
+
+    nonexistent = Path("/tmp/does_not_exist_preregistration.yaml")
+
+    with pytest.raises(FileNotFoundError):
+        PreregistrationPlan.from_yaml(nonexistent)
+
+
+def test_preregistration_from_yaml_corrupted_yaml(tmp_path: Path) -> None:
+    """Test that corrupted YAML content raises error."""
+    import pytest
+
+    corrupted_yaml = tmp_path / "corrupted.yaml"
+    with open(corrupted_yaml, "w") as f:
+        f.write("this is not valid YAML: {{{]]]")
+
+    with pytest.raises(Exception):  # yaml.YAMLError or similar
+        PreregistrationPlan.from_yaml(corrupted_yaml)
+
+
+def test_preregistration_from_yaml_empty_file(tmp_path: Path) -> None:
+    """Test that empty YAML file raises error."""
+    import pytest
+
+    empty_yaml = tmp_path / "empty.yaml"
+    empty_yaml.touch()
+
+    with pytest.raises((ValueError, TypeError, AttributeError)):
+        PreregistrationPlan.from_yaml(empty_yaml)
