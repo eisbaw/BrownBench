@@ -48,12 +48,10 @@ class SequentialBoundaries:
                 self.alpha_spending,
                 self.z_boundaries,
                 self.information_fractions,
+                strict=True,
             )
         ):
-            lines.append(
-                f"  Look {i+1}: n={n:>4}, info={info:.2f}, "
-                f"z={z:.3f}, α={alpha:.4f}"
-            )
+            lines.append(f"  Look {i+1}: n={n:>4}, info={info:.2f}, " f"z={z:.3f}, α={alpha:.4f}")
         return "\n".join(lines)
 
 
@@ -182,9 +180,7 @@ class GroupSequentialDesign:
 
         return "continue"
 
-    def _conditional_power(
-        self, n_current: int, z_current: float, effect_estimate: float
-    ) -> float:
+    def _conditional_power(self, n_current: int, z_current: float, effect_estimate: float) -> float:
         """Calculate conditional power given current data.
 
         Conditional power = P(reject H0 at final analysis | current data)
@@ -215,9 +211,7 @@ class GroupSequentialDesign:
         # Expected z at final analysis under alternative hypothesis
         # z_final = z_current * √(info_ratio) + δ * √(n_remaining)
         # Simplified approximation:
-        z_final_expected = z_current * se_ratio + effect_estimate * np.sqrt(
-            n_remaining / 2
-        )
+        z_final_expected = z_current * se_ratio + effect_estimate * np.sqrt(n_remaining / 2)
 
         # Final critical value (two-sided)
         z_crit = stats.norm.ppf(1 - self.alpha / 2)

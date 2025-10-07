@@ -81,9 +81,7 @@ def test_init_command_with_tasks(runner, tmp_path):
 
 def test_generate_command_missing_task(runner):
     """Test generate command with non-existent task."""
-    result = runner.invoke(
-        cli, ["generate", "--dut", "simple-chat", "--task-id", "nonexistent"]
-    )
+    result = runner.invoke(cli, ["generate", "--dut", "simple-chat", "--task-id", "nonexistent"])
 
     assert result.exit_code != 0
     assert "not found" in result.output.lower() or isinstance(result.exception, SystemExit)
@@ -96,13 +94,17 @@ def test_generate_command_missing_api_key(runner, tmp_path):
 
     with patch("os.getenv", return_value=None):
         result = runner.invoke(
-            cli, [
-                "--cache-dir", str(cache_dir),
+            cli,
+            [
+                "--cache-dir",
+                str(cache_dir),
                 "generate",
-                "--dut", "simple-chat",
-                "--task-id", "task_001",
-                "--no-cache"
-            ]
+                "--dut",
+                "simple-chat",
+                "--task-id",
+                "task_001",
+                "--no-cache",
+            ],
         )
 
         # Should fail with API key error

@@ -137,7 +137,7 @@ def test_end_to_end_workflow(tmp_path, mock_anthropic_response):
 
     finally:
         # Cleanup worktree
-        if 'worktree_strategy' in locals() and 'worktree_path' in locals():
+        if "worktree_strategy" in locals() and "worktree_path" in locals():
             worktree_strategy.remove_worktree(worktree_path)
 
 

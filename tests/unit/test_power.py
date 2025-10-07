@@ -1,7 +1,5 @@
 """Tests for statistical power analysis."""
 
-import pytest
-
 from codegen_bench.stats.power import (
     PowerAnalysisResult,
     calculate_minimum_detectable_effect,
@@ -87,9 +85,7 @@ def test_calculate_sample_size_ttest_stricter_alpha() -> None:
 
 def test_calculate_sample_size_ttest_one_sided() -> None:
     """Test one-sided test requires fewer samples."""
-    result_two = calculate_sample_size_ttest(
-        effect_size=0.5, alternative="two-sided"
-    )
+    result_two = calculate_sample_size_ttest(effect_size=0.5, alternative="two-sided")
     result_one = calculate_sample_size_ttest(effect_size=0.5, alternative="larger")
 
     # One-sided test is more powerful
@@ -250,9 +246,7 @@ def test_sample_size_and_power_are_inverses() -> None:
 
     # Use that sample size to calculate power
     assert result_n.sample_size is not None
-    result_p = calculate_power_ttest(
-        sample_size=result_n.sample_size, effect_size=0.5
-    )
+    result_p = calculate_power_ttest(sample_size=result_n.sample_size, effect_size=0.5)
 
     # Should recover original power (within tolerance)
     assert abs(result_p.power - 0.80) < 0.02
@@ -265,9 +259,7 @@ def test_minimum_detectable_effect_consistency() -> None:
 
     # Use that effect size to calculate power with n=50
     assert result_mde.effect_size is not None
-    result_p = calculate_power_ttest(
-        sample_size=50, effect_size=result_mde.effect_size
-    )
+    result_p = calculate_power_ttest(sample_size=50, effect_size=result_mde.effect_size)
 
     # Should recover original power
     assert abs(result_p.power - 0.80) < 0.02
@@ -280,9 +272,7 @@ def test_proportion_calculations_consistency() -> None:
 
     # Use that sample size to calculate power
     assert result_n.sample_size is not None
-    result_p = calculate_power_proportion(
-        sample_size=result_n.sample_size, p1=0.5, p2=0.6
-    )
+    result_p = calculate_power_proportion(sample_size=result_n.sample_size, p1=0.5, p2=0.6)
 
     # Should recover original power (within tolerance)
     assert abs(result_p.power - 0.80) < 0.03

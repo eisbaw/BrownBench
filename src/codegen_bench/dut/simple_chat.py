@@ -70,9 +70,7 @@ class SimpleChatDUT(CodeGenerationApproach):
         changed_files = self._parse_code_changes(response.content[0].text)
 
         # Calculate cost
-        cost = self._calculate_cost(
-            response.usage.input_tokens, response.usage.output_tokens
-        )
+        cost = self._calculate_cost(response.usage.input_tokens, response.usage.output_tokens)
 
         return Solution(
             approach_id=self.get_metadata().id,

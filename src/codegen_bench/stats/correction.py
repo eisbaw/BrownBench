@@ -73,9 +73,7 @@ def correct_pvalues(
 
     statsmodels_method = method_map.get(method, method)
 
-    rejected, p_adjusted, _, _ = multipletests(
-        p_values, alpha=alpha, method=statsmodels_method
-    )
+    rejected, p_adjusted, _, _ = multipletests(p_values, alpha=alpha, method=statsmodels_method)
 
     return rejected, p_adjusted
 

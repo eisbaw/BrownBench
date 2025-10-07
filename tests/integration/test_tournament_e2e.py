@@ -13,10 +13,12 @@ from codegen_bench.dut.registry import DUTRegistry
 @pytest.fixture
 def mock_judge_response():
     """Mock judge response."""
+
     def _response(winner="A"):
         return f"""WINNER: {winner}
 REASONING: Solution {winner} is better because it has clearer code.
 CONFIDENCE: 0.85"""
+
     return _response
 
 

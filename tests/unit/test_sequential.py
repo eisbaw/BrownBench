@@ -150,9 +150,7 @@ def test_conditional_power_high() -> None:
     design = GroupSequentialDesign(max_n=300, num_looks=3, alpha=0.05)
 
     # At n=100 with strong z and large effect
-    cond_power = design._conditional_power(
-        n_current=100, z_current=3.0, effect_estimate=0.8
-    )
+    cond_power = design._conditional_power(n_current=100, z_current=3.0, effect_estimate=0.8)
 
     # Should have high conditional power (likely to succeed)
     assert cond_power > 0.80
@@ -163,9 +161,7 @@ def test_conditional_power_low() -> None:
     design = GroupSequentialDesign(max_n=300, num_looks=3, alpha=0.05)
 
     # At n=200 with weak z and small effect
-    cond_power = design._conditional_power(
-        n_current=200, z_current=0.5, effect_estimate=0.1
-    )
+    cond_power = design._conditional_power(n_current=200, z_current=0.5, effect_estimate=0.1)
 
     # Should have low conditional power (unlikely to succeed)
     assert cond_power < 0.30
@@ -176,9 +172,7 @@ def test_conditional_power_at_max_n() -> None:
     design = GroupSequentialDesign(max_n=300, num_looks=3, alpha=0.05)
 
     # Already at max with significant result
-    cond_power = design._conditional_power(
-        n_current=300, z_current=2.5, effect_estimate=0.5
-    )
+    cond_power = design._conditional_power(n_current=300, z_current=2.5, effect_estimate=0.5)
 
     # Should be 1.0 (already significant)
     assert cond_power == 1.0
@@ -253,9 +247,7 @@ def test_different_alpha_levels() -> None:
 
 def test_custom_futility_threshold() -> None:
     """Test custom futility threshold."""
-    design = GroupSequentialDesign(
-        max_n=300, num_looks=3, alpha=0.05, futility_threshold=0.10
-    )
+    design = GroupSequentialDesign(max_n=300, num_looks=3, alpha=0.05, futility_threshold=0.10)
 
     assert design.futility_threshold == 0.10
 

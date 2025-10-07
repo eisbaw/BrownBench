@@ -61,9 +61,7 @@ def test_claude_judge_evaluate_no_api_key(sample_task, sample_solution):
             judge.evaluate(sample_solution, sample_solution, arena, sample_task)
 
 
-def test_claude_judge_evaluate(
-    sample_task, sample_solution, mock_anthropic_response
-):
+def test_claude_judge_evaluate(sample_task, sample_solution, mock_anthropic_response):
     """Test ClaudeJudge evaluate method."""
     judge = ClaudeJudge(api_key="test-key")
 

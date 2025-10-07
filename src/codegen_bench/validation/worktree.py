@@ -77,9 +77,7 @@ class GitWorktreeStrategy:
 
             if result.returncode != 0:
                 temp_dir.rmdir()
-                raise RuntimeError(
-                    f"Failed to create worktree: {result.stderr}"
-                )
+                raise RuntimeError(f"Failed to create worktree: {result.stderr}")
 
             return temp_dir
 
@@ -111,9 +109,7 @@ class GitWorktreeStrategy:
             )
 
             if result.returncode != 0:
-                raise RuntimeError(
-                    f"Failed to remove worktree: {result.stderr}"
-                )
+                raise RuntimeError(f"Failed to remove worktree: {result.stderr}")
 
         except Exception as e:
             raise RuntimeError(f"Failed to remove worktree: {e}") from e
@@ -137,7 +133,7 @@ class GitWorktreeStrategy:
             worktrees = []
             for line in result.stdout.splitlines():
                 if line.startswith("worktree "):
-                    worktree_path = line[len("worktree "):].strip()
+                    worktree_path = line[len("worktree ") :].strip()
                     worktrees.append(Path(worktree_path))
 
             return worktrees

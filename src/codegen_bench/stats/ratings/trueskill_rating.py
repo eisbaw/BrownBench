@@ -37,9 +37,7 @@ class TrueSkillRating:
         """
         self.rating = Rating(mu, sigma)
 
-    def update(
-        self, opponent: "TrueSkillRating", outcome: Literal["win", "loss", "tie"]
-    ) -> None:
+    def update(self, opponent: "TrueSkillRating", outcome: Literal["win", "loss", "tie"]) -> None:
         """Update rating after a match.
 
         Args:

@@ -42,9 +42,7 @@ def cli(
 @click.option("--download-projects", is_flag=True, help="Download reference projects")
 @click.argument("output_dir", type=Path)
 @click.pass_context
-def init(
-    ctx: click.Context, tasks: str, download_projects: bool, output_dir: Path
-) -> None:
+def init(ctx: click.Context, tasks: str, download_projects: bool, output_dir: Path) -> None:
     """Initialize benchmark suite."""
     console.print(f"[bold green]Initializing benchmark in {output_dir}[/bold green]")
     console.print(f"Task set: {tasks}")
@@ -216,8 +214,7 @@ def validate(
                     metrics = executor.parse_test_output(result.output)
                     if "passed" in metrics:
                         console.print(
-                            f"  Passed: {metrics['passed']}, "
-                            f"Failed: {metrics.get('failed', 0)}"
+                            f"  Passed: {metrics['passed']}, " f"Failed: {metrics.get('failed', 0)}"
                         )
                 else:
                     console.print("[red]Tests: FAILED[/red]")

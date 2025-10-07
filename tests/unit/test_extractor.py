@@ -1,6 +1,5 @@
 """Tests for code extraction."""
 
-
 from codegen_bench.parsing.extractor import CodeExtractor
 
 

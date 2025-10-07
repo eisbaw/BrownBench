@@ -14,7 +14,9 @@ def mock_anthropic_client(monkeypatch):
     """Mock Anthropic client."""
     mock_client = Mock()
     mock_response = Mock()
-    mock_response.content = [Mock(text="""Here's the solution:
+    mock_response.content = [
+        Mock(
+            text="""Here's the solution:
 
 ```c:src/main.c
 #include <stdio.h>
@@ -30,7 +32,9 @@ void helper() {
     // Helper function
 }
 ```
-""")]
+"""
+        )
+    ]
     mock_response.usage = Mock(input_tokens=100, output_tokens=200)
     mock_client.messages.create = Mock(return_value=mock_response)
 

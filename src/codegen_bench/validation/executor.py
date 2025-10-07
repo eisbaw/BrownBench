@@ -29,9 +29,7 @@ class ValidationExecutor:
         if not self.workspace.exists():
             raise ValueError(f"Workspace does not exist: {self.workspace}")
 
-    def run_compile(
-        self, compile_command: str, timeout: int = 300
-    ) -> ValidationResult:
+    def run_compile(self, compile_command: str, timeout: int = 300) -> ValidationResult:
         """Run compile command.
 
         Args:
@@ -43,9 +41,7 @@ class ValidationExecutor:
         """
         return self._run_command(compile_command, timeout)
 
-    def run_tests(
-        self, test_command: str, timeout: int = 600
-    ) -> ValidationResult:
+    def run_tests(self, test_command: str, timeout: int = 600) -> ValidationResult:
         """Run test command.
 
         Args:

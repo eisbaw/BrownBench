@@ -52,9 +52,7 @@ class TestDecomposeVariance:
         # Create data where tasks are very different
         data = pd.DataFrame(
             {
-                "elo": (
-                    [1500] * 3 + [1700] * 3 + [1900] * 3
-                ),  # Tasks differ a lot
+                "elo": ([1500] * 3 + [1700] * 3 + [1900] * 3),  # Tasks differ a lot
                 "approach": ["A", "B", "C"] * 3,
                 "task": ["t1", "t1", "t1", "t2", "t2", "t2", "t3", "t3", "t3"],
             }
@@ -129,9 +127,7 @@ class TestDecomposeVariance:
             data_list = []
 
             for i, group_mean in enumerate(group_means):
-                group_values = np.random.normal(
-                    group_mean, np.sqrt(var_within), n_per_group
-                )
+                group_values = np.random.normal(group_mean, np.sqrt(var_within), n_per_group)
                 for j, value in enumerate(group_values):
                     data_list.append(
                         {

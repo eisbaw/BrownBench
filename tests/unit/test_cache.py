@@ -123,9 +123,7 @@ def test_cache_miss(solution_cache, mock_dut, simple_task):
     assert solution_cache.get(mock_dut, simple_task, 42) is None
 
 
-def test_cache_different_seeds(
-    solution_cache, mock_dut, simple_task, sample_solution
-):
+def test_cache_different_seeds(solution_cache, mock_dut, simple_task, sample_solution):
     """Test caching with different seeds."""
     solution_cache.put(mock_dut, simple_task, 42, sample_solution)
     solution_cache.put(mock_dut, simple_task, 43, sample_solution)
@@ -179,9 +177,7 @@ def test_cache_invalidate_nonexistent(solution_cache, mock_dut, simple_task):
     assert result is False
 
 
-def test_cache_corrupted_file(
-    solution_cache, mock_dut, simple_task, sample_solution, cache_dir
-):
+def test_cache_corrupted_file(solution_cache, mock_dut, simple_task, sample_solution, cache_dir):
     """Test handling of corrupted cache file."""
     # Store valid solution
     solution_cache.put(mock_dut, simple_task, 42, sample_solution)
@@ -196,9 +192,7 @@ def test_cache_corrupted_file(
     assert solution_cache.get(mock_dut, simple_task, 42) is None
 
 
-def test_cache_file_format(
-    solution_cache, mock_dut, simple_task, sample_solution, cache_dir
-):
+def test_cache_file_format(solution_cache, mock_dut, simple_task, sample_solution, cache_dir):
     """Test cache file format is valid JSON."""
     import json
 

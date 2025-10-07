@@ -25,9 +25,7 @@ class SolutionCache:
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-    def _cache_key(
-        self, dut: CodeGenerationApproach, task: Task, seed: int
-    ) -> str:
+    def _cache_key(self, dut: CodeGenerationApproach, task: Task, seed: int) -> str:
         """Generate unique cache key.
 
         Args:
@@ -42,9 +40,7 @@ class SolutionCache:
         key_data = f"{metadata.id}_{metadata.version}_{task.id}_{seed}"
         return hashlib.sha256(key_data.encode()).hexdigest()[:16]
 
-    def get(
-        self, dut: CodeGenerationApproach, task: Task, seed: int
-    ) -> Solution | None:
+    def get(self, dut: CodeGenerationApproach, task: Task, seed: int) -> Solution | None:
         """Retrieve cached solution.
 
         Args:
@@ -69,9 +65,7 @@ class SolutionCache:
             # Cache file corrupted, return None
             return None
 
-    def put(
-        self, dut: CodeGenerationApproach, task: Task, seed: int, solution: Solution
-    ) -> None:
+    def put(self, dut: CodeGenerationApproach, task: Task, seed: int, solution: Solution) -> None:
         """Store solution in cache.
 
         Args:
@@ -99,9 +93,7 @@ class SolutionCache:
         """
         return len(list(self.cache_dir.glob("*.json")))
 
-    def invalidate(
-        self, dut: CodeGenerationApproach, task: Task, seed: int
-    ) -> bool:
+    def invalidate(self, dut: CodeGenerationApproach, task: Task, seed: int) -> bool:
         """Invalidate specific cached solution.
 
         Args:

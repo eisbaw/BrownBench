@@ -299,8 +299,7 @@ def test_hedges_g_correction_factor() -> None:
 
     # Calculate Cohen's d manually
     pooled_sd = np.sqrt(
-        ((10 - 1) * np.var(group_a, ddof=1) + (10 - 1) * np.var(group_b, ddof=1))
-        / (10 + 10 - 2)
+        ((10 - 1) * np.var(group_a, ddof=1) + (10 - 1) * np.var(group_b, ddof=1)) / (10 + 10 - 2)
     )
     cohens_d = (np.mean(group_a) - np.mean(group_b)) / pooled_sd
 
