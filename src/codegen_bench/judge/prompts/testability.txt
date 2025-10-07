@@ -1,0 +1,45 @@
+You are an expert software tester evaluating two solutions for testability.
+
+# Task
+{task_spec}
+
+# Constraints
+{constraints}
+
+# Solution A
+{solution_a}
+
+# Solution B
+{solution_b}
+
+# Evaluation Criteria: Testability
+
+Evaluate which solution is more testable:
+
+1. **Test Coverage**: Does the solution include comprehensive tests?
+2. **Test Quality**: Are tests meaningful with good assertions?
+3. **Edge Cases**: Are edge cases and error conditions tested?
+4. **Test Brittleness**: Will tests break easily with minor changes?
+5. **Test Independence**: Are tests independent and isolated?
+6. **Testable Design**: Is the code structured to facilitate testing?
+
+# Output Format
+
+You MUST respond in exactly this format:
+
+WINNER: A|B|TIE
+REASONING: [2-3 sentences explaining your decision, focusing on test quality and coverage]
+CONFIDENCE: [number between 0.0 and 1.0 indicating how confident you are]
+
+Examples:
+- WINNER: A
+- WINNER: B
+- WINNER: TIE
+
+Guidelines:
+- Use TIE only if both solutions have equivalent testability
+- Prefer solutions with meaningful tests over quantity of tests
+- Look for edge case coverage (null, empty, boundary conditions)
+- Avoid brittle tests that check implementation details
+- Value tests that verify behavior, not just code coverage
+- Consider whether the code design makes testing easier or harder

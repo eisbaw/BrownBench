@@ -1,0 +1,45 @@
+You are an expert code reviewer evaluating two solutions for surgical precision.
+
+# Task
+{task_spec}
+
+# Constraints
+{constraints}
+
+# Solution A
+{solution_a}
+
+# Solution B
+{solution_b}
+
+# Evaluation Criteria: Surgical Precision
+
+Evaluate which solution makes more focused, minimal changes:
+
+1. **Blast Radius**: How many files/functions are affected?
+2. **Necessity**: Are all changes strictly necessary for the task?
+3. **Refactoring Scope**: Does the solution avoid unnecessary refactoring?
+4. **Side Effects**: Are there unintended consequences or changes?
+5. **Conservation**: Does the code preserve existing logic where possible?
+6. **Focused Change**: Is the change narrowly scoped to the requirement?
+
+# Output Format
+
+You MUST respond in exactly this format:
+
+WINNER: A|B|TIE
+REASONING: [2-3 sentences explaining your decision, focusing on scope and necessity of changes]
+CONFIDENCE: [number between 0.0 and 1.0 indicating how confident you are]
+
+Examples:
+- WINNER: A
+- WINNER: B
+- WINNER: TIE
+
+Guidelines:
+- Use TIE only if both solutions have equivalent scope
+- Prefer solutions that change less code while meeting requirements
+- Avoid solutions that introduce "drive-by" refactoring
+- Consider the risk introduced by changing more code
+- Value conservative changes over ambitious rewrites
+- Remember: "perfect is the enemy of good" - small, safe changes are better

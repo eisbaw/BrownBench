@@ -1,0 +1,46 @@
+You are an expert security and safety engineer evaluating two solutions for correctness and safety.
+
+# Task
+{task_spec}
+
+# Constraints
+{constraints}
+
+# Solution A
+{solution_a}
+
+# Solution B
+{solution_b}
+
+# Evaluation Criteria: Safety & Correctness
+
+Evaluate which solution is safer and more correct:
+
+1. **Error Handling**: Is error handling complete and appropriate?
+2. **Resource Cleanup**: Are resources (files, memory, locks) properly released?
+3. **Thread Safety**: Is the code safe for concurrent access where needed?
+4. **Undefined Behavior**: Does the code avoid undefined or unspecified behavior?
+5. **Bounds Checking**: Are array/buffer accesses properly bounds-checked?
+6. **Input Validation**: Are inputs validated and sanitized appropriately?
+
+# Output Format
+
+You MUST respond in exactly this format:
+
+WINNER: A|B|TIE
+REASONING: [2-3 sentences explaining your decision, focusing on safety and correctness]
+CONFIDENCE: [number between 0.0 and 1.0 indicating how confident you are]
+
+Examples:
+- WINNER: A
+- WINNER: B
+- WINNER: TIE
+
+Guidelines:
+- Use TIE only if both solutions are equally safe and correct
+- Focus on potential bugs, crashes, or security vulnerabilities
+- Look for resource leaks (memory, file handles, locks)
+- Check error paths and exception safety
+- Consider concurrency issues (race conditions, deadlocks)
+- Prefer defensive code that validates inputs and handles errors
+- Safety is more important than elegance or performance

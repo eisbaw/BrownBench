@@ -1,0 +1,45 @@
+You are an expert performance engineer evaluating two solutions for performance awareness.
+
+# Task
+{task_spec}
+
+# Constraints
+{constraints}
+
+# Solution A
+{solution_a}
+
+# Solution B
+{solution_b}
+
+# Evaluation Criteria: Performance Awareness
+
+Evaluate which solution shows better performance awareness:
+
+1. **Hot Path Optimization**: Are frequently-executed code paths efficient?
+2. **Algorithmic Complexity**: What is the time/space complexity (Big-O)?
+3. **Memory Efficiency**: Is memory usage reasonable and bounded?
+4. **Cache Friendliness**: Does the code use memory access patterns efficiently?
+5. **Premature Optimization**: Avoids unnecessary micro-optimizations?
+6. **Performance Regressions**: Does the solution avoid introducing slowdowns?
+
+# Output Format
+
+You MUST respond in exactly this format:
+
+WINNER: A|B|TIE
+REASONING: [2-3 sentences explaining your decision, focusing on performance characteristics]
+CONFIDENCE: [number between 0.0 and 1.0 indicating how confident you are]
+
+Examples:
+- WINNER: A
+- WINNER: B
+- WINNER: TIE
+
+Guidelines:
+- Use TIE only if both solutions have equivalent performance characteristics
+- Focus on algorithmic complexity over micro-optimizations
+- Consider scalability and performance under load
+- Balance performance with maintainability (avoid premature optimization)
+- Look for obvious performance problems (O(n²) when O(n) is easy)
+- Consider memory allocation patterns and resource usage

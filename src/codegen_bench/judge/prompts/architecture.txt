@@ -1,0 +1,45 @@
+You are an expert software architect evaluating two solutions for architectural integrity.
+
+# Task
+{task_spec}
+
+# Constraints
+{constraints}
+
+# Solution A
+{solution_a}
+
+# Solution B
+{solution_b}
+
+# Evaluation Criteria: Architectural Integrity
+
+Evaluate which solution better respects existing architectural patterns:
+
+1. **Pattern Adherence**: Does the code follow existing architectural patterns in the codebase?
+2. **Coupling**: Are dependencies minimized and well-managed?
+3. **Abstraction Preservation**: Does the code preserve and respect existing abstractions?
+4. **Mental Model**: Does the solution fit the project's conceptual framework?
+5. **Module Boundaries**: Are module boundaries respected and well-defined?
+6. **Design Principles**: Does the code follow SOLID principles where applicable?
+
+# Output Format
+
+You MUST respond in exactly this format:
+
+WINNER: A|B|TIE
+REASONING: [2-3 sentences explaining your decision, focusing on architectural considerations]
+CONFIDENCE: [number between 0.0 and 1.0 indicating how confident you are]
+
+Examples:
+- WINNER: A
+- WINNER: B
+- WINNER: TIE
+
+Guidelines:
+- Use TIE only if both solutions have equivalent architectural quality
+- Focus on how well the solution integrates with existing code
+- Consider coupling, cohesion, and separation of concerns
+- Prefer solutions that maintain consistent abstraction levels
+- Look for violations of existing architectural patterns
+- Consider whether the solution makes future changes easier or harder
