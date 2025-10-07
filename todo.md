@@ -997,23 +997,21 @@ Ready to proceed with Phase 1: Judge system and tournament runner
 
 ### Critical Priority (Fix Before Phase 1)
 
-- [ ] **ISSUE 4.1: Fix silent cache corruption handling** (Impact: Critical, Effort: Low)
-  - Location: src/codegen_bench/cache/store.py:71-93
-  - Problem: Corrupted cache returns None instead of failing fast
-  - Fix: Raise CacheError and delete corrupt cache file
-  - Test: Add test for corrupted JSON in cache
+- [x] **DONE: ISSUE 4.1: Fix silent cache corruption handling** (Impact: Critical, Effort: Low)
+  - Fixed: Cache now raises CacheError and deletes corrupt file
+  - Test: test_cache_corrupted_file verifies deletion and exception
+  - Commit: c774fd1
 
-- [ ] **ISSUE 5.1: Fix lazy client initialization** (Impact: Critical, Effort: Low)
-  - Location: src/codegen_bench/judge/claude_judge.py:21, src/codegen_bench/dut/simple_chat.py:25
-  - Problem: API key errors discovered at first use, not construction
-  - Fix: Initialize client in __init__, fail immediately if API key missing
-  - Test: Add test for missing API key at construction time
+- [x] **DONE: ISSUE 5.1: Fix lazy client initialization** (Impact: Critical, Effort: Low)
+  - Fixed: ClaudeJudge and SimpleChatDUT initialize client in __init__
+  - Test: test_claude_judge_evaluate_no_api_key, test_simple_chat_solve_no_api_key
+  - Commit: c774fd1
 
-- [ ] **ISSUE 1.2: Remove mutable vote modification** (Impact: Critical, Effort: Medium)
-  - Location: src/codegen_bench/judge/orchestrator.py:79-85
-  - Problem: JudgeVote objects mutated after creation
-  - Fix: Create normalized_votes instead of mutating
-  - Test: Verify vote immutability
+- [x] **DONE: ISSUE 1.2: Remove mutable vote modification** (Impact: Critical, Effort: Medium)
+  - Fixed: JudgeVote is now frozen dataclass (immutable)
+  - Fixed: Orchestrator creates normalized_votes instead of mutating
+  - Test: test_vote_immutability, test_orchestrator_preserves_original_votes
+  - Commit: c774fd1, b4cf06a
 
 ### High Priority (Fix During Phase 1)
 
