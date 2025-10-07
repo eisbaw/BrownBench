@@ -293,19 +293,61 @@ def test_tournament_caching(tmp_path, mock_task, mock_arena, mock_judge_orchestr
 
 def test_dut_rating_properties():
     """Test DUTRating property calculations."""
+    from codegen_bench.core.judgment import JudgeVote, JudgmentResult
     from codegen_bench.core.tournament import DUTRating
     from codegen_bench.stats.ratings.bayesian_elo import BayesianELO
 
     rating = DUTRating(
         dut_id="test",
         rating=BayesianELO(prior_mean=1500, prior_std=200),
-        wins=10,
-        losses=5,
-        ties=2,
         total_cost_usd=1.5,
         total_time_seconds=30.0,
         total_tokens=1000,
     )
+
+    # Add some comparisons to history
+    # 10 wins, 5 losses, 2 ties
+    for _ in range(10):
+        comparison = (
+            "test",
+            "other",
+            "arena",
+            JudgmentResult(
+                winner="A",
+                votes=[JudgeVote(vote="A", reasoning="test", confidence=0.9)],
+                agreement_rate=1.0,
+                confidence=0.9,
+            ),
+        )
+        rating._comparisons.append(comparison)
+
+    for _ in range(5):
+        comparison = (
+            "test",
+            "other",
+            "arena",
+            JudgmentResult(
+                winner="B",
+                votes=[JudgeVote(vote="B", reasoning="test", confidence=0.9)],
+                agreement_rate=1.0,
+                confidence=0.9,
+            ),
+        )
+        rating._comparisons.append(comparison)
+
+    for _ in range(2):
+        comparison = (
+            "test",
+            "other",
+            "arena",
+            JudgmentResult(
+                winner="TIE",
+                votes=[JudgeVote(vote="TIE", reasoning="test", confidence=0.9)],
+                agreement_rate=1.0,
+                confidence=0.9,
+            ),
+        )
+        rating._comparisons.append(comparison)
 
     assert rating.elo == 1500
     assert rating.elo_std == 200

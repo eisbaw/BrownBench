@@ -25,12 +25,10 @@ class DUTRating:
 
     dut_id: str
     rating: BayesianELO
-    wins: int = 0
-    losses: int = 0
-    ties: int = 0
     total_cost_usd: float = 0.0
     total_time_seconds: float = 0.0
     total_tokens: int = 0
+    _comparisons: list[tuple[str, str, str, JudgmentResult]] = field(default_factory=list, repr=False)
 
     @property
     def elo(self) -> float:
@@ -51,6 +49,37 @@ class DUTRating:
     def elo_upper_bound(self) -> float:
         """Get 95% confidence upper bound."""
         return self.rating.mean + 2 * self.rating.std
+
+    @property
+    def wins(self) -> int:
+        """Compute wins from comparison history."""
+        count = 0
+        for dut_a, dut_b, _, judgment in self._comparisons:
+            if dut_a == self.dut_id and judgment.winner == "A":
+                count += 1
+            elif dut_b == self.dut_id and judgment.winner == "B":
+                count += 1
+        return count
+
+    @property
+    def losses(self) -> int:
+        """Compute losses from comparison history."""
+        count = 0
+        for dut_a, dut_b, _, judgment in self._comparisons:
+            if dut_a == self.dut_id and judgment.winner == "B":
+                count += 1
+            elif dut_b == self.dut_id and judgment.winner == "A":
+                count += 1
+        return count
+
+    @property
+    def ties(self) -> int:
+        """Compute ties from comparison history."""
+        count = 0
+        for dut_a, dut_b, _, judgment in self._comparisons:
+            if (dut_a == self.dut_id or dut_b == self.dut_id) and judgment.winner == "TIE":
+                count += 1
+        return count
 
 
 @dataclass
@@ -172,11 +201,12 @@ class TournamentRunner:
                         # Get judgment
                         judgment = self.judges.compare(sol_a, sol_b, arena, task)
 
-                        # Update ratings
-                        self._update_ratings(dut_a_id, dut_b_id, judgment.winner)
-
                         # Record comparison
-                        comparisons.append((dut_a_id, dut_b_id, arena.name, judgment))
+                        comparison = (dut_a_id, dut_b_id, arena.name, judgment)
+                        comparisons.append(comparison)
+
+                        # Update ratings and add to comparison history
+                        self._update_ratings(dut_a_id, dut_b_id, judgment.winner, comparison)
                         total_comparisons += 1
 
                         if progress_callback:
@@ -195,26 +225,28 @@ class TournamentRunner:
             end_time=time.time(),
         )
 
-    def _update_ratings(self, dut_a_id: str, dut_b_id: str, winner: str) -> None:
+    def _update_ratings(
+        self, dut_a_id: str, dut_b_id: str, winner: str, comparison: tuple[str, str, str, JudgmentResult]
+    ) -> None:
         """Update ELO ratings based on comparison result.
 
         Args:
             dut_a_id: ID of first DUT
             dut_b_id: ID of second DUT
             winner: 'A', 'B', or 'TIE'
+            comparison: The full comparison tuple to add to history
         """
         rating_a = self.ratings[dut_a_id].rating
         rating_b = self.ratings[dut_b_id].rating
 
+        # Update ELO ratings
         if winner == "A":
             rating_a.update(rating_b, "win")
-            self.ratings[dut_a_id].wins += 1
-            self.ratings[dut_b_id].losses += 1
         elif winner == "B":
             rating_a.update(rating_b, "loss")
-            self.ratings[dut_a_id].losses += 1
-            self.ratings[dut_b_id].wins += 1
         else:  # TIE
             rating_a.update(rating_b, "tie")
-            self.ratings[dut_a_id].ties += 1
-            self.ratings[dut_b_id].ties += 1
+
+        # Add comparison to both DUT histories
+        self.ratings[dut_a_id]._comparisons.append(comparison)
+        self.ratings[dut_b_id]._comparisons.append(comparison)
