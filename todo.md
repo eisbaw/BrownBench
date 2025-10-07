@@ -1,150 +1,196 @@
 # BrownBench Development Todo
 
-## Pick items from here to implement - when done, mark as [x] DONE: .
-## Read design from @ai_codegen_bench_prd.md file.
+## 🎯 Current Status: Phase 0 COMPLETE, Phase 1 PARTIALLY COMPLETE (2025-10-07)
 
-- Check this todo.md file - we may have already implemented stuff.
-- Research mature well-documented open-source projects to use as brownfield DUTs; add as submodules.
-- Pick medium-to-large size commits from these open-source DUTs, inspect the work done. Formulate the commit as a prompt that would implement that very same work. This prompt will be used as eval benchmark.
-
-## Phase 0: Foundations (Weeks 1-3) ✓ COMPLETE
-
-### Week 1: Project Setup & Core Models
-
-- [ ] **Project scaffolding**
-  - [ ] Initialize git repository
-  - [ ] Create pyproject.toml with uv dependencies
-  - [ ] Set up shell.nix for reproducible environment
-  - [ ] Create justfile with common tasks
-  - [ ] Configure pytest, mypy, ruff
-  - [ ] Set up pre-commit hooks
-
-- [ ] **Core data models** `src/codegen_bench/core/`
-  - [ ] Implement Task dataclass with validation
-  - [ ] Implement Solution dataclass
-  - [ ] Implement Arena dataclass
-  - [ ] Implement JudgeVote and JudgmentResult
-  - [ ] Add serialization (to_dict/from_dict)
-  - [ ] Write unit tests for all models
-
-- [ ] **Task loader** `src/codegen_bench/tasks/`
-  - [ ] YAML schema for task definitions
-  - [ ] TaskLoader class with validation
-  - [ ] Support for loading task sets (core, embedded, all)
-  - [ ] Error handling for malformed tasks
-  - [ ] Unit tests with fixture tasks
-
-### Week 2: DUT System & Caching
-
-- [ ] **DUT base infrastructure** `src/codegen_bench/dut/`
-  - [ ] CodeGenerationApproach abstract base class
-  - [ ] ApproachMetadata dataclass
-  - [ ] DUT registry/factory pattern
-  - [ ] Unit tests for registry
-
-- [ ] **SimpleChatDUT implementation**
-  - [ ] Anthropic API client integration
-  - [ ] Prompt building
-  - [ ] Response parsing (basic)
-  - [ ] Cost calculation
-  - [ ] Unit tests with mocked API
-
-- [ ] **Solution caching** `src/codegen_bench/cache/`
-  - [ ] SolutionCache with SHA-256 keying
-  - [ ] Disk persistence (JSON)
-  - [ ] Cache invalidation logic
-  - [ ] Unit tests for cache hit/miss
-
-- [ ] **Code extraction** `src/codegen_bench/parsing/`
-  - [ ] CodeExtractor with multiple strategies
-  - [ ] Markdown block parser
-  - [ ] Diff format parser
-  - [ ] Fallback parsers
-  - [ ] Unit tests with real LLM outputs
-
-### Week 3: Validation Pipeline
-
-- [ ] **Git worktree isolation** `src/codegen_bench/validation/`
-  - [ ] GitWorktreeStrategy implementation
-  - [ ] Workspace creation & cleanup
-  - [ ] Error handling for non-git repos
-  - [ ] Unit tests
-
-- [ ] **SolutionApplicator**
-  - [ ] Apply changed files to workspace
-  - [ ] Handle both full files and diffs
-  - [ ] Apply diff using git apply
-  - [ ] Integration tests with sample repos
-
-- [ ] **ValidationExecutor**
-  - [ ] Compile command execution
-  - [ ] Test command execution
-  - [ ] Test output parsing (pytest, unittest)
-  - [ ] Timeout handling
-  - [ ] Integration tests
-
-- [ ] **CLI skeleton** `src/codegen_bench/cli/`
-  - [ ] Click-based CLI structure
-  - [ ] `codegen-bench init` command
-  - [ ] `codegen-bench generate` command
-  - [ ] `codegen-bench validate` command
-  - [ ] Rich terminal output
-  - [ ] Basic error handling
+**Production-Ready:** Core engine, judge system, tournament runner (396 tests, 95% coverage)
+**Needs Work:** Real-world tasks, judge validation, documentation, container security
+**Critical Gap:** Only toy tasks, no human validation of judges, no docs for external users
 
 ---
 
-## Phase 1: Minimal Viable Benchmark (Weeks 4-7) - IN PROGRESS
+## 📋 Quick Action Items (Top Priorities)
 
-### Week 4: Judge System
+### HIGH PRIORITY (Phase 1 Completion)
+- [ ] **Create 10 realistic tasks from open-source projects** (Week 7)
+  - Extract real commits from nginx, redis, requests, flask
+  - Document brownfield refactoring scenarios
+  - Validate test suites pass on original code
+  
+### HIGH PRIORITY (Phase 3 Start)
+- [ ] **Collect 50 human judgments for judge calibration** (Week 13)
+  - Set up simple comparison UI
+  - Recruit 5-10 developers
+  - Calculate agreement metrics (target: ≥85%)
 
-- [ ] **Judge base infrastructure** `src/codegen_bench/judge/`
-  - [ ] Judge abstract base class
-  - [ ] ClaudeJudge implementation
-  - [ ] Retry logic with tenacity
-  - [ ] Rate limiting
+### MEDIUM PRIORITY (Phase 4-5)
+- [ ] **Write user documentation** (Week 19)
+  - Quickstart guide (5 minutes)
+  - CLI reference
+  - Troubleshooting guide
+  
+- [ ] **Add HTML reports** (Week 18)
+  - Jinja2 templates
+  - Plotly charts
+  - Export to JSON/CSV
 
-- [ ] **Judge prompts** `src/codegen_bench/judge/prompts/`
-  - [ ] Base prompt template structure
-  - [ ] Maintainability arena prompt
-  - [ ] Architecture arena prompt
-  - [ ] Prompt versioning with SHA-256
-  - [ ] Load and format prompts
+---
 
-- [ ] **Vote parsing**
-  - [ ] Parse structured judge output (WINNER/REASONING/CONFIDENCE)
-  - [ ] Handle malformed responses
-  - [ ] Confidence score extraction
-  - [ ] Unit tests with sample outputs
+## Pick items from here to implement - when done, mark as [x] DONE: .
+## Read design from @ai_codegen_bench_prd.md file.
 
-- [ ] **Judge orchestrator**
-  - [ ] JudgeOrchestrator class
-  - [ ] Consensus algorithm (majority vote)
-  - [ ] Agreement rate calculation
-  - [ ] Position randomization (A/B swap)
-  - [ ] Unit tests for consensus logic
+- [ ] Research mature well-documented open-source projects to use as brownfield tasks
+- [ ] Pick medium-to-large size commits from these open-source projects, inspect the work done
+- [ ] Formulate commits as prompts that would implement the same work (use as eval benchmark)
 
-### Week 5: Simple ELO & Tournament
+## Phase 0: Foundations (Weeks 1-3) ✅ COMPLETE
 
-- [ ] **Simple ELO ratings** `src/codegen_bench/stats/ratings/`
-  - [ ] BayesianELO implementation
-  - [ ] Update mechanism
-  - [ ] Uncertainty tracking
-  - [ ] Unit tests
+### Week 1: Project Setup & Core Models ✅
 
-- [ ] **Tournament runner** `src/codegen_bench/core/`
-  - [ ] TournamentRunner class
-  - [ ] Pairwise comparison scheduling
-  - [ ] Fixed sample size mode
-  - [ ] Progress tracking
-  - [ ] Result aggregation
-  - [ ] Integration tests
+- [x] **Project scaffolding** ✅ COMPLETE
+  - [x] Initialize git repository
+  - [x] Create pyproject.toml with uv dependencies
+  - [x] Set up shell.nix for reproducible environment
+  - [x] Create justfile with common tasks
+  - [x] Configure pytest, mypy, ruff
+  - [x] Set up pre-commit hooks
 
-- [ ] **Terminal reporting** `src/codegen_bench/reporting/`
-  - [ ] TerminalReporter with rich tables
-  - [ ] ELO leaderboard display
-  - [ ] Per-arena breakdown
-  - [ ] Cost summary
-  - [ ] Formatting tests
+- [x] **Core data models** `src/codegen_bench/core/` ✅ COMPLETE
+  - [x] Implement Task dataclass with validation
+  - [x] Implement Solution dataclass
+  - [x] Implement Arena dataclass
+  - [x] Implement JudgeVote and JudgmentResult
+  - [x] Add serialization (to_dict/from_dict)
+  - [x] Write unit tests for all models
+
+- [x] **Task loader** `src/codegen_bench/tasks/` ✅ COMPLETE
+  - [x] YAML schema for task definitions
+  - [x] TaskLoader class with validation
+  - [x] Support for loading task sets (core, embedded, all)
+  - [x] Error handling for malformed tasks
+  - [x] Unit tests with fixture tasks
+
+### Week 2: DUT System & Caching ✅
+
+- [x] **DUT base infrastructure** `src/codegen_bench/dut/` ✅ COMPLETE
+  - [x] CodeGenerationApproach abstract base class
+  - [x] ApproachMetadata dataclass
+  - [x] DUT registry/factory pattern (thread-safe)
+  - [x] Unit tests for registry
+
+- [x] **SimpleChatDUT implementation** ✅ COMPLETE
+  - [x] Anthropic API client integration
+  - [x] Prompt building
+  - [x] Response parsing (basic)
+  - [x] Cost calculation
+  - [x] Unit tests with mocked API
+
+- [x] **Solution caching** `src/codegen_bench/cache/` ✅ COMPLETE
+  - [x] SolutionCache with SHA-256 keying
+  - [x] Disk persistence (JSON)
+  - [x] Atomic writes with corruption protection
+  - [x] Cache invalidation logic
+  - [x] Unit tests for cache hit/miss
+
+- [x] **Code extraction** `src/codegen_bench/parsing/` ✅ COMPLETE
+  - [x] CodeExtractor with multiple strategies
+  - [x] Markdown block parser
+  - [x] Diff format parser
+  - [x] XML tag parser
+  - [x] Fallback parsers
+  - [x] Unit tests with real LLM outputs
+
+### Week 3: Validation Pipeline ✅
+
+- [x] **Git worktree isolation** `src/codegen_bench/validation/` ✅ COMPLETE
+  - [x] GitWorktreeStrategy implementation
+  - [x] Workspace creation & cleanup
+  - [x] Context manager pattern for safety
+  - [x] Error handling for non-git repos
+  - [x] Unit tests
+
+- [x] **SolutionApplicator** ✅ COMPLETE
+  - [x] Apply changed files to workspace
+  - [x] Handle both full files and diffs
+  - [x] Apply diff using git apply
+  - [x] Idempotent application
+  - [x] Integration tests with sample repos
+
+- [x] **ValidationExecutor** ✅ COMPLETE
+  - [x] Compile command execution (shell-injection safe)
+  - [x] Test command execution
+  - [x] Test output parsing (pytest, unittest)
+  - [x] Timeout handling
+  - [x] Integration tests
+
+- [x] **CLI skeleton** `src/codegen_bench/cli/` ✅ COMPLETE
+  - [x] Click-based CLI structure
+  - [x] `codegen-bench init` command
+  - [x] `codegen-bench generate` command
+  - [x] `codegen-bench validate` command
+  - [x] Rich terminal output
+  - [x] Error handling with domain exceptions
+
+---
+
+## Phase 1: Minimal Viable Benchmark (Weeks 4-7) - PARTIALLY COMPLETE ⚠️
+
+### Week 4: Judge System ✅ COMPLETE
+
+- [x] **Judge base infrastructure** `src/codegen_bench/judge/` ✅
+  - [x] Judge abstract base class
+  - [x] ClaudeJudge implementation
+  - [x] Error handling for API failures
+  - [ ] Retry logic with tenacity (NOT IMPLEMENTED)
+  - [ ] Rate limiting (NOT IMPLEMENTED)
+
+- [x] **Judge prompts** `src/codegen_bench/judge/prompts/` ✅ 6 PROMPTS
+  - [x] Base prompt template structure
+  - [x] Maintainability arena prompt
+  - [x] Architecture arena prompt
+  - [x] Performance arena prompt
+  - [x] Safety arena prompt
+  - [x] Testability arena prompt
+  - [x] Surgical precision arena prompt
+  - [ ] Prompt versioning with SHA-256 (NOT IMPLEMENTED)
+
+- [x] **Vote parsing** ✅ COMPLETE
+  - [x] Parse structured judge output (WINNER/REASONING/CONFIDENCE)
+  - [x] Handle malformed responses
+  - [x] Confidence score extraction
+  - [x] Unit tests with sample outputs
+
+- [x] **Judge orchestrator** ✅ COMPLETE
+  - [x] JudgeOrchestrator class
+  - [x] Consensus algorithm (majority vote)
+  - [x] Agreement rate calculation
+  - [x] Position randomization (A/B swap)
+  - [x] Unit tests for consensus logic
+
+### Week 5: Simple ELO & Tournament ✅ COMPLETE
+
+- [x] **Simple ELO ratings** `src/codegen_bench/stats/ratings/` ✅
+  - [x] BayesianELO implementation
+  - [x] Update mechanism with Kalman filter
+  - [x] Uncertainty tracking
+  - [x] Unit tests
+
+- [x] **Tournament runner** `src/codegen_bench/core/` ✅ REFACTORED
+  - [x] TournamentRunner class
+  - [x] Pairwise comparison scheduling
+  - [x] Fixed sample size mode
+  - [x] Progress tracking
+  - [x] Result aggregation
+  - [x] Results persistence to Git (YAML)
+  - [x] Composable functions (generate/compare/rate)
+  - [x] Integration tests
+
+- [x] **Terminal reporting** `src/codegen_bench/reporting/` ✅ COMPLETE
+  - [x] TerminalReporter with rich tables
+  - [x] ELO leaderboard display
+  - [x] Per-arena breakdown
+  - [x] Cost summary
+  - [x] Judge agreement statistics
+  - [x] Formatting tests
 
 ### Week 6-7: Task Curation & Testing
 
