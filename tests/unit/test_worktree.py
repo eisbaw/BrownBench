@@ -4,6 +4,7 @@ import subprocess
 
 import pytest
 
+from codegen_bench.exceptions import WorktreeError
 from codegen_bench.validation.worktree import GitWorktreeStrategy
 
 
@@ -50,7 +51,7 @@ def test_worktree_init_valid_repo(git_repo):
 
 def test_worktree_init_invalid_repo(tmp_path):
     """Test initializing with non-git directory."""
-    with pytest.raises(ValueError, match="Not a git repository"):
+    with pytest.raises(WorktreeError, match="Not a git repository"):
         GitWorktreeStrategy(tmp_path)
 
 
@@ -130,7 +131,7 @@ def test_create_worktree_failure(tmp_path):
     non_git = tmp_path / "non_git"
     non_git.mkdir()
 
-    with pytest.raises(ValueError, match="Not a git repository"):
+    with pytest.raises(WorktreeError, match="Not a git repository"):
         GitWorktreeStrategy(non_git)
 
 
@@ -139,7 +140,7 @@ def test_remove_nonexistent_worktree(git_repo):
     strategy = GitWorktreeStrategy(git_repo)
     fake_path = git_repo.parent / "nonexistent_worktree"
 
-    with pytest.raises(RuntimeError, match="Failed to remove worktree"):
+    with pytest.raises(WorktreeError, match="Failed to remove worktree"):
         strategy.remove_worktree(fake_path)
 
 
@@ -210,7 +211,7 @@ def test_list_worktrees_error(git_repo, monkeypatch):
 
     monkeypatch.setattr(subprocess, "run", mock_run)
 
-    with pytest.raises(RuntimeError, match="Failed to list worktrees"):
+    with pytest.raises(WorktreeError, match="Failed to list worktrees"):
         strategy.list_worktrees()
 
 
@@ -223,7 +224,7 @@ def test_create_worktree_timeout(git_repo, monkeypatch):
 
     monkeypatch.setattr(subprocess, "run", mock_run)
 
-    with pytest.raises(RuntimeError, match="Worktree creation timed out"):
+    with pytest.raises(WorktreeError, match="Worktree creation timed out"):
         strategy.create_worktree()
 
 
@@ -240,7 +241,7 @@ def test_remove_worktree_timeout(git_repo, monkeypatch):
 
     monkeypatch.setattr(subprocess, "run", mock_run)
 
-    with pytest.raises(RuntimeError, match="Worktree removal timed out"):
+    with pytest.raises(WorktreeError, match="Worktree removal timed out"):
         strategy.remove_worktree(worktree_path)
 
 

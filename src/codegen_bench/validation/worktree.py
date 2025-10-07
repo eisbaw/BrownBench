@@ -9,6 +9,8 @@ from pathlib import Path
 
 import structlog
 
+from codegen_bench.exceptions import WorktreeError
+
 logger = structlog.get_logger(__name__)
 
 
@@ -26,11 +28,11 @@ class GitWorktreeStrategy:
             repo_path: Path to git repository
 
         Raises:
-            ValueError: If path is not a git repository
+            WorktreeError: If path is not a git repository
         """
         self.repo_path = Path(repo_path).resolve()
         if not self._is_git_repo(self.repo_path):
-            raise ValueError(f"Not a git repository: {self.repo_path}")
+            raise WorktreeError(f"Not a git repository: {self.repo_path}")
 
     def _is_git_repo(self, path: Path) -> bool:
         """Check if path is a git repository.
@@ -63,7 +65,7 @@ class GitWorktreeStrategy:
             Path to created worktree
 
         Raises:
-            RuntimeError: If worktree creation fails
+            WorktreeError: If worktree creation fails
         """
         # Create temporary directory
         temp_dir = Path(tempfile.mkdtemp(prefix="brownbench_worktree_"))
@@ -86,7 +88,9 @@ class GitWorktreeStrategy:
                 # Use shutil.rmtree to handle non-empty directories
                 if temp_dir.exists():
                     shutil.rmtree(temp_dir, ignore_errors=True)
-                raise RuntimeError(f"Failed to create worktree: {result.stderr}")
+                raise WorktreeError(
+                    f"Failed to create worktree at {temp_dir}: {result.stderr}"
+                )
 
             return temp_dir
 
@@ -94,12 +98,12 @@ class GitWorktreeStrategy:
             # Clean up temp directory on timeout
             if temp_dir.exists():
                 shutil.rmtree(temp_dir, ignore_errors=True)
-            raise RuntimeError(f"Worktree creation timed out: {e}") from e
+            raise WorktreeError(f"Worktree creation timed out after 30s: {e}") from e
         except (OSError, subprocess.CalledProcessError) as e:
             # Clean up temp directory on failure
             if temp_dir.exists():
                 shutil.rmtree(temp_dir, ignore_errors=True)
-            raise RuntimeError(f"Failed to create worktree: {e}") from e
+            raise WorktreeError(f"Failed to create worktree due to system error: {e}") from e
 
     def remove_worktree(self, worktree_path: Path) -> None:
         """Remove a git worktree.
@@ -108,7 +112,7 @@ class GitWorktreeStrategy:
             worktree_path: Path to worktree to remove
 
         Raises:
-            RuntimeError: If worktree removal fails
+            WorktreeError: If worktree removal fails
         """
         worktree_path = Path(worktree_path).resolve()
 
@@ -123,12 +127,12 @@ class GitWorktreeStrategy:
             )
 
             if result.returncode != 0:
-                raise RuntimeError(f"Failed to remove worktree: {result.stderr}")
+                raise WorktreeError(f"Failed to remove worktree at {worktree_path}: {result.stderr}")
 
         except subprocess.TimeoutExpired as e:
-            raise RuntimeError(f"Worktree removal timed out: {e}") from e
+            raise WorktreeError(f"Worktree removal timed out after 30s: {e}") from e
         except (OSError, subprocess.CalledProcessError) as e:
-            raise RuntimeError(f"Failed to remove worktree: {e}") from e
+            raise WorktreeError(f"Failed to remove worktree due to system error: {e}") from e
 
     def list_worktrees(self) -> list[Path]:
         """List all worktrees for this repository.
@@ -155,7 +159,7 @@ class GitWorktreeStrategy:
             return worktrees
 
         except subprocess.CalledProcessError as e:
-            raise RuntimeError(f"Failed to list worktrees: {e.stderr}") from e
+            raise WorktreeError(f"Failed to list worktrees: {e.stderr}") from e
 
     @contextmanager
     def worktree(self, branch: str | None = None) -> Iterator[Path]:
