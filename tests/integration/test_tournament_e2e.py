@@ -222,3 +222,52 @@ def test_tournament_runner_initialization(tmp_path):
     assert runner.duts[1].get_metadata().id in ["simple-chat", "elaborate-prompt"]
     assert runner.tasks is not None
     assert len(runner.tasks) >= 1  # At least task_001 should exist
+
+
+def test_tournament_with_persistent_api_failures(tmp_path):
+    """Test tournament graceful degradation when all judge API calls fail.
+
+    This verifies that the tournament runner handles persistent API failures
+    without crashing, and provides meaningful error messages.
+    """
+    from codegen_bench.cache.store import SolutionCache
+    from codegen_bench.judge.claude_judge import ClaudeJudge
+    from codegen_bench.judge.orchestrator import JudgeOrchestrator
+    from codegen_bench.tasks.loader import TaskLoader
+
+    # Create mock client that always fails
+    mock_client = Mock()
+    mock_client.messages.create = Mock(
+        side_effect=RuntimeError("API connection failed")
+    )
+
+    with patch("anthropic.Anthropic", return_value=mock_client):
+        # Create DUTs
+        duts = [
+            DUTRegistry.create("simple-chat", {"api_key": "mock-key"}),
+        ]
+
+        # Load minimal task set
+        task_loader = TaskLoader(Path("tasks"))
+        tasks = task_loader.load_task_set("core")[:1]
+
+        # Create judges
+        judges = [ClaudeJudge(api_key="mock-key", model="claude-test")]
+        judge_orchestrator = JudgeOrchestrator(judges)
+
+        # Create cache
+        cache = SolutionCache(tmp_path / "cache")
+
+        # Create tournament runner
+        runner = TournamentRunner(
+            duts=duts,
+            tasks=tasks,
+            judges=judge_orchestrator,
+            arenas=[MAINTAINABILITY],
+            cache=cache,
+            samples_per_pairing=1,
+        )
+
+        # Should raise an error when trying to generate solutions
+        with pytest.raises(RuntimeError, match="API connection failed"):
+            runner.run()
