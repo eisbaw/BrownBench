@@ -23,6 +23,10 @@ pkgs.mkShell {
     # Optional: For building reference projects
     gcc
     clang
+
+    # C++ standard library and other libs for numpy/scipy
+    stdenv.cc.cc.lib
+    zlib
   ];
 
   shellHook = ''
@@ -32,5 +36,6 @@ pkgs.mkShell {
     source .venv/bin/activate
     uv pip install -e ".[dev]" > /dev/null 2>&1
     export CODEGEN_BENCH_DEV=1
+    export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.zlib}/lib:$LD_LIBRARY_PATH"
   '';
 }
