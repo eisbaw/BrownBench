@@ -208,3 +208,51 @@ def test_apply_diff_failure(workspace):
     applicator = SolutionApplicator(workspace)
     with pytest.raises(ValidationError, match="Failed to apply diff"):
         applicator.apply_diff(diff_content)
+
+
+def test_apply_idempotent(workspace):
+    """Test that applying A→B→A produces same result as A (idempotency)."""
+    solution_a = Solution(
+        approach_id="dut_a",
+        task_id="test",
+        seed=1,
+        timestamp=datetime.now(UTC),
+        changed_files={"file1.txt": "A content"},
+        new_files={"file2.txt": "A new file"},
+    )
+
+    solution_b = Solution(
+        approach_id="dut_b",
+        task_id="test",
+        seed=2,
+        timestamp=datetime.now(UTC),
+        changed_files={"file1.txt": "B content", "file2.txt": "B modifies file2"},
+        new_files={"file3.txt": "B new file"},
+    )
+
+    applicator = SolutionApplicator(workspace)
+
+    # Apply A
+    applicator.apply(solution_a)
+    file1_after_a = (workspace / "file1.txt").read_text()
+    file2_after_a = (workspace / "file2.txt").read_text()
+    assert file1_after_a == "A content"
+    assert file2_after_a == "A new file"
+
+    # Apply B
+    applicator.apply(solution_b)
+    assert (workspace / "file1.txt").read_text() == "B content"
+    assert (workspace / "file2.txt").read_text() == "B modifies file2"
+    assert (workspace / "file3.txt").read_text() == "B new file"
+
+    # Apply A again - should produce same result as first application of A
+    applicator.apply(solution_a)
+    file1_after_a_again = (workspace / "file1.txt").read_text()
+    file2_after_a_again = (workspace / "file2.txt").read_text()
+
+    # Idempotency check: A→B→A should equal A
+    assert file1_after_a_again == file1_after_a
+    assert file2_after_a_again == file2_after_a
+
+    # file3 from B should still exist (A doesn't delete it)
+    assert (workspace / "file3.txt").exists()

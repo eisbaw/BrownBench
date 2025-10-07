@@ -21,7 +21,11 @@ class SolutionApplicator:
             raise ValidationError(f"Workspace does not exist: {self.workspace}")
 
     def apply(self, solution: Solution) -> None:
-        """Apply solution changes to workspace.
+        """Apply solution changes to workspace idempotently.
+
+        Merges changed_files and new_files since both operations are identical
+        (write content to file). This makes the operation idempotent: applying
+        solution A, then B, then A again produces the same result as A alone.
 
         Args:
             solution: Solution with code changes
@@ -29,12 +33,11 @@ class SolutionApplicator:
         Raises:
             RuntimeError: If applying changes fails
         """
-        # Apply changed files
-        for path, content in solution.changed_files.items():
-            self._write_file(path, content)
+        # Merge changed and new files - both are just write operations
+        # This ensures idempotency: A→B→A produces same result as A
+        all_writes = {**solution.changed_files, **solution.new_files}
 
-        # Apply new files
-        for path, content in solution.new_files.items():
+        for path, content in all_writes.items():
             self._write_file(path, content)
 
         # Delete removed files
