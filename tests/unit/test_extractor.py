@@ -221,6 +221,21 @@ from markdown
     assert "from xml" not in files["main.c"]
 
 
+def test_extract_all_xml_overrides_comments():
+    """Test that XML tags override comment markers (intermediate precedence)."""
+    text = """// FILE: main.c
+from comments
+// END FILE
+
+<file path="main.c">
+from xml
+</file>"""
+    files = CodeExtractor.extract_all(text)
+    assert len(files) == 1
+    assert "from xml" in files["main.c"]
+    assert "from comments" not in files["main.c"]
+
+
 def test_extract_all_logs_conflicts(caplog):
     """Test that conflicts between extraction strategies are logged."""
     import structlog
