@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 
 from codegen_bench.core.task import Task
-from codegen_bench.exceptions import TaskError
+from codegen_bench.exceptions import TaskError, ValidationError
 
 
 class TaskLoader:
@@ -43,9 +43,12 @@ class TaskLoader:
 
         task = Task.from_yaml(path)
 
-        # Validate task
-        if not task.validate():
-            raise TaskError(f"Task {task_id} failed validation")
+        # Validate task (raises ValidationError with details if invalid)
+        try:
+            task.validate()
+        except ValidationError as e:
+            # Wrap ValidationError as TaskError to maintain interface
+            raise TaskError(str(e)) from e
 
         return task
 
@@ -79,15 +82,15 @@ class TaskLoader:
         for path in paths:
             try:
                 task = Task.from_yaml(path)
-                if not task.validate():
-                    raise TaskError(f"Task {task.id} failed validation")
+                task.validate()  # Raises ValidationError with details if invalid
                 tasks.append(task)
-            except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError) as e:
+            except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError, ValidationError) as e:
                 # OSError: file read errors (includes IOError in Python 3.3+)
-                # ValueError: validation errors
+                # ValueError: validation errors (now from shlex.split)
                 # KeyError: missing required fields in dict
                 # TypeError: missing required __init__ arguments
                 # yaml.YAMLError: YAML parsing errors (includes ParserError)
+                # ValidationError: task validation failures
                 raise TaskError(f"Failed to load task from {path}: {e}") from e
 
         return tasks
@@ -103,12 +106,13 @@ class TaskLoader:
             try:
                 task = Task.from_yaml(path)
                 tasks.append(task.id)
-            except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError):
+            except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError, ValidationError):
                 # Skip invalid tasks
                 # OSError: file read errors (includes IOError in Python 3.3+)
-                # ValueError: validation errors
+                # ValueError: validation errors (now from shlex.split)
                 # KeyError: missing required fields in dict
                 # TypeError: missing required __init__ arguments
                 # yaml.YAMLError: YAML parsing errors (includes ParserError)
+                # ValidationError: task validation failures
                 continue
         return sorted(tasks)

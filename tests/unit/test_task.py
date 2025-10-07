@@ -2,9 +2,11 @@
 
 from pathlib import Path
 
+import pytest
 import yaml
 
 from codegen_bench.core.task import Task
+from codegen_bench.exceptions import ValidationError
 
 
 def test_task_creation(sample_task_dict: dict) -> None:
@@ -18,14 +20,15 @@ def test_task_creation(sample_task_dict: dict) -> None:
 def test_task_validation_success(sample_task_dict: dict) -> None:
     """Test task validation with valid data."""
     task = Task(**sample_task_dict)
-    assert task.validate() is True
+    task.validate()  # Should not raise
 
 
 def test_task_validation_missing_codebase(sample_task_dict: dict, tmp_path: Path) -> None:
     """Test task validation fails with missing codebase."""
     sample_task_dict["codebase_path"] = tmp_path / "nonexistent"
     task = Task(**sample_task_dict)
-    assert task.validate() is False
+    with pytest.raises(ValidationError, match="codebase path does not exist"):
+        task.validate()
 
 
 def test_task_to_dict(sample_task_dict: dict) -> None:
@@ -65,18 +68,21 @@ def test_task_empty_id_invalid() -> None:
         codebase_path=Path("/nonexistent"),
         specification="test",
     )
-    assert task.validate() is False
+    with pytest.raises(ValidationError, match="Task ID is required"):
+        task.validate()
 
 
 def test_task_validate_invalid_compile_command(sample_task_dict: dict) -> None:
     """Test that invalid compile command fails validation."""
     sample_task_dict["compile_command"] = "gcc 'unterminated"
     task = Task(**sample_task_dict)
-    assert task.validate() is False
+    with pytest.raises(ValidationError, match="invalid compile command"):
+        task.validate()
 
 
 def test_task_validate_invalid_test_command(sample_task_dict: dict) -> None:
     """Test that invalid test command fails validation."""
     sample_task_dict["test_command"] = "pytest 'unterminated"
     task = Task(**sample_task_dict)
-    assert task.validate() is False
+    with pytest.raises(ValidationError, match="invalid test command"):
+        task.validate()

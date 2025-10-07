@@ -120,7 +120,7 @@ def test_load_invalid_task_fails_validation(tmp_path: Path) -> None:
         yaml.dump(invalid_task, f)
 
     loader = TaskLoader(tasks_dir)
-    with pytest.raises(TaskError, match="failed validation"):
+    with pytest.raises(TaskError, match="codebase path does not exist"):
         loader.load_task("invalid")
 
 
