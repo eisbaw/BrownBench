@@ -44,7 +44,7 @@ class ClaudeJudge(Judge):
             raise JudgeError("ANTHROPIC_API_KEY not found in environment or config")
         self.client = anthropic.Anthropic(api_key=self.api_key)
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))  # type: ignore[misc]
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))  # type: ignore[misc, unused-ignore]
     def evaluate(
         self, solution_a: Solution, solution_b: Solution, arena: Arena, task: Task
     ) -> JudgeVote:
