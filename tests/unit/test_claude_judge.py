@@ -42,29 +42,16 @@ def test_claude_judge_init_from_env():
 
 
 def test_claude_judge_evaluate_no_api_key(sample_task, sample_solution):
-    """Test ClaudeJudge evaluate without API key raises error."""
-    from tenacity import RetryError
-
-    judge = ClaudeJudge(api_key=None)
-
+    """Test ClaudeJudge construction without API key raises error."""
+    # Clear environment to ensure no API key is available
     with patch.dict("os.environ", {}, clear=True):
-        arena = Arena(
-            name="test",
-            display_name="Test",
-            description="Test",
-            criteria=["Test"],
-            prompt_template_path=Path("test.txt"),
-        )
-
-        # The retry decorator wraps the JudgeError in RetryError
-        with pytest.raises((JudgeError, RetryError)):
-            judge.evaluate(sample_solution, sample_solution, arena, sample_task)
+        # Should raise JudgeError during construction (not during evaluate)
+        with pytest.raises(JudgeError, match="ANTHROPIC_API_KEY not found"):
+            ClaudeJudge(api_key=None)
 
 
 def test_claude_judge_evaluate(sample_task, sample_solution, mock_anthropic_response):
     """Test ClaudeJudge evaluate method."""
-    judge = ClaudeJudge(api_key="test-key")
-
     arena = Arena(
         name="maintainability",
         display_name="Maintainability",
@@ -77,6 +64,9 @@ def test_claude_judge_evaluate(sample_task, sample_solution, mock_anthropic_resp
         mock_client = MagicMock()
         mock_client.messages.create.return_value = mock_anthropic_response
         mock_client_class.return_value = mock_client
+
+        # Initialize judge with mocked client
+        judge = ClaudeJudge(api_key="test-key")
 
         result = judge.evaluate(sample_solution, sample_solution, arena, sample_task)
 

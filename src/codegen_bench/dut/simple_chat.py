@@ -22,7 +22,7 @@ class SimpleChatDUT(CodeGenerationApproach):
     """Single-turn chat with minimal prompting using Claude."""
 
     APPROACH_ID = "simple-chat"
-    client: anthropic.Anthropic | None
+    client: anthropic.Anthropic
 
     def __init__(self, config: dict[str, Any]):
         """Initialize SimpleChatDUT.
@@ -33,11 +33,16 @@ class SimpleChatDUT(CodeGenerationApproach):
                 - api_key: Anthropic API key (optional, falls back to env var)
                 - max_tokens: Max tokens for response (default: 8000)
                 - temperature: Sampling temperature (default: 0.3)
+
+        Raises:
+            DUTError: If API key not found
         """
         super().__init__(config)
         self.model = config.get("model", "claude-sonnet-4-20250514")
         self.api_key = config.get("api_key") or os.getenv("ANTHROPIC_API_KEY")
-        self.client = None  # Lazy initialization
+        if not self.api_key:
+            raise DUTError("ANTHROPIC_API_KEY not found in config or environment")
+        self.client = anthropic.Anthropic(api_key=self.api_key)
         self.max_tokens = config.get("max_tokens", 8000)
         self.temperature = config.get("temperature", 0.3)
 
@@ -58,12 +63,6 @@ class SimpleChatDUT(CodeGenerationApproach):
             seed=seed,
             model=self.model,
         )
-
-        # Initialize client if needed
-        if self.client is None:
-            if not self.api_key:
-                raise DUTError("ANTHROPIC_API_KEY not found in config or environment")
-            self.client = anthropic.Anthropic(api_key=self.api_key)
 
         try:
             start_time = time.time()

@@ -87,11 +87,11 @@ def test_simple_chat_init_with_custom_config():
 
 
 def test_simple_chat_solve_no_api_key(monkeypatch, simple_task):
-    """Test SimpleChatDUT solve fails without API key."""
+    """Test SimpleChatDUT construction fails without API key."""
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-    dut = SimpleChatDUT(config={})
+    # Should raise error during construction (not during solve)
     with pytest.raises(DUTError, match="ANTHROPIC_API_KEY not found"):
-        dut.solve(simple_task, seed=42)
+        SimpleChatDUT(config={})
 
 
 def test_simple_chat_solve(mock_anthropic_client, simple_task):

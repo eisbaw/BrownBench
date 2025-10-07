@@ -76,17 +76,25 @@ class JudgeOrchestrator:
         # Compute consensus
         consensus_vote = self._compute_consensus(votes)
 
-        # Swap back if needed
-        if swap and consensus_vote != "TIE":
-            consensus_vote = "B" if consensus_vote == "A" else "A"
-            # Also swap votes
-            for vote in votes:
-                if vote.vote != "TIE":
-                    vote.vote = "B" if vote.vote == "A" else "A"
+        # Swap back if needed - create normalized votes instead of mutating
+        normalized_votes = votes
+        if swap:
+            # Swap consensus
+            if consensus_vote != "TIE":
+                consensus_vote = "B" if consensus_vote == "A" else "A"
+            # Create new votes with swapped positions instead of mutating
+            normalized_votes = [
+                JudgeVote(
+                    vote="B" if v.vote == "A" else "A" if v.vote == "B" else "TIE",
+                    reasoning=v.reasoning,
+                    confidence=v.confidence,
+                )
+                for v in votes
+            ]
 
-        # Calculate agreement and confidence
-        agreement = self._agreement_rate(votes, consensus_vote)
-        confidence = self._compute_confidence(votes)
+        # Calculate agreement and confidence (use normalized votes)
+        agreement = self._agreement_rate(normalized_votes, consensus_vote)
+        confidence = self._compute_confidence(normalized_votes)
 
         logger.info(
             "judge_comparison_complete",
@@ -101,7 +109,7 @@ class JudgeOrchestrator:
 
         return JudgmentResult(
             winner=consensus_vote,
-            votes=votes,
+            votes=normalized_votes,
             agreement_rate=agreement,
             confidence=confidence,
         )

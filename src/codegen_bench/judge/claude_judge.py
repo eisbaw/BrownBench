@@ -18,7 +18,7 @@ from codegen_bench.judge.base import Judge
 class ClaudeJudge(Judge):
     """Claude-based judge for comparing solutions."""
 
-    client: anthropic.Anthropic | None
+    client: anthropic.Anthropic
 
     def __init__(
         self,
@@ -34,10 +34,15 @@ class ClaudeJudge(Judge):
             model: Claude model to use
             temperature: Sampling temperature
             variant: Prompt variant for diversity
+
+        Raises:
+            JudgeError: If API key not found
         """
         super().__init__(model, temperature, variant)
         self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
-        self.client = None  # Lazy initialization
+        if not self.api_key:
+            raise JudgeError("ANTHROPIC_API_KEY not found in environment or config")
+        self.client = anthropic.Anthropic(api_key=self.api_key)
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))  # type: ignore[misc]
     def evaluate(
@@ -53,16 +58,7 @@ class ClaudeJudge(Judge):
 
         Returns:
             JudgeVote with winner, reasoning, and confidence
-
-        Raises:
-            ValueError: If API key not configured
         """
-        # Initialize client if needed
-        if self.client is None:
-            if not self.api_key:
-                raise JudgeError("ANTHROPIC_API_KEY not found in environment")
-            self.client = anthropic.Anthropic(api_key=self.api_key)
-
         # Build prompt
         prompt = self._build_prompt(solution_a, solution_b, arena, task)
 

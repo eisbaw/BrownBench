@@ -6,9 +6,12 @@ from typing import Literal
 Vote = Literal["A", "B", "TIE"]
 
 
-@dataclass
+@dataclass(frozen=True)
 class JudgeVote:
-    """A single judge's vote."""
+    """A single judge's vote.
+
+    Immutable to prevent accidental modification after creation.
+    """
 
     vote: Vote
     reasoning: str
