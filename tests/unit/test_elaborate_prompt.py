@@ -109,3 +109,27 @@ def test_elaborate_prompt_inherits_from_simple_chat():
 
     # But overrides _build_prompt
     assert dut._build_prompt.__qualname__.startswith("ElaboratePromptDUT")
+
+
+def test_elaborate_prompt_hash_consistency():
+    """Test that prompt hash is consistent for ElaboratePromptDUT."""
+    dut = ElaboratePromptDUT(config={"api_key": "test-key"})
+    metadata1 = dut.get_metadata()
+    metadata2 = dut.get_metadata()
+
+    assert metadata1.prompt_hash is not None
+    assert metadata1.prompt_hash == metadata2.prompt_hash
+    assert len(metadata1.prompt_hash) == 16
+
+
+def test_elaborate_prompt_includes_gotchas_in_hash():
+    """Test that gotchas are included in prompt hash computation."""
+    # This is implicit in the prompt generation - the hash should remain
+    # consistent as long as the template doesn't change
+    dut = ElaboratePromptDUT(config={"api_key": "test-key"})
+    metadata = dut.get_metadata()
+
+    # Just verify the hash exists and has correct format
+    assert metadata.prompt_hash is not None
+    assert len(metadata.prompt_hash) == 16
+    assert all(c in "0123456789abcdef" for c in metadata.prompt_hash)

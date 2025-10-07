@@ -183,3 +183,128 @@ def test_rate_limiter_timestamp_consistency() -> None:
     assert stats["requests_in_last_minute"] == 1, (
         f"Expected 1 request after sleep, got {stats['requests_in_last_minute']}"
     )
+
+
+def test_rate_limiter_release() -> None:
+    """Test releasing an acquired request slot."""
+    limiter = RateLimiter(max_requests_per_minute=3)
+
+    # Acquire 3 requests
+    limiter.acquire()
+    limiter.acquire()
+    limiter.acquire()
+
+    stats = limiter.get_stats()
+    assert stats["requests_in_last_minute"] == 3
+
+    # Release one
+    limiter.release()
+
+    stats = limiter.get_stats()
+    assert stats["requests_in_last_minute"] == 2
+
+    # Should be able to acquire immediately
+    start = time.time()
+    limiter.acquire()
+    elapsed = time.time() - start
+    assert elapsed < 0.1, f"Expected immediate acquire, got {elapsed}s delay"
+
+
+def test_rate_limiter_release_with_tokens() -> None:
+    """Test releasing with token tracking."""
+    limiter = RateLimiter(max_requests_per_minute=10, max_tokens_per_minute=100)
+
+    # Acquire with tokens
+    limiter.acquire(tokens=50)
+    limiter.acquire(tokens=30)
+
+    stats = limiter.get_stats()
+    assert stats["tokens_in_last_minute"] == 80
+
+    # Release the last one
+    limiter.release(tokens=30)
+
+    stats = limiter.get_stats()
+    assert stats["tokens_in_last_minute"] == 50
+    assert stats["requests_in_last_minute"] == 1
+
+
+def test_rate_limiter_release_no_requests() -> None:
+    """Test releasing when no requests have been made."""
+    limiter = RateLimiter(max_requests_per_minute=10)
+
+    with pytest.raises(ValueError, match="No requests to release"):
+        limiter.release()
+
+
+def test_rate_limiter_release_negative_tokens() -> None:
+    """Test releasing with negative token count."""
+    limiter = RateLimiter(max_requests_per_minute=10)
+
+    limiter.acquire(tokens=10)
+
+    with pytest.raises(ValueError, match="Token count must be non-negative"):
+        limiter.release(tokens=-1)
+
+
+def test_rate_limiter_large_token_request() -> None:
+    """Test requesting tokens larger than the limit in one call."""
+    limiter = RateLimiter(max_requests_per_minute=100, max_tokens_per_minute=1000)
+
+    # Request more tokens than the limit allows
+    # This should wait until the window clears, then still fail the next cycle
+    # In practice, this is a misconfiguration - we document this behavior
+    limiter.acquire(tokens=500)
+
+    # Next large request should wait
+    start = time.time()
+    limiter.acquire(tokens=600)
+    elapsed = time.time() - start
+
+    # Should have waited for the previous request to age out
+    assert elapsed > 58, f"Expected wait of ~60s, got {elapsed}s"
+
+
+def test_rate_limiter_many_small_token_requests() -> None:
+    """Test many small token requests that accumulate."""
+    limiter = RateLimiter(max_requests_per_minute=100, max_tokens_per_minute=1000)
+
+    # Make 10 requests of 100 tokens each
+    for _ in range(10):
+        limiter.acquire(tokens=100)
+
+    stats = limiter.get_stats()
+    assert stats["tokens_in_last_minute"] == 1000
+
+    # Next request should wait
+    start = time.time()
+    limiter.acquire(tokens=1)
+    elapsed = time.time() - start
+    assert elapsed > 58, f"Expected wait for token limit, got {elapsed}s"
+
+
+def test_rate_limiter_mixed_zero_and_nonzero_tokens() -> None:
+    """Test mixing requests with and without token tracking."""
+    limiter = RateLimiter(max_requests_per_minute=5, max_tokens_per_minute=100)
+
+    # Mix of token and non-token requests
+    limiter.acquire(tokens=0)  # Just request limit
+    limiter.acquire(tokens=50)  # Both limits
+    limiter.acquire(tokens=0)  # Just request limit
+    limiter.acquire(tokens=50)  # Both limits
+
+    stats = limiter.get_stats()
+    assert stats["requests_in_last_minute"] == 4
+    assert stats["tokens_in_last_minute"] == 100
+
+    # One more request should not wait (request limit not hit)
+    start = time.time()
+    limiter.acquire(tokens=0)
+    elapsed = time.time() - start
+    assert elapsed < 0.1, "Should be immediate (request limit not hit)"
+
+    # But a token request should wait
+    start = time.time()
+    limiter.acquire(tokens=1)
+    elapsed = time.time() - start
+    assert elapsed > 58, f"Expected wait for token limit, got {elapsed}s"

@@ -201,6 +201,31 @@ def test_simple_chat_string_representation():
     assert str(dut) == "Simple Chat (v1.0.0)"
 
 
+def test_simple_chat_prompt_hash_consistency():
+    """Test that prompt hash is consistent across multiple metadata calls."""
+    dut = SimpleChatDUT(config={"api_key": "test-key"})
+    metadata1 = dut.get_metadata()
+    metadata2 = dut.get_metadata()
+
+    assert metadata1.prompt_hash is not None
+    assert metadata1.prompt_hash == metadata2.prompt_hash
+    assert len(metadata1.prompt_hash) == 16
+
+
+def test_simple_chat_prompt_hash_changes_with_template():
+    """Test that different DUTs have different prompt hashes."""
+    from codegen_bench.dut.elaborate_prompt import ElaboratePromptDUT
+
+    simple_dut = SimpleChatDUT(config={"api_key": "test-key"})
+    elaborate_dut = ElaboratePromptDUT(config={"api_key": "test-key"})
+
+    simple_metadata = simple_dut.get_metadata()
+    elaborate_metadata = elaborate_dut.get_metadata()
+
+    # Different prompt templates should have different hashes
+    assert simple_metadata.prompt_hash != elaborate_metadata.prompt_hash
+
+
 def test_simple_chat_solve_unexpected_content_type(monkeypatch, simple_task):
     """Test SimpleChatDUT handles unexpected response content type."""
     # Mock client with non-TextBlock response
