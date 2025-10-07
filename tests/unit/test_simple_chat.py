@@ -7,6 +7,7 @@ import pytest
 
 from codegen_bench.core.task import Task
 from codegen_bench.dut.simple_chat import SimpleChatDUT
+from codegen_bench.exceptions import DUTError
 
 
 @pytest.fixture
@@ -88,7 +89,7 @@ def test_simple_chat_solve_no_api_key(monkeypatch, simple_task):
     """Test SimpleChatDUT solve fails without API key."""
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     dut = SimpleChatDUT(config={})
-    with pytest.raises(ValueError, match="ANTHROPIC_API_KEY not found"):
+    with pytest.raises(DUTError, match="ANTHROPIC_API_KEY not found"):
         dut.solve(simple_task, seed=42)
 
 

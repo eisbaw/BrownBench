@@ -3,6 +3,7 @@
 from typing import Any
 
 from codegen_bench.dut.base import CodeGenerationApproach
+from codegen_bench.exceptions import DUTError
 
 
 class DUTRegistry:
@@ -21,12 +22,12 @@ class DUTRegistry:
             The same class (for use as decorator)
 
         Raises:
-            ValueError: If DUT class doesn't define APPROACH_ID
+            DUTError: If DUT class doesn't define APPROACH_ID
         """
         # Get ID from class attribute (no instance needed)
         dut_id = dut_class.APPROACH_ID
         if not dut_id:
-            raise ValueError(f"{dut_class.__name__} must define APPROACH_ID class attribute")
+            raise DUTError(f"{dut_class.__name__} must define APPROACH_ID class attribute")
         cls._registry[dut_id] = dut_class
         return dut_class
 
@@ -41,10 +42,10 @@ class DUTRegistry:
             DUT class
 
         Raises:
-            ValueError: If DUT not found
+            DUTError: If DUT not found
         """
         if dut_id not in cls._registry:
-            raise ValueError(f"Unknown DUT: {dut_id}")
+            raise DUTError(f"Unknown DUT: {dut_id}")
         return cls._registry[dut_id]
 
     @classmethod

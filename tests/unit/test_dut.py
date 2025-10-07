@@ -6,6 +6,7 @@ from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
 from codegen_bench.dut.base import ApproachMetadata, CodeGenerationApproach
 from codegen_bench.dut.registry import DUTRegistry
+from codegen_bench.exceptions import DUTError
 
 
 class MockDUT(CodeGenerationApproach):
@@ -109,7 +110,7 @@ def test_registry_get() -> None:
 def test_registry_get_unknown() -> None:
     """Test getting unknown DUT raises error."""
     DUTRegistry.clear()
-    with pytest.raises(ValueError, match="Unknown DUT"):
+    with pytest.raises(DUTError, match="Unknown DUT"):
         DUTRegistry.get("nonexistent")
 
 

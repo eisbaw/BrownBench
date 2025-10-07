@@ -11,6 +11,7 @@ import structlog
 from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
 from codegen_bench.dut.base import ApproachMetadata, CodeGenerationApproach
+from codegen_bench.exceptions import DUTError
 from codegen_bench.parsing.extractor import CodeExtractor
 
 logger = structlog.get_logger(__name__)
@@ -60,62 +61,73 @@ class SimpleChatDUT(CodeGenerationApproach):
         # Initialize client if needed
         if self.client is None:
             if not self.api_key:
-                raise ValueError("ANTHROPIC_API_KEY not found in config or environment")
+                raise DUTError("ANTHROPIC_API_KEY not found in config or environment")
             self.client = anthropic.Anthropic(api_key=self.api_key)
 
-        start_time = time.time()
+        try:
+            start_time = time.time()
 
-        # Build simple prompt
-        prompt = self._build_prompt(task)
-        logger.debug("prompt_built", task_id=task.id, prompt_length=len(prompt))
+            # Build simple prompt
+            prompt = self._build_prompt(task)
+            logger.debug("prompt_built", task_id=task.id, prompt_length=len(prompt))
 
-        # Single API call
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=self.max_tokens,
-            temperature=self.temperature,
-            messages=[{"role": "user", "content": prompt}],
-        )
+            # Single API call
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                messages=[{"role": "user", "content": prompt}],
+            )
 
-        elapsed = time.time() - start_time
+            elapsed = time.time() - start_time
 
-        # Parse response to extract code changes
-        changed_files = self._parse_code_changes(response.content[0].text)
-        logger.debug(
-            "code_extracted",
-            task_id=task.id,
-            num_files=len(changed_files),
-            files=list(changed_files.keys()),
-        )
+            # Parse response to extract code changes
+            changed_files = self._parse_code_changes(response.content[0].text)
+            logger.debug(
+                "code_extracted",
+                task_id=task.id,
+                num_files=len(changed_files),
+                files=list(changed_files.keys()),
+            )
 
-        # Calculate cost
-        cost = self._calculate_cost(response.usage.input_tokens, response.usage.output_tokens)
+            # Calculate cost
+            cost = self._calculate_cost(response.usage.input_tokens, response.usage.output_tokens)
 
-        logger.info(
-            "solution_generated",
-            dut=self.get_metadata().id,
-            task_id=task.id,
-            seed=seed,
-            elapsed_seconds=elapsed,
-            input_tokens=response.usage.input_tokens,
-            output_tokens=response.usage.output_tokens,
-            cost_usd=cost,
-            num_files=len(changed_files),
-        )
+            logger.info(
+                "solution_generated",
+                dut=self.get_metadata().id,
+                task_id=task.id,
+                seed=seed,
+                elapsed_seconds=elapsed,
+                input_tokens=response.usage.input_tokens,
+                output_tokens=response.usage.output_tokens,
+                cost_usd=cost,
+                num_files=len(changed_files),
+            )
 
-        return Solution(
-            approach_id=self.get_metadata().id,
-            task_id=task.id,
-            seed=seed,
-            timestamp=datetime.now(UTC),
-            changed_files=changed_files,
-            generation_time_seconds=elapsed,
-            total_tokens=response.usage.input_tokens + response.usage.output_tokens,
-            prompt_tokens=response.usage.input_tokens,
-            completion_tokens=response.usage.output_tokens,
-            api_calls=1,
-            cost_usd=cost,
-        )
+            return Solution(
+                approach_id=self.get_metadata().id,
+                task_id=task.id,
+                seed=seed,
+                timestamp=datetime.now(UTC),
+                changed_files=changed_files,
+                generation_time_seconds=elapsed,
+                total_tokens=response.usage.input_tokens + response.usage.output_tokens,
+                prompt_tokens=response.usage.input_tokens,
+                completion_tokens=response.usage.output_tokens,
+                api_calls=1,
+                cost_usd=cost,
+            )
+        except Exception as e:
+            logger.error(
+                "solution_generation_failed",
+                dut=self.get_metadata().id,
+                task_id=task.id,
+                seed=seed,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            raise
 
     def _build_prompt(self, task: Task) -> str:
         """Build minimal prompt for task.
