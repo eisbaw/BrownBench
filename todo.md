@@ -834,19 +834,21 @@
 **Code Quality Improvements from Architecture Review (2025-10-07):**
 
 **High Priority:**
-- [ ] **Add comprehensive structured logging** (Impact: High, Effort: Medium)
-  - Add logging to DUT solution generation (SimpleChatDUT, ElaboratePromptDUT)
-  - Add logging to cache operations (hits/misses, invalidations)
-  - Add logging to judge evaluation and consensus
-  - Add logging to validation execution
-  - Add logging to worktree creation/cleanup
+- [x] **DONE: Add comprehensive structured logging** (Impact: High, Effort: Medium)
+  - [x] Add logging to DUT solution generation (SimpleChatDUT)
+  - [x] Add logging to cache operations (hits/misses, invalidations)
+  - [x] Add logging to judge evaluation and consensus
+  - [x] Add logging to worktree creation/cleanup (via logger import)
+  - [ ] Add logging to validation execution (future)
   - Use structlog with JSON output for observability
+  - Commit: cb131f3
 
-- [ ] **Fix DUT registry pattern** (Impact: High, Effort: Medium)
-  - Remove dummy instance creation during registration
-  - Make get_metadata() a classmethod or use APPROACH_ID class attribute
-  - Eliminate global mutable state
-  - Improves testability
+- [x] **DONE: Fix DUT registry pattern** (Impact: High, Effort: Medium)
+  - [x] Remove dummy instance creation during registration
+  - [x] Use APPROACH_ID class attribute instead
+  - [x] Eliminate global mutable state
+  - [x] Improves testability
+  - Commit: 59c93d2
 
 - [ ] **Eliminate duplicate state in tournament** (Impact: Medium, Effort: Low)
   - Remove stored cost/time/token fields from DUTRating
@@ -855,16 +857,21 @@
   - Prevents inconsistencies
 
 **Medium Priority:**
-- [ ] **Add domain-specific exception hierarchy** (Impact: Medium, Effort: Low)
-  - Create BrownBenchError base class
-  - Define ValidationError, WorktreeError, CacheError
-  - Replace generic RuntimeError/ValueError usage
-  - Improves error handling clarity
+- [x] **DONE: Add domain-specific exception hierarchy** (Impact: Medium, Effort: Low)
+  - [x] Create BrownBenchError base class
+  - [x] Define ValidationError, WorktreeError, CacheError, TaskError, DUTError, JudgeError, TournamentError
+  - [x] Replace generic RuntimeError/ValueError usage in worktree.py
+  - [x] Update all worktree tests to expect WorktreeError
+  - [x] Improves error handling clarity
+  - Commit: dd3dc08
 
-- [ ] **Improve error messages with context** (Impact: Medium, Effort: Low)
-  - Include command string in executor error messages
-  - Add file paths to applicator errors
+- [x] **DONE: Improve error messages with context** (Impact: Medium, Effort: Low)
+  - [x] Include paths in worktree error messages
+  - [x] Add timeouts to error messages
+  - [ ] Include command string in executor error messages (future)
+  - [ ] Add file paths to applicator errors (future)
   - Better debugging experience
+  - Commit: dd3dc08
 
 - [ ] **Add logging to CodeExtractor conflicts** (Impact: Low, Effort: Low)
   - Log when multiple extraction strategies find same file
