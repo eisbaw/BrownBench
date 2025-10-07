@@ -1,7 +1,9 @@
 """Arena (quality dimension) for evaluation."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+
+from codegen_bench.utils.hashing import compute_prompt_hash
 
 
 @dataclass
@@ -13,12 +15,14 @@ class Arena:
     description: str
     criteria: list[str]
     prompt_template_path: Path
+    prompt_version: str = field(default="", init=False)
 
     def load_prompt(self, **kwargs: str) -> str:
         """Load and format prompt template.
 
         Loads the prompt template from the package resources,
         resolving the path relative to the codegen_bench package.
+        Also computes and caches the SHA-256 hash of the template.
         """
         # Convert relative path to absolute by resolving from package
         if not self.prompt_template_path.is_absolute():
@@ -31,7 +35,24 @@ class Arena:
 
         with open(template_path) as f:
             template = f.read()
+
+        # Compute and cache prompt version hash if not already set
+        if not self.prompt_version:
+            self.prompt_version = compute_prompt_hash(template)
+
         return template.format(**kwargs)
+
+    def get_prompt_version(self) -> str:
+        """Get the current prompt version hash.
+
+        Loads the prompt if not already loaded to compute the hash.
+
+        Returns:
+            SHA-256 hash (truncated) of the prompt template
+        """
+        if not self.prompt_version:
+            self.load_prompt()
+        return self.prompt_version
 
 
 # Built-in arenas (will be defined with actual prompts later)

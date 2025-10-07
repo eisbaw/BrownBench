@@ -268,5 +268,8 @@ def test_tournament_with_persistent_api_failures(tmp_path):
         )
 
         # Should raise an error when trying to generate solutions
-        with pytest.raises(RuntimeError, match="API connection failed"):
+        # With retry logic, this will be wrapped in a DUTError after 3 retry attempts
+        from codegen_bench.exceptions import DUTError
+
+        with pytest.raises(DUTError, match="API call failed for task task_001 after retries"):
             runner.run()

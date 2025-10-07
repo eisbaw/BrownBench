@@ -225,7 +225,7 @@ def test_simple_chat_solve_unexpected_content_type(monkeypatch, simple_task):
 
 
 def test_simple_chat_solve_api_error(monkeypatch, simple_task):
-    """Test SimpleChatDUT handles Anthropic API errors."""
+    """Test SimpleChatDUT handles Anthropic API errors after retries."""
     # Mock client that raises APIError
     mock_client = Mock()
 
@@ -245,9 +245,13 @@ def test_simple_chat_solve_api_error(monkeypatch, simple_task):
 
     dut = SimpleChatDUT(config={"api_key": "test-key"})
 
-    # Should wrap APIError in DUTError with context
-    with pytest.raises(DUTError, match="API call failed for task test_task_001"):
+    # Should wrap APIError in DUTError with context after retries
+    # With retry decorator, the error will be raised after 3 attempts
+    with pytest.raises(DUTError, match="API call failed for task test_task_001 after retries"):
         dut.solve(simple_task, seed=42)
+
+    # Verify retries occurred (should be called 3 times)
+    assert mock_client.messages.create.call_count == 3
 
 
 def test_simple_chat_solve_parsing_error(monkeypatch, simple_task):

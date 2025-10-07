@@ -81,6 +81,16 @@ Provide your complete implementation now.
         Returns:
             Metadata describing this approach
         """
+        # Compute prompt hash from template
+        sample_task = type("Task", (), {
+            "name": "sample",
+            "specification": "sample spec",
+            "constraints": ["constraint1"],
+            "gotchas": ["gotcha1"],
+            "key_files": ["file.py"],
+        })()
+        prompt = self._build_prompt(sample_task)
+
         return ApproachMetadata(
             id="elaborate-prompt",
             name="Elaborate Prompt",
@@ -89,4 +99,5 @@ Provide your complete implementation now.
             model=self.model,
             provider="anthropic",
             config=self.config,
+            prompt_hash=self._compute_prompt_hash(prompt),
         )

@@ -13,12 +13,14 @@ from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
 from codegen_bench.exceptions import JudgeError
 from codegen_bench.judge.base import Judge
+from codegen_bench.utils.rate_limiter import RateLimiter
 
 
 class ClaudeJudge(Judge):
     """Claude-based judge for comparing solutions."""
 
     client: anthropic.Anthropic
+    rate_limiter: RateLimiter
 
     def __init__(
         self,
@@ -26,6 +28,7 @@ class ClaudeJudge(Judge):
         model: str = "claude-sonnet-4-20250514",
         temperature: float = 0.3,
         variant: int = 0,
+        max_requests_per_minute: int = 50,
     ):
         """Initialize ClaudeJudge.
 
@@ -34,6 +37,7 @@ class ClaudeJudge(Judge):
             model: Claude model to use
             temperature: Sampling temperature
             variant: Prompt variant for diversity
+            max_requests_per_minute: Rate limit for API calls
 
         Raises:
             JudgeError: If API key not found
@@ -43,6 +47,7 @@ class ClaudeJudge(Judge):
         if not self.api_key:
             raise JudgeError("ANTHROPIC_API_KEY not found in environment or config")
         self.client = anthropic.Anthropic(api_key=self.api_key)
+        self.rate_limiter = RateLimiter(max_requests_per_minute=max_requests_per_minute)
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))  # type: ignore[misc]
     def evaluate(
@@ -61,6 +66,9 @@ class ClaudeJudge(Judge):
         """
         # Build prompt
         prompt = self._build_prompt(solution_a, solution_b, arena, task)
+
+        # Apply rate limiting before API call
+        self.rate_limiter.acquire()
 
         # Call API
         response = self.client.messages.create(

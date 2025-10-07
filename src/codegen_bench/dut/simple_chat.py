@@ -8,12 +8,14 @@ from typing import Any
 import anthropic
 import structlog
 from anthropic.types import TextBlock
+from tenacity import RetryError, retry, stop_after_attempt, wait_exponential
 
 from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
 from codegen_bench.dut.base import ApproachMetadata, CodeGenerationApproach
 from codegen_bench.exceptions import DUTError
 from codegen_bench.parsing.extractor import CodeExtractor
+from codegen_bench.utils.rate_limiter import RateLimiter
 
 logger = structlog.get_logger(__name__)
 
@@ -28,6 +30,7 @@ class SimpleChatDUT(CodeGenerationApproach):
 
     APPROACH_ID = "simple-chat"
     client: anthropic.Anthropic
+    rate_limiter: RateLimiter
 
     def __init__(self, config: dict[str, Any]):
         """Initialize SimpleChatDUT.
@@ -38,6 +41,7 @@ class SimpleChatDUT(CodeGenerationApproach):
                 - api_key: Anthropic API key (optional, falls back to env var)
                 - max_tokens: Max tokens for response (default: 8000)
                 - temperature: Sampling temperature (default: 0.3)
+                - max_requests_per_minute: Rate limit for API calls (default: 50)
 
         Raises:
             DUTError: If API key not found
@@ -50,6 +54,9 @@ class SimpleChatDUT(CodeGenerationApproach):
         self.client = anthropic.Anthropic(api_key=self.api_key)
         self.max_tokens = config.get("max_tokens", 8000)
         self.temperature = config.get("temperature", 0.3)
+        self.rate_limiter = RateLimiter(
+            max_requests_per_minute=config.get("max_requests_per_minute", 50)
+        )
 
     def solve(self, task: Task, seed: int) -> Solution:
         """Generate solution with simple prompt.
@@ -76,13 +83,8 @@ class SimpleChatDUT(CodeGenerationApproach):
             prompt = self._build_prompt(task)
             logger.debug("prompt_built", task_id=task.id, prompt_length=len(prompt))
 
-            # Single API call
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                messages=[{"role": "user", "content": prompt}],
-            )
+            # Single API call with retry
+            response = self._call_api_with_retry(prompt)
 
             elapsed = time.time() - start_time
 
@@ -129,7 +131,7 @@ class SimpleChatDUT(CodeGenerationApproach):
                 api_calls=1,
                 cost_usd=cost,
             )
-        except anthropic.APIError as e:
+        except (anthropic.APIError, RetryError) as e:
             logger.error(
                 "api_error",
                 dut=self.get_metadata().id,
@@ -138,7 +140,11 @@ class SimpleChatDUT(CodeGenerationApproach):
                 error=str(e),
                 error_type=type(e).__name__,
             )
-            raise DUTError(f"API call failed for task {task.id}: {e}") from e
+            # Extract original error from RetryError if applicable
+            if isinstance(e, RetryError):
+                raise DUTError(f"API call failed for task {task.id} after retries: {e}") from e
+            else:
+                raise DUTError(f"API call failed for task {task.id}: {e}") from e
         except (KeyError, AttributeError, ValueError) as e:
             logger.error(
                 "response_parsing_failed",
@@ -149,6 +155,29 @@ class SimpleChatDUT(CodeGenerationApproach):
                 error_type=type(e).__name__,
             )
             raise DUTError(f"Failed to parse API response for task {task.id}: {e}") from e
+
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))  # type: ignore[misc]
+    def _call_api_with_retry(self, prompt: str) -> anthropic.types.Message:
+        """Call Anthropic API with retry logic and rate limiting.
+
+        Args:
+            prompt: The prompt to send
+
+        Returns:
+            API response
+
+        Raises:
+            anthropic.APIError: If all retry attempts fail
+        """
+        # Apply rate limiting before API call
+        self.rate_limiter.acquire()
+
+        return self.client.messages.create(
+            model=self.model,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            messages=[{"role": "user", "content": prompt}],
+        )
 
     def _build_prompt(self, task: Task) -> str:
         """Build minimal prompt for task.
@@ -225,6 +254,15 @@ int main() {{
         Returns:
             ApproachMetadata for this DUT
         """
+        # Compute prompt hash from template
+        sample_task = type("Task", (), {
+            "name": "sample",
+            "specification": "sample spec",
+            "constraints": ["constraint1"],
+            "key_files": ["file.py"],
+        })()
+        prompt = self._build_prompt(sample_task)
+
         return ApproachMetadata(
             id="simple-chat",
             name="Simple Chat",
@@ -233,4 +271,5 @@ int main() {{
             model=self.model,
             provider="anthropic",
             config=self.config,
+            prompt_hash=self._compute_prompt_hash(prompt),
         )
