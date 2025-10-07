@@ -249,3 +249,27 @@ def test_cache_concurrent_writes(solution_cache, mock_dut, simple_task, sample_s
         assert cached is not None
         assert cached.seed == seed
         assert cached.generation_time_seconds == original_sol.generation_time_seconds
+
+
+def test_cache_put_exception_during_write(solution_cache, mock_dut, simple_task, sample_solution, monkeypatch):
+    """Test that temp file is cleaned up when an exception occurs during write."""
+    import os
+
+    # Mock os.replace to raise an exception
+    def mock_replace(*args, **kwargs):
+        raise OSError("Simulated disk full")
+
+    monkeypatch.setattr(os, "replace", mock_replace)
+
+    # Attempt to cache a solution - should raise and clean up temp file
+    with pytest.raises(OSError, match="Simulated disk full"):
+        solution_cache.put(mock_dut, simple_task, 42, sample_solution)
+
+    # Verify temp file was cleaned up (no .tmp files left)
+    temp_files = list(solution_cache.cache_dir.glob("*.tmp"))
+    assert len(temp_files) == 0
+
+    # Verify the final cache file was not created
+    key = solution_cache._cache_key(mock_dut, simple_task, 42)
+    cache_file = solution_cache.cache_dir / f"{key}.json"
+    assert not cache_file.exists()
