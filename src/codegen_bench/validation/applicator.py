@@ -60,7 +60,10 @@ class SolutionApplicator:
             with open(file_path, "w") as f:
                 f.write(content)
 
-        except Exception as e:
+        except (OSError, IOError, PermissionError) as e:
+            # OSError: general file system errors
+            # IOError: input/output errors
+            # PermissionError: insufficient permissions
             raise RuntimeError(f"Failed to write file {rel_path}: {e}") from e
 
     def _delete_file(self, rel_path: str) -> None:
@@ -77,7 +80,9 @@ class SolutionApplicator:
         try:
             if file_path.exists():
                 file_path.unlink()
-        except Exception as e:
+        except (OSError, PermissionError) as e:
+            # OSError: file system errors
+            # PermissionError: insufficient permissions
             raise RuntimeError(f"Failed to delete file {rel_path}: {e}") from e
 
     def apply_diff(self, diff_content: str) -> None:
@@ -104,5 +109,7 @@ class SolutionApplicator:
 
         except subprocess.TimeoutExpired as e:
             raise RuntimeError("Diff application timed out") from e
-        except Exception as e:
+        except (OSError, subprocess.CalledProcessError) as e:
+            # OSError: git not found or execution failed
+            # CalledProcessError: git returned non-zero
             raise RuntimeError(f"Failed to apply diff: {e}") from e

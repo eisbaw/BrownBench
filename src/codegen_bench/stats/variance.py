@@ -123,7 +123,12 @@ def decompose_variance(
     variance_within = fitted.scale  # Residual variance
 
     # Intraclass Correlation Coefficient
-    icc = variance_between / (variance_between + variance_within)
+    total_variance = variance_between + variance_within
+    if total_variance == 0:
+        # Edge case: no variance at all (all values identical)
+        icc = 0.0
+    else:
+        icc = variance_between / total_variance
 
     # R² calculations
     r2_marginal = _calculate_r2_marginal(fitted, data[response].values)

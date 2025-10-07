@@ -1,8 +1,11 @@
 """Git worktree-based isolation for solution validation."""
 
+import shutil
 import subprocess
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Iterator
 
 
 class GitWorktreeStrategy:
@@ -76,15 +79,22 @@ class GitWorktreeStrategy:
             )
 
             if result.returncode != 0:
-                temp_dir.rmdir()
+                # Use shutil.rmtree to handle non-empty directories
+                if temp_dir.exists():
+                    shutil.rmtree(temp_dir, ignore_errors=True)
                 raise RuntimeError(f"Failed to create worktree: {result.stderr}")
 
             return temp_dir
 
-        except Exception as e:
+        except subprocess.TimeoutExpired as e:
+            # Clean up temp directory on timeout
+            if temp_dir.exists():
+                shutil.rmtree(temp_dir, ignore_errors=True)
+            raise RuntimeError(f"Worktree creation timed out: {e}") from e
+        except (OSError, subprocess.CalledProcessError) as e:
             # Clean up temp directory on failure
             if temp_dir.exists():
-                temp_dir.rmdir()
+                shutil.rmtree(temp_dir, ignore_errors=True)
             raise RuntimeError(f"Failed to create worktree: {e}") from e
 
     def remove_worktree(self, worktree_path: Path) -> None:
@@ -111,7 +121,9 @@ class GitWorktreeStrategy:
             if result.returncode != 0:
                 raise RuntimeError(f"Failed to remove worktree: {result.stderr}")
 
-        except Exception as e:
+        except subprocess.TimeoutExpired as e:
+            raise RuntimeError(f"Worktree removal timed out: {e}") from e
+        except (OSError, subprocess.CalledProcessError) as e:
             raise RuntimeError(f"Failed to remove worktree: {e}") from e
 
     def list_worktrees(self) -> list[Path]:
@@ -140,3 +152,30 @@ class GitWorktreeStrategy:
 
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to list worktrees: {e.stderr}") from e
+
+    @contextmanager
+    def worktree(self, branch: str | None = None) -> Iterator[Path]:
+        """Context manager for creating and automatically cleaning up a worktree.
+
+        Args:
+            branch: Branch to checkout (default: current HEAD)
+
+        Yields:
+            Path to created worktree
+
+        Example:
+            with strategy.worktree() as worktree_path:
+                # Use worktree_path
+                # Automatic cleanup on exit
+        """
+        worktree_path = None
+        try:
+            worktree_path = self.create_worktree(branch)
+            yield worktree_path
+        finally:
+            if worktree_path and worktree_path.exists():
+                try:
+                    self.remove_worktree(worktree_path)
+                except RuntimeError:
+                    # If git worktree remove fails, try manual cleanup
+                    shutil.rmtree(worktree_path, ignore_errors=True)

@@ -1,5 +1,6 @@
 """Execute validation commands (compile, test) on solutions."""
 
+import shlex
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -64,9 +65,13 @@ class ValidationExecutor:
             ValidationResult
         """
         try:
+            # Parse command using shlex to avoid shell injection
+            # This splits the command safely while respecting quotes
+            cmd_list = shlex.split(command)
+
             result = subprocess.run(
-                command,
-                shell=True,
+                cmd_list,
+                shell=False,
                 cwd=self.workspace,
                 capture_output=True,
                 text=True,
@@ -90,11 +95,13 @@ class ValidationExecutor:
                 timed_out=True,
             )
 
-        except Exception as e:
+        except (OSError, ValueError) as e:
+            # OSError: Command not found or execution failed
+            # ValueError: shlex.split() failed (malformed command)
             return ValidationResult(
                 success=False,
                 output="",
-                error=str(e),
+                error=f"Command execution failed: {e}",
                 returncode=-1,
                 timed_out=False,
             )

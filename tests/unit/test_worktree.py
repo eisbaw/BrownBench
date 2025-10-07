@@ -141,3 +141,61 @@ def test_remove_nonexistent_worktree(git_repo):
 
     with pytest.raises(RuntimeError, match="Failed to remove worktree"):
         strategy.remove_worktree(fake_path)
+
+
+def test_worktree_context_manager_success(git_repo):
+    """Test worktree context manager creates and cleans up successfully."""
+    strategy = GitWorktreeStrategy(git_repo)
+
+    with strategy.worktree() as worktree_path:
+        # Worktree should exist during context
+        assert worktree_path.exists()
+        assert worktree_path.is_dir()
+        assert (worktree_path / "README.md").exists()
+
+        # Track path for verification after context
+        tracked_path = worktree_path
+
+    # Worktree should be cleaned up after context
+    worktrees = strategy.list_worktrees()
+    assert tracked_path not in worktrees
+
+
+def test_worktree_context_manager_with_exception(git_repo):
+    """Test worktree context manager cleans up even when exception is raised."""
+    strategy = GitWorktreeStrategy(git_repo)
+    tracked_path = None
+
+    with pytest.raises(RuntimeError, match="Test exception"):
+        with strategy.worktree() as worktree_path:
+            tracked_path = worktree_path
+            assert worktree_path.exists()
+            # Raise exception to test cleanup
+            raise RuntimeError("Test exception")
+
+    # Worktree should still be cleaned up
+    worktrees = strategy.list_worktrees()
+    assert tracked_path not in worktrees
+
+
+def test_worktree_context_manager_multiple(git_repo):
+    """Test multiple context managers can be used sequentially."""
+    strategy = GitWorktreeStrategy(git_repo)
+    paths = []
+
+    # Create and cleanup first worktree
+    with strategy.worktree() as path1:
+        assert path1.exists()
+        paths.append(path1)
+
+    # Create and cleanup second worktree
+    with strategy.worktree() as path2:
+        assert path2.exists()
+        paths.append(path2)
+        # Should be different paths
+        assert path1 != path2
+
+    # Both should be cleaned up
+    worktrees = strategy.list_worktrees()
+    for path in paths:
+        assert path not in worktrees

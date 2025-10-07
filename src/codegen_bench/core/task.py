@@ -24,6 +24,9 @@ class Task:
 
     # Validation
     test_suite_path: Path | None = None
+    # SECURITY NOTE: Commands are parsed with shlex.split() and executed with shell=False
+    # to prevent shell injection. Use simple command syntax: "make test" or "pytest tests/"
+    # Shell features like pipes (|), redirects (>), or command chaining (&&) are NOT supported.
     compile_command: str | None = None
     test_command: str | None = None
 

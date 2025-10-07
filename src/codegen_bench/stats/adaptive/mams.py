@@ -17,6 +17,17 @@ from typing import Literal
 import numpy as np
 from scipy import stats
 
+# Decision thresholds
+EFFICACY_Z_THRESHOLD = 3.0  # Z-score threshold for early efficacy stopping
+"""Very strong evidence threshold (p < 0.0027 two-tailed) for single arm."""
+
+# Cost ratio constants for power/cost analysis
+STAGE1_COST_RATIO = 0.2  # Stage 1 is 20% of full evaluation cost
+"""Cheap proxy metrics in Stage 1 cost 20% of full evaluation."""
+
+STAGE2_COST_RATIO = 1.0  # Stage 2 is full evaluation cost
+"""Full metrics in Stage 2 cost 100% of evaluation budget."""
+
 
 @dataclass
 class MAMSResult:
@@ -166,8 +177,8 @@ class MAMSDesign:
         decision: Literal["continue", "stop_futility", "stop_efficacy"]
         if len(selected_arms) == 0:
             decision = "stop_futility"
-        elif len(selected_arms) == 1 and dunnett_result["statistics"][0] > 3.0:
-            # Very strong evidence for single arm
+        elif len(selected_arms) == 1 and dunnett_result["statistics"][0] > EFFICACY_Z_THRESHOLD:
+            # Very strong evidence for single arm (Z > 3.0, p < 0.0027)
             decision = "stop_efficacy"
         else:
             decision = "continue"
@@ -279,9 +290,9 @@ class MAMSDesign:
         k = self.config.num_arms
         max_selected = self.config.max_selected
 
-        # Assume Stage 1 is 20% of full evaluation cost
-        stage1_cost_per_arm = 0.2
-        stage2_cost_per_arm = 1.0
+        # Stage 1 uses cheap proxy metrics (20% cost), Stage 2 uses full evaluation (100% cost)
+        stage1_cost_per_arm = STAGE1_COST_RATIO
+        stage2_cost_per_arm = STAGE2_COST_RATIO
 
         # MAMS: all arms in stage 1, top max_selected in stage 2
         mams_total = (k * stage1_cost_per_arm) + (max_selected * stage2_cost_per_arm)

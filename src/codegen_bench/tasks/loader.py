@@ -79,7 +79,10 @@ class TaskLoader:
                 if not task.validate():
                     raise ValueError(f"Task {task.id} failed validation")
                 tasks.append(task)
-            except Exception as e:
+            except (OSError, IOError, ValueError, KeyError) as e:
+                # OSError/IOError: file read errors
+                # ValueError: YAML parsing or validation errors
+                # KeyError: missing required fields in YAML
                 raise ValueError(f"Failed to load task from {path}: {e}") from e
 
         return tasks
@@ -95,7 +98,10 @@ class TaskLoader:
             try:
                 task = Task.from_yaml(path)
                 tasks.append(task.id)
-            except Exception:
+            except (OSError, IOError, ValueError, KeyError):
                 # Skip invalid tasks
+                # OSError/IOError: file read errors
+                # ValueError: YAML parsing errors
+                # KeyError: missing required fields
                 continue
         return sorted(tasks)
