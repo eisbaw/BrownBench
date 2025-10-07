@@ -2,6 +2,10 @@
 
 import re
 
+import structlog
+
+logger = structlog.get_logger()
+
 
 class CodeExtractor:
     """Extract code changes from various formats in LLM responses.
@@ -132,8 +136,32 @@ class CodeExtractor:
 
         # Merge results (markdown takes precedence)
         files = {}
-        files.update(comments)
-        files.update(xml)
-        files.update(markdown)
+
+        # Track conflicts for debugging LLM output issues
+        for path, content in comments.items():
+            files[path] = content
+
+        for path, content in xml.items():
+            if path in files:
+                logger.warning(
+                    "code_extraction_conflict",
+                    file_path=path,
+                    previous_strategy="comment_markers",
+                    current_strategy="xml_tags",
+                    overwriting=True,
+                )
+            files[path] = content
+
+        for path, content in markdown.items():
+            if path in files:
+                previous = "xml_tags" if path in xml else "comment_markers"
+                logger.warning(
+                    "code_extraction_conflict",
+                    file_path=path,
+                    previous_strategy=previous,
+                    current_strategy="markdown_blocks",
+                    overwriting=True,
+                )
+            files[path] = content
 
         return files

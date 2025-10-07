@@ -219,3 +219,36 @@ from markdown
     assert len(files) == 1
     assert "from markdown" in files["main.c"]
     assert "from xml" not in files["main.c"]
+
+
+def test_extract_all_logs_conflicts(caplog):
+    """Test that conflicts between extraction strategies are logged."""
+    import structlog
+
+    # Configure structlog for testing
+    structlog.configure(
+        processors=[structlog.processors.KeyValueRenderer()],
+        wrapper_class=structlog.BoundLogger,
+        context_class=dict,
+        logger_factory=structlog.PrintLoggerFactory(),
+        cache_logger_on_first_use=False,
+    )
+
+    text = """// FILE: main.c
+from comments
+// END FILE
+
+<file path="main.c">
+from xml
+</file>
+
+```c:main.c
+from markdown
+```"""
+
+    files = CodeExtractor.extract_all(text)
+
+    # Should log warning for xml overwriting comments
+    # Should log warning for markdown overwriting xml
+    assert len(files) == 1
+    assert "from markdown" in files["main.c"]
