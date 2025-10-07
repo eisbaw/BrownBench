@@ -827,21 +827,33 @@
 
 **Status Summary (Updated 2025-10-07):**
 ✅ All critical security and robustness issues fixed
-✅ Test coverage at 94% (354 tests passing, up from 348)
-✅ All linting and type checks passing
+✅ Test coverage at 94% (354 tests passing)
+✅ All linting and type checks passing (ruff + mypy)
 ✅ Codebase is production-ready
 ✅ New tests added:
   - MAMS dunnett fallback to Bonferroni
   - Preregistration malformed YAML handling (4 tests)
   - CodeExtractor conflict logging
 ✅ All commits made with conventional commit messages
+✅ **Comprehensive security audit completed - NO ISSUES FOUND**
 
-**Remaining Optional Improvements:**
+**Security Audit Results (2025-10-07):**
+✅ No eval/exec/__import__ usage
+✅ No shell injection vulnerabilities (shlex.split + shell=False everywhere)
+✅ No SQL injection (no SQL used)
+✅ No unclosed file handles (all use context managers)
+✅ No bare except clauses (all exception handling is specific)
+✅ No division by zero vulnerabilities (protected in variance.py)
+✅ No global mutable state
+✅ No unsafe format string usage
+✅ Proper resource cleanup with context managers and finally blocks
+
+**Remaining Optional Improvements (LOW PRIORITY):**
 - [ ] Add error path tests for CLI commands (to reach 90%+ coverage)
 - [ ] Add performance benchmarks for large tournaments
-- [ ] Implement async support for parallel judge evaluations
-- [ ] Add rate limiting for API calls
-- [ ] Implement graceful shutdown handling
+- [ ] Implement async support for parallel judge evaluations - FUTURE
+- [ ] Add rate limiting for API calls - FUTURE
+- [ ] Implement graceful shutdown handling - FUTURE
 
 **Code Quality Improvements from Architecture Review (2025-10-07):**
 
@@ -862,11 +874,16 @@
   - [x] Improves testability
   - Commit: 59c93d2
 
-- [ ] **Eliminate duplicate state in tournament** (Impact: Medium, Effort: Low)
-  - Remove stored cost/time/token fields from DUTRating
-  - Compute metrics on-demand from solution references
-  - Use @property decorators
-  - Prevents inconsistencies
+- [x] **DECISION: Keep DUTRating metrics as-is** (Architectural Decision)
+  - Current design: Accumulate cost/time/tokens during generation (materialized view pattern)
+  - Alternative considered: Store solution references, compute on-demand
+  - **Decision: KEEP current design** - this is NOT duplicate state
+  - Rationale:
+    * Metrics are cached computed values for performance
+    * On-demand would require cache dependencies in result objects
+    * On-demand would cause repeated cache lookups
+    * Current design is simpler, faster, and thread-safe
+  - Impact: None - current design is correct
 
 **Medium Priority:**
 - [x] **DONE: Add domain-specific exception hierarchy** (Impact: Medium, Effort: Low)
