@@ -829,23 +829,26 @@
 
 ---
 
-**Status Summary (Updated 2025-10-07):**
+**Status Summary (Updated 2025-10-07 Evening):**
 ✅ All critical security and robustness issues fixed
-✅ Test coverage at 94% (354 tests passing)
+✅ Test coverage at 95% (387 tests passing, improved from 94%)
 ✅ All linting and type checks passing (ruff + mypy)
 ✅ **ALL TYPE ERRORS FIXED** - mypy passes with zero errors
 ✅ Codebase is production-ready
-✅ New tests added:
-  - MAMS dunnett fallback to Bonferroni
-  - Preregistration malformed YAML handling (4 tests)
-  - CodeExtractor conflict logging
-✅ All commits made with conventional commit messages
-✅ **Comprehensive security audit completed - NO ISSUES FOUND**
-✅ **Type safety improvements:**
-  - Proper TextBlock type handling in Anthropic responses
-  - Fixed numpy float64/float conversion
-  - Removed all type: ignore comments (except 1 needed)
-  - All test fixtures use proper types
+✅ **New tests added (this session):**
+  - Cache exception cleanup path (ISSUE 8.3)
+  - Applicator exception paths: permission denied, timeout (ISSUE 8.4)
+  - Worktree OSError paths (ISSUE 9.2)
+  - Total: 6 new tests added, 3 issues resolved
+✅ **Code quality improvements (this session):**
+  - Moved CacheError import to module level (architectural fix)
+  - Added proper test cleanup for worktree tests
+  - Fixed all lint errors (import ordering, unused variables)
+  - All commits made with conventional commit messages
+✅ **Coverage improvements:**
+  - cache/store.py: 88% → 94%
+  - applicator.py: 85% → 97%
+  - worktree.py: 91% → 96%
 
 **Security Audit Results (2025-10-07):**
 ✅ No eval/exec/__import__ usage
@@ -876,28 +879,25 @@
   - Fixed: Added yaml.YAMLError, TypeError handling + 3 tests
   - Commit: b8af470
 
-- [ ] **ISSUE 8.3: Cache concurrent corruption handling** (Impact: Low, Effort: Low)
-  - Location: src/codegen_bench/cache/store.py:138-144
-  - Problem: Exception path in atomic write cleanup not tested
-  - Test: test_cache_put_exception_during_write
-  - Coverage: 88% → expected 95%+
+- [x] **DONE: ISSUE 8.3: Cache concurrent corruption handling** (Impact: Low, Effort: Low)
+  - Fixed: Added test_cache_put_exception_during_write
+  - Coverage: 88% → 94%
+  - Commit: 0379da1
 
-- [ ] **ISSUE 8.4: Applicator exception paths uncovered** (Impact: Low, Effort: Low)
-  - Location: src/codegen_bench/validation/applicator.py:67-70, 86-89, 114, 118
-  - Problem: OSError/PermissionError paths not tested
-  - Test: test_apply_write_permission_denied, test_apply_delete_permission_denied, test_apply_diff_timeout
-  - Coverage: 85% → expected 95%+
+- [x] **DONE: ISSUE 8.4: Applicator exception paths uncovered** (Impact: Low, Effort: Low)
+  - Fixed: Added test_write_file_permission_denied, test_delete_file_permission_denied, test_apply_diff_timeout
+  - Coverage: 85% → 97%
+  - Commit: ba776fe
 
 ### Potential Bugs (Low Priority) - RESOLVED
 - [x] **DONE: ISSUE 9.1: __main__.py never tested or executed**
   - Fixed: Added integration tests for CLI entry point
   - Commit: 0792328
 
-- [ ] **ISSUE 9.2: Worktree error logging incomplete** (Impact: Low, Effort: Low)
-  - Location: src/codegen_bench/validation/worktree.py:86, 97-98, 107-109, 138
-  - Problem: Some error paths don't have tests (OSError on line 109, 138)
-  - Test: test_worktree_create_oserror, test_worktree_remove_oserror
-  - Coverage: 91% → expected 95%+
+- [x] **DONE: ISSUE 9.2: Worktree error logging incomplete** (Impact: Low, Effort: Low)
+  - Fixed: Added test_create_worktree_oserror, test_remove_worktree_oserror
+  - Coverage: 91% → 96%
+  - Commit: 14ea4d1
 
 ### Code Smells (Low Priority)
 - [ ] **ISSUE 10.1: Inconsistent error handling in executor** (Impact: Low, Effort: Medium)
@@ -1066,6 +1066,21 @@ Ready to proceed with Phase 1: Judge system and tournament runner
   - Fixed: test_load_invalid_task_fails_validation now matches specific error "codebase path does not exist"
   - All TaskError messages now include specific ValidationError details
   - Commit: 5310891 (validated as part of 11.1)
+
+---
+
+## Architectural Improvements from MPED Review - Second Pass (2025-10-07)
+
+### Medium Priority (Fixed)
+- [x] **DONE: ISSUE 4.2: Import inside exception handler** (Impact: Medium, Effort: Low)
+  - Fixed: Moved CacheError import to module level
+  - Coverage: No change (import location doesn't affect coverage)
+  - Commit: 523f763
+
+- [x] **DONE: ISSUE 4.1b: Worktree test cleanup** (Impact: Medium, Effort: Low)
+  - Fixed: Added try/finally cleanup to test_remove_worktree_oserror
+  - Ensures tests leave no filesystem state behind
+  - Commit: 523f763
 
 ---
 
