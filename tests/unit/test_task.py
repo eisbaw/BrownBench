@@ -66,3 +66,17 @@ def test_task_empty_id_invalid() -> None:
         specification="test",
     )
     assert task.validate() is False
+
+
+def test_task_validate_invalid_compile_command(sample_task_dict: dict) -> None:
+    """Test that invalid compile command fails validation."""
+    sample_task_dict["compile_command"] = "gcc 'unterminated"
+    task = Task(**sample_task_dict)
+    assert task.validate() is False
+
+
+def test_task_validate_invalid_test_command(sample_task_dict: dict) -> None:
+    """Test that invalid test command fails validation."""
+    sample_task_dict["test_command"] = "pytest 'unterminated"
+    task = Task(**sample_task_dict)
+    assert task.validate() is False
