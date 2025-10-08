@@ -254,7 +254,7 @@ def calibrate(
     Example:
         codegen-bench calibrate ground_truth.yaml --judge claude --simulate
     """
-    from codegen_bench.stats.calibration import generate_calibration_report
+    from codegen_bench.stats.calibration import JudgeDecision, generate_calibration_report
     from codegen_bench.stats.ground_truth import GroundTruthDataset
 
     console.print(f"[bold]Calibrating judge: {judge}[/bold]")
@@ -286,14 +286,14 @@ def calibrate(
     import random
 
     random.seed(42)  # Reproducible simulation
-    judge_decisions = []
+    judge_decisions: list[JudgeDecision] = []
     for comp in dataset.comparisons:
         # 85% agreement rate simulation
         if random.random() < 0.85:
             judge_decisions.append(comp.ground_truth)
         else:
             # Random wrong decision
-            alternatives = [d for d in ["A", "B", "TIE"] if d != comp.ground_truth]
+            alternatives: list[JudgeDecision] = [d for d in ["A", "B", "TIE"] if d != comp.ground_truth]
             judge_decisions.append(random.choice(alternatives))
 
     ground_truth = [c.ground_truth for c in dataset.comparisons]
