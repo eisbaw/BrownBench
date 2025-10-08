@@ -49,7 +49,7 @@ class ClaudeJudge(Judge):
         self.client = anthropic.Anthropic(api_key=self.api_key)
         self.rate_limiter = RateLimiter(max_requests_per_minute=max_requests_per_minute)
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))  # type: ignore[misc]
     def evaluate(
         self, solution_a: Solution, solution_b: Solution, arena: Arena, task: Task
     ) -> JudgeVote:

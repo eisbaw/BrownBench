@@ -188,7 +188,7 @@ class SimpleChatDUT(CodeGenerationApproach):
         # Apply rate limiting before any retry attempts
         self.rate_limiter.acquire()
 
-        @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))
+        @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))  # type: ignore[misc]
         def _call_api() -> anthropic.types.Message:
             """Inner function with retry logic that doesn't re-acquire rate limit."""
             return self.client.messages.create(

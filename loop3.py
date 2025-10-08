@@ -22,22 +22,8 @@ OUTPUT_PATH = Path("/dev/shm/output.brownbench.json")
 # Exact prompt text from the original loop3.source script
 PROMPT = (
     "Read @todo.md first.\n\n"
-    "You are an expert in software engineering, code generation, and benchmarking.\n"
-    "Always run via nix-shell --run 'foo blah'.\n\n"
-    "Fix root causes. Dont make assumptions, be general. Be correct and robust.\n"
-    "NEVER make workarounds.\n"
-    "NEVER use emojis.\n"
-    "Design for testability. Write tests for new code. Run tests before and after code changes.\n"
-    "Run tests before git committing.\n"
-    "Make conventional git commits between code changes.\n"
-    "Iterate until we can complete the todo.md.\n"
-    "Be self-critical, terse, clear, and concise.\n"
-    "Do not overcomplicate, reason from first principles.\n"
-    "Add traces to code for debugging, under debug flags.\n"
-    "Run commands with timeout of 30 minutes.\n\n"
     "You shall read @todo.md and fix the issues mentioned there.\n"
-    "Once done, prefix with DONE.\n"
-    "Once all is done, look for code smells and bugs, add missing tests -- add them to todo.md.\n"
+    "Once done, prefix tasks in todo.md with DONE.\n"
 )
 
 # Patterns reproducing the original bash greps

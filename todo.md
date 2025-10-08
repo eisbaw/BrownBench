@@ -34,9 +34,9 @@
 - [ ] Validate tournament outputs
 - [ ] Fix bugs discovered in tournament
 - [ ] Document edge cases from tournament
-- [x] Retry logic with tenacity
-- [x] Rate limiting implementation
-- [x] Prompt versioning with SHA-256
+- DONE [x] Retry logic with tenacity
+- DONE [x] Rate limiting implementation
+- DONE [x] Prompt versioning with SHA-256
 
 ## Phase 2: Statistical Rigor
 
@@ -264,7 +264,7 @@
 ## Technical Debt
 
 - [ ] Async support for API calls (3-5x speedup potential)
-- [x] Rate limiting implementation
+- DONE [x] Rate limiting implementation
 - [ ] Graceful shutdown handling (SIGINT/SIGTERM)
 - [ ] TournamentConfig dataclass for base_seed, consensus_threshold
 - [ ] TrueSkill defaults to configuration
@@ -272,21 +272,21 @@
 - [ ] Store solution IDs and load from cache on demand
 - [ ] Troubleshooting guide for worktree issues
 - [ ] Manual cleanup commands documentation
-- [x] Rate limiter: Single-lock design for atomic acquire() operations
-- [x] Rate limiter: Add release() method for failed request idempotency
+- DONE [x] Rate limiter: Single-lock design for atomic acquire() operations
+- DONE [x] Rate limiter: Add release() method for failed request idempotency
 - [ ] Rate limiter: Consider bucket-based O(1) implementation
-- [x] Rate limiter: Add observability logging when limits hit
-- [x] Rate limiter: Add missing error checks in release() method (FIXED 2025-10-08)
+- DONE [x] Rate limiter: Add observability logging when limits hit
+- DONE [x] Rate limiter: Add missing error checks in release() method (FIXED 2025-10-08)
 
 ## Code Quality Improvements (2025-10-08 Review)
 
-- [x] Rate limiter: Fixed silent failure bug in release() when _token_times empty
-- [x] Rate limiter: Added token mismatch validation in release()
-- [x] SimpleChatDUT: Fixed rate limiter usage with @retry decorator (FIXED 2025-10-08)
-- [x] SimpleChatDUT: Added rate_limiter.release() on API failure
-- [x] Remove unused type ignore comments from retry decorators
-- [x] Fix PYTHONPATH conflict in shell.nix (FIXED 2025-10-08)
-- [x] Remove unnecessary f-string prefix in worktree.py (FIXED 2025-10-08)
+- DONE [x] Rate limiter: Fixed silent failure bug in release() when _token_times empty
+- DONE [x] Rate limiter: Added token mismatch validation in release()
+- DONE [x] SimpleChatDUT: Fixed rate limiter usage with @retry decorator (FIXED 2025-10-08)
+- DONE [x] SimpleChatDUT: Added rate_limiter.release() on API failure
+- DONE [x] Remove unused type ignore comments from retry decorators
+- DONE [x] Fix PYTHONPATH conflict in shell.nix (FIXED 2025-10-08)
+- DONE [x] Remove unnecessary f-string prefix in worktree.py (FIXED 2025-10-08)
 - [ ] Cache: Add lock-free concurrent write protection (currently uses atomic rename)
 - [ ] Cache: Consider TTL/expiration for stale cache entries
 - [ ] Worktree: Add retry logic for transient git failures
@@ -299,53 +299,53 @@
 ## Architecture Review Findings (2025-10-08)
 
 ### Critical Issues (Must Fix)
-- [x] Rate limiter: Fix race condition in acquire() - re-verify limits after sleep (rate_limiter.py:116-133) (FIXED 2025-10-08)
-- [x] Worktree: Fix resource leak in cleanup - preserve original exceptions (worktree.py:186-209) (FIXED 2025-10-08)
-- [x] Rate limiter: Validate token limiting enabled in release() before checking tokens (rate_limiter.py:177-190) (FIXED 2025-10-08)
+- DONE [x] Rate limiter: Fix race condition in acquire() - re-verify limits after sleep (rate_limiter.py:116-133) (FIXED 2025-10-08)
+- DONE [x] Worktree: Fix resource leak in cleanup - preserve original exceptions (worktree.py:186-209) (FIXED 2025-10-08)
+- DONE [x] Rate limiter: Validate token limiting enabled in release() before checking tokens (rate_limiter.py:177-190) (FIXED 2025-10-08)
 
 ### High Priority Issues
-- [x] Cache: Treat corruption as cache miss, not fatal error (store.py:74-105) (FIXED 2025-10-08)
-- [x] SimpleChatDUT: Add config validation for temperature/max_tokens at init (simple_chat.py:35-59) (FIXED 2025-10-08)
-- [x] Tournament: Move validation from run() to __init__() for fail-fast (tournament.py:338-346) (FIXED 2025-10-08)
-- [x] Tournament: Don't swallow save failures - re-raise if output_dir specified (tournament.py:386-400) (FIXED 2025-10-08)
-- [x] SimpleChatDUT: Separate exception types for better error context (simple_chat.py:134-157) (FIXED 2025-10-08)
-- [x] CodeExtractor: Warn on unclosed code blocks instead of silent truncation (extractor.py:36-54) (FIXED 2025-10-08)
-- [x] ValidationExecutor: Fix timeout exception handling for stdout/stderr (executor.py:91-98) (FIXED 2025-10-08)
-- [x] JudgeOrchestrator: Validate judges list is non-empty in __init__ (orchestrator.py:26-32) (FIXED 2025-10-08)
+- DONE [x] Cache: Treat corruption as cache miss, not fatal error (store.py:74-105) (FIXED 2025-10-08)
+- DONE [x] SimpleChatDUT: Add config validation for temperature/max_tokens at init (simple_chat.py:35-59) (FIXED 2025-10-08)
+- DONE [x] Tournament: Move validation from run() to __init__() for fail-fast (tournament.py:338-346) (FIXED 2025-10-08)
+- DONE [x] Tournament: Don't swallow save failures - re-raise if output_dir specified (tournament.py:386-400) (FIXED 2025-10-08)
+- DONE [x] SimpleChatDUT: Separate exception types for better error context (simple_chat.py:134-157) (FIXED 2025-10-08)
+- DONE [x] CodeExtractor: Warn on unclosed code blocks instead of silent truncation (extractor.py:36-54) (FIXED 2025-10-08)
+- DONE [x] ValidationExecutor: Fix timeout exception handling for stdout/stderr (executor.py:91-98) (FIXED 2025-10-08)
+- DONE [x] JudgeOrchestrator: Validate judges list is non-empty in __init__ (orchestrator.py:26-32) (FIXED 2025-10-08)
 
 ### Medium Priority Issues
-- [x] Worktree: Separate git missing vs timeout vs not-a-repo errors (worktree.py:46-56) (FIXED 2025-10-08)
-- [x] Cache: Improve temp file cleanup logging (store.py:148-155) (FIXED 2025-10-08)
-- [x] Solution: Add validation for required fields in from_dict() (solution.py:68-74) (FIXED 2025-10-08)
-- [x] SimpleChatDUT: Fix cost calculation comment date (simple_chat.py:245-261) (FIXED 2025-10-08)
-- [x] Worktree: Clarify branch vs ref parameter in create_worktree (worktree.py:67-98) (FIXED 2025-10-08)
-- [x] ValidationExecutor: Document shell=False security rationale (executor.py:69-81) (FIXED 2025-10-08)
-- [x] Tournament: Add type for progress_callback instead of Any (tournament.py:266-268) (FIXED 2025-10-08)
-- [x] JudgeOrchestrator: Clarify position swap with better variable names (orchestrator.py:58-61) (FIXED 2025-10-08)
+- DONE [x] Worktree: Separate git missing vs timeout vs not-a-repo errors (worktree.py:46-56) (FIXED 2025-10-08)
+- DONE [x] Cache: Improve temp file cleanup logging (store.py:148-155) (FIXED 2025-10-08)
+- DONE [x] Solution: Add validation for required fields in from_dict() (solution.py:68-74) (FIXED 2025-10-08)
+- DONE [x] SimpleChatDUT: Fix cost calculation comment date (simple_chat.py:245-261) (FIXED 2025-10-08)
+- DONE [x] Worktree: Clarify branch vs ref parameter in create_worktree (worktree.py:67-98) (FIXED 2025-10-08)
+- DONE [x] ValidationExecutor: Document shell=False security rationale (executor.py:69-81) (FIXED 2025-10-08)
+- DONE [x] Tournament: Add type for progress_callback instead of Any (tournament.py:266-268) (FIXED 2025-10-08)
+- DONE [x] JudgeOrchestrator: Clarify position swap with better variable names (orchestrator.py:58-61) (FIXED 2025-10-08)
 - [ ] Cache: Add size limits and LRU eviction (store.py:157-168) (DEFER - major feature)
-- [x] CodeExtractor: Document nested block limitation (extractor.py:36-54) (FIXED 2025-10-08)
-- [x] SimpleChatDUT: Use real Task or hash template instead of synthetic (simple_chat.py:269-287) (FIXED 2025-10-08)
-- [x] Tournament: Document pipeline stages in run() docstring (tournament.py:229-305) (FIXED 2025-10-08)
+- DONE [x] CodeExtractor: Document nested block limitation (extractor.py:36-54) (FIXED 2025-10-08)
+- DONE [x] SimpleChatDUT: Use real Task or hash template instead of synthetic (simple_chat.py:269-287) (FIXED 2025-10-08)
+- DONE [x] Tournament: Document pipeline stages in run() docstring (tournament.py:229-305) (FIXED 2025-10-08)
 
 ### Low Priority Issues
-- [x] Add missing logging: cache.clear(), cache.invalidate(), executor parsers (various) (FIXED 2025-10-08)
-- [x] Add __repr__ methods for Solution, Task, DUTRating (various) (FIXED 2025-10-08)
-- [x] Standardize error message formatting with quotes around paths (various) (FIXED 2025-10-08)
-- [x] Fix TournamentResult.duration_seconds fallback behavior (tournament.py:133-135) (FIXED 2025-10-08)
-- [x] Remove or use test_output field in Solution (solution.py:40) (FIXED 2025-10-08)
-- [x] Move pricing constants to config (simple_chat.py:22-25) (FIXED 2025-10-08 - Added TODO comment)
-- [x] Remove unused type: ignore comments (FIXED 2025-10-08)
+- DONE [x] Add missing logging: cache.clear(), cache.invalidate(), executor parsers (various) (FIXED 2025-10-08)
+- DONE [x] Add __repr__ methods for Solution, Task, DUTRating (various) (FIXED 2025-10-08)
+- DONE [x] Standardize error message formatting with quotes around paths (various) (FIXED 2025-10-08)
+- DONE [x] Fix TournamentResult.duration_seconds fallback behavior (tournament.py:133-135) (FIXED 2025-10-08)
+- DONE [x] Remove or use test_output field in Solution (solution.py:40) (FIXED 2025-10-08)
+- DONE [x] Move pricing constants to config (simple_chat.py:22-25) (FIXED 2025-10-08 - Added TODO comment)
+- DONE [x] Remove unused type: ignore comments (FIXED 2025-10-08)
 
 ## Code Review Findings (2025-10-08 Session 2)
 
 ### Test Coverage Gaps (Current: 95%, Target: >95%)
-- [x] Arena: Test custom prompt_template_path (line 34) - 100% coverage (FIXED 2025-10-08)
-- [x] Arena: Test get_prompt_version() when prompt not loaded (lines 53-55) - 100% coverage (FIXED 2025-10-08)
-- [x] Solution: Test from_dict() with missing required fields (line 84) - 100% coverage (FIXED 2025-10-08)
-- [x] Solution: Test __repr__() edge cases (lines 94-101) - 100% coverage (FIXED 2025-10-08)
-- [x] Task: Test validation edge cases (lines 55, 57, 74-75, 86-87, 93-98) - 100% coverage (FIXED 2025-10-08)
-- [x] RateLimiter: Test token race condition paths (lines 180-197) - existing tests adequate (VERIFIED 2025-10-08)
-- [x] RateLimiter: Test edge cases in release() validation (line 85, 97, 161, 236) - 78% coverage (FIXED 2025-10-08)
+- DONE [x] Arena: Test custom prompt_template_path (line 34) - 100% coverage (FIXED 2025-10-08)
+- DONE [x] Arena: Test get_prompt_version() when prompt not loaded (lines 53-55) - 100% coverage (FIXED 2025-10-08)
+- DONE [x] Solution: Test from_dict() with missing required fields (line 84) - 100% coverage (FIXED 2025-10-08)
+- DONE [x] Solution: Test __repr__() edge cases (lines 94-101) - 100% coverage (FIXED 2025-10-08)
+- DONE [x] Task: Test validation edge cases (lines 55, 57, 74-75, 86-87, 93-98) - 100% coverage (FIXED 2025-10-08)
+- DONE [x] RateLimiter: Test token race condition paths (lines 180-197) - existing tests adequate (VERIFIED 2025-10-08)
+- DONE [x] RateLimiter: Test edge cases in release() validation (line 85, 97, 161, 236) - 78% coverage (FIXED 2025-10-08)
 
 ### Code Smells
 - [ ] SimpleChatDUT: Pricing constants hardcoded (lines 22-25) - should move to config
@@ -369,9 +369,9 @@
 - [ ] Tournament: No guide on cost estimation for different scales
 
 ### Potential Bugs/Edge Cases
-- [x] Arena.load_prompt(): FileNotFoundError not explicitly handled (FIXED 2025-10-08)
-- [x] Task.from_yaml(): Missing validation for empty/malformed YAML (FIXED 2025-10-08)
-- [x] Arena: Code duplication in get_prompt_version() (FIXED 2025-10-08 - refactored with _load_template_file helper)
+- DONE [x] Arena.load_prompt(): FileNotFoundError not explicitly handled (FIXED 2025-10-08)
+- DONE [x] Task.from_yaml(): Missing validation for empty/malformed YAML (FIXED 2025-10-08)
+- DONE [x] Arena: Code duplication in get_prompt_version() (FIXED 2025-10-08 - refactored with _load_template_file helper)
 - [ ] Cache: No size limit enforcement - could fill disk
 - [ ] RateLimiter: Potential thundering herd on rate limit reset
 - [ ] Worktree: No retry logic for transient git failures
