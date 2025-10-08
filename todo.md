@@ -180,11 +180,14 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Audit report generation
 - [ ] Integration with DUT loading
 
-### Tournament Checkpointing 📋
-- [ ] TournamentCheckpoint class
-- [ ] Serialize tournament state to disk
-- [ ] Resume from checkpoint
-- [ ] Handle partial results
+### Tournament Checkpointing ⏳ In Progress
+- [x] CheckpointManager class
+- [x] CheckpointState dataclass (immutable)
+- [x] Atomic save operations
+- [x] Progress tracking and resume support
+- [x] Checkpoint unit tests (19 tests, 90% coverage)
+- [ ] Integrate checkpointing into TournamentRunner
+- [ ] Handle resume from checkpoint in tournament
 - [ ] Checkpointing integration tests
 - [ ] Comprehensive error taxonomy
 - [ ] Actionable error messages
@@ -194,6 +197,21 @@ See `docs/PHASE2_PROGRESS.md` for full details
 
 ## Phase 5: Usability & Polish
 
+### Additional DUT and Judge Implementations 📋
+- [ ] ClaudeCodeDUT - Use Claude Code as a code generation approach
+  - [ ] Implement ClaudeCodeDUT class
+  - [ ] Handle tool use and file operations
+  - [ ] Capture generated code from Claude Code
+  - [ ] Unit tests for ClaudeCodeDUT
+  - [ ] Integration tests with real tasks
+- [ ] ClaudeCodeJudge - Use Claude Code as a judge
+  - [ ] Implement ClaudeCodeJudge class
+  - [ ] Provide comparison context to Claude Code
+  - [ ] Extract judgment from Claude Code output
+  - [ ] Unit tests for ClaudeCodeJudge
+  - [ ] Calibration testing with ground truth
+
+### Visualization & Reporting 📋
 - [ ] Jinja2 template for HTML output
 - [ ] Interactive Plotly charts
 - [ ] Sortable leaderboard tables
@@ -205,18 +223,23 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Dominated solution identification
 - [ ] Pareto visualization with Plotly
 - [ ] Pareto frontier unit tests
+
+### Export Formats 📋
 - [ ] JSON exporter with schema
 - [ ] CSV exporter for custom analysis
 - [ ] LaTeX table generator
 - [ ] Export CLI options
+
+### Documentation 📋
 - [ ] Installation guide
 - [ ] Quickstart tutorial (5-min)
 - [ ] CLI reference
 - [ ] Configuration guide
 - [ ] Troubleshooting guide
 - [ ] Architecture overview
-- [ ] Adding new DUTs guide
+- [ ] Adding new DUTs guide (include ClaudeCodeDUT example)
 - [ ] Adding new arenas guide
+- [ ] Adding new judges guide (include ClaudeCodeJudge example)
 - [ ] Contributing guidelines
 - [ ] API reference (auto-generated)
 - [ ] Explain rating systems
@@ -224,6 +247,8 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Multiple testing rationale
 - [ ] Adaptive design benefits
 - [ ] References to literature
+
+### Additional Tasks & Configs 📋
 - [ ] Add 5 additional C/C++ tasks
 - [ ] Add 5 additional Python tasks
 - [ ] Document each task thoroughly
@@ -233,7 +258,10 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Per-DUT example configs
 - [ ] Document SimpleChatDUT
 - [ ] Document ElaboratePromptDUT
+- [ ] Document ClaudeCodeDUT (once implemented)
 - [ ] Template for custom DUTs
+
+### CLI/UX Improvements 📋
 - [ ] Improve progress indicators
 - [ ] Better error messages
 - [ ] Consistent formatting
