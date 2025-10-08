@@ -348,47 +348,47 @@
 - DONE [x] RateLimiter: Test edge cases in release() validation (line 85, 97, 161, 236) - 78% coverage (FIXED 2025-10-08)
 
 ### Code Smells
-- [ ] SimpleChatDUT: Pricing constants hardcoded (lines 22-25) - should move to config
-- [ ] Solution: test_output field has TODO comment but unused (line 40)
-- [ ] __main__.py: Zero test coverage (0%) - add integration test for CLI entry point
-- [ ] Registry: Class-level state may cause issues in parallel testing - consider instance-based design
-- [ ] Cache: No TTL/expiration mechanism - stale cache could accumulate indefinitely
+- [ ] SimpleChatDUT: Pricing constants hardcoded (lines 22-25) - TODO comment exists (simple_chat.py:24) - needs config system
+- [ ] Solution: test_output field has TODO comment but unused (line 40) - TODO comment exists (solution.py:40) - remove or implement
+- [ ] __main__.py: Zero test coverage (0% verified in QA report) - integration tests exist but don't cover entry point directly
+- REVIEWED [x] Registry: Class-level state acceptable - thread-safe with RLock, optional convenience registry, documented testing limitations
+- [ ] Cache: No TTL/expiration mechanism - stale cache could accumulate indefinitely (DEFER - major feature)
 
 ### Missing Functionality
-- [ ] No async support for concurrent API calls (3-5x speedup potential)
-- [ ] No graceful shutdown handling (SIGINT/SIGTERM signals)
-- [ ] No checkpoint/resume for long-running tournaments
-- [ ] No timeout protection for DUT.solve() method
-- [ ] No circuit breaker pattern for repeated API failures
-- [ ] No metrics/observability for production deployments
+- [ ] No async support for concurrent API calls (3-5x speedup potential) (tracked in line 266)
+- [ ] No graceful shutdown handling (SIGINT/SIGTERM signals) (tracked in line 268)
+- [ ] No checkpoint/resume for long-running tournaments (tracked in line 294)
+- [ ] No timeout protection for DUT.solve() method (tracked in line 295)
+- [ ] No circuit breaker pattern for repeated API failures (tracked in line 296)
+- [ ] No metrics/observability for production deployments (DEFER - Phase 5+ feature)
 
 ### Documentation Gaps
-- [ ] Worktree: No troubleshooting guide for manual cleanup
-- [ ] Cache: No documentation on size limits or cache management
-- [ ] RateLimiter: No explanation of bucket-based O(1) alternative
-- [ ] Tournament: No guide on cost estimation for different scales
+- [ ] Worktree: No troubleshooting guide for manual cleanup (tracked in line 273)
+- [ ] Cache: No documentation on size limits or cache management (DEFER - pending cache size feature)
+- [ ] RateLimiter: No explanation of bucket-based O(1) alternative (tracked in line 277)
+- [ ] Tournament: No guide on cost estimation for different scales (DEFER - Phase 5 documentation)
 
 ### Potential Bugs/Edge Cases
 - DONE [x] Arena.load_prompt(): FileNotFoundError not explicitly handled (FIXED 2025-10-08)
 - DONE [x] Task.from_yaml(): Missing validation for empty/malformed YAML (FIXED 2025-10-08)
 - DONE [x] Arena: Code duplication in get_prompt_version() (FIXED 2025-10-08 - refactored with _load_template_file helper)
-- [ ] Cache: No size limit enforcement - could fill disk
-- [ ] RateLimiter: Potential thundering herd on rate limit reset
-- [ ] Worktree: No retry logic for transient git failures
-- [ ] SimpleChatDUT: No request timeout configuration
+- [ ] Cache: No size limit enforcement - could fill disk (DEFER - major feature, see line 325)
+- [ ] RateLimiter: Potential thundering herd on rate limit reset (DEFER - edge case optimization)
+- [ ] Worktree: No retry logic for transient git failures (tracked in line 292)
+- [ ] SimpleChatDUT: No request timeout configuration (DEFER - feature request)
 
 ### Performance Concerns
-- [ ] RateLimiter: O(n) token checking - consider bucket-based O(1) implementation
-- [ ] Cache: No LRU eviction - memory usage unbounded
-- [ ] Tournament: Loads all solutions in memory - consider streaming for large tournaments
-- [ ] Solution storage: Store full objects - consider storing IDs and loading on demand
+- [ ] RateLimiter: O(n) token checking - consider bucket-based O(1) implementation (tracked in line 277)
+- [ ] Cache: No LRU eviction - memory usage unbounded (DEFER - major feature, see line 325)
+- [ ] Tournament: Loads all solutions in memory - consider streaming for large tournaments (tracked in line 271)
+- [ ] Solution storage: Store full objects - consider storing IDs and loading on demand (tracked in line 272)
 
 ### Security/Safety
-- [ ] Executor: shell=False is good, but document security rationale more prominently
-- [ ] Worktree: git commands use user-provided paths - validate/sanitize inputs
-- [ ] Cache: Temp file creation uses mkstemp but cleanup could be more robust
-- [ ] API keys: No key rotation mechanism
-- [ ] Rate limiting: No per-user quotas for shared deployments
+- DONE [x] Executor: shell=False is good, but document security rationale more prominently (FIXED 2025-10-08, see line 322)
+- [ ] Worktree: git commands use user-provided paths - validate/sanitize inputs (DEFER - needs input sanitization framework)
+- DONE [x] Cache: Temp file creation uses mkstemp but cleanup could be more robust (FIXED 2025-10-08, see lines 318, 170-182)
+- [ ] API keys: No key rotation mechanism (DEFER - feature request)
+- [ ] Rate limiting: No per-user quotas for shared deployments (DEFER - feature request)
 
 ## Milestones
 
