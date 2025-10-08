@@ -58,8 +58,10 @@ def test_worktree_init_invalid_repo(tmp_path):
 def test_is_git_repo(git_repo, tmp_path):
     """Test git repository detection."""
     strategy = GitWorktreeStrategy(git_repo)
-    assert strategy._is_git_repo(git_repo) is True
-    assert strategy._is_git_repo(tmp_path) is False
+    # _is_git_repo raises WorktreeError on failure, returns None on success
+    assert strategy._is_git_repo(git_repo) is None  # Success - no exception
+    with pytest.raises(WorktreeError, match="Not a git repository"):
+        strategy._is_git_repo(tmp_path)  # Failure - raises exception
 
 
 def test_create_worktree(git_repo):

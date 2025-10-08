@@ -2,6 +2,7 @@
 
 import itertools
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -277,13 +278,14 @@ class TournamentRunner:
     def compare_solutions(
         self,
         solutions: dict[tuple[str, str, int], Solution],
-        progress_callback: Any = None,
+        progress_callback: Callable[[int], None] | None = None,
     ) -> list[tuple[str, str, str, JudgmentResult]]:
         """Compare all solution pairs across arenas.
 
         Args:
             solutions: Dictionary mapping (dut_id, task_id, sample_index) to Solution
-            progress_callback: Optional callback for progress updates
+            progress_callback: Optional callback called with total comparison count.
+                             Signature: callback(total_comparisons: int) -> None
 
         Returns:
             List of comparisons: (dut_a_id, dut_b_id, arena_name, judgment)
@@ -332,13 +334,27 @@ class TournamentRunner:
 
     def run(
         self,
-        progress_callback: Any = None,
+        progress_callback: Callable[[int], None] | None = None,
         output_dir: Path | None = None,
     ) -> TournamentResult:
         """Run full tournament.
 
+        Tournament execution pipeline:
+        1. Solution Generation: Call each DUT on each task (with samples_per_pairing iterations)
+           - Uses cache to avoid regenerating identical solutions
+           - Collects cost, time, and token metrics
+        2. Pairwise Comparison: Compare all DUT pairs across all arenas
+           - Judges evaluate solution pairs
+           - Results in n*(n-1)/2 comparisons per task per arena
+        3. Rating Update: Update Bayesian ELO ratings based on comparison results
+           - Tracks win/loss/tie for each DUT
+           - Maintains uncertainty estimates (mean and variance)
+        4. Result Aggregation: Package all results into TournamentResult
+        5. Optional: Save results to disk if output_dir is specified
+
         Args:
-            progress_callback: Optional callback for progress updates
+            progress_callback: Optional callback called with total comparison count.
+                             Signature: callback(total_comparisons: int) -> None
             output_dir: Optional directory to save results. If provided, results will be
                        saved to {output_dir}/tournament-{timestamp}/tournament.yaml
 

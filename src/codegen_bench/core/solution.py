@@ -66,7 +66,23 @@ class Solution:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Solution":
-        """Deserialize from dict."""
+        """Deserialize from dict.
+
+        Args:
+            data: Dictionary with solution data
+
+        Returns:
+            Solution instance
+
+        Raises:
+            ValueError: If required fields are missing
+        """
+        # Validate required fields
+        required_fields = ["approach_id", "task_id", "seed"]
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            raise ValueError(f"Missing required fields in Solution.from_dict(): {missing_fields}")
+
         # Parse timestamp
         if isinstance(data.get("timestamp"), str):
             data["timestamp"] = datetime.fromisoformat(data["timestamp"])

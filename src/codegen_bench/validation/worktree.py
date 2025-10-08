@@ -28,32 +28,36 @@ class GitWorktreeStrategy:
             repo_path: Path to git repository
 
         Raises:
-            WorktreeError: If path is not a git repository
+            WorktreeError: If path is not a git repository, git not found, or timeout
         """
         self.repo_path = Path(repo_path).resolve()
-        if not self._is_git_repo(self.repo_path):
-            raise WorktreeError(f"Not a git repository: {self.repo_path}")
+        self._is_git_repo(self.repo_path)  # Raises WorktreeError with specific context
 
-    def _is_git_repo(self, path: Path) -> bool:
+    def _is_git_repo(self, path: Path) -> None:
         """Check if path is a git repository.
 
         Args:
             path: Path to check
 
-        Returns:
-            True if path is a git repository
+        Raises:
+            WorktreeError: With specific error context (git not found, timeout, or not a repo)
         """
         try:
-            result = subprocess.run(
+            subprocess.run(
                 ["git", "rev-parse", "--git-dir"],
                 cwd=path,
                 capture_output=True,
                 check=True,
                 timeout=5,
             )
-            return result.returncode == 0
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
-            return False
+            # Success - path is a valid git repo
+        except FileNotFoundError as e:
+            raise WorktreeError(f"git command not found in PATH. Is git installed?") from e
+        except subprocess.TimeoutExpired as e:
+            raise WorktreeError(f"git command timed out after 5s while checking {path}") from e
+        except subprocess.CalledProcessError as e:
+            # Non-zero exit code means not a git repo
+            raise WorktreeError(f"Not a git repository: {path}") from e
 
     def _cleanup_temp_dir(self, temp_dir: Path) -> None:
         """Clean up temporary directory, ignoring errors.
@@ -64,11 +68,13 @@ class GitWorktreeStrategy:
         if temp_dir.exists():
             shutil.rmtree(temp_dir, ignore_errors=True)
 
-    def create_worktree(self, branch: str | None = None) -> Path:
+    def create_worktree(self, ref: str | None = None) -> Path:
         """Create a new git worktree.
 
         Args:
-            branch: Branch to checkout (default: current HEAD)
+            ref: Git ref (branch/tag/commit) to checkout. If None, checks out current HEAD.
+                 If a branch name that doesn't exist, creates a new branch from current HEAD.
+                 Examples: "main", "v1.0.0", "abc123", None
 
         Returns:
             Path to created worktree
@@ -82,8 +88,10 @@ class GitWorktreeStrategy:
         try:
             # Create worktree
             cmd = ["git", "worktree", "add", str(temp_dir)]
-            if branch:
-                cmd.extend(["-b", branch, branch])
+            if ref:
+                # Note: -b creates a new branch from current HEAD
+                # If ref is an existing branch/tag/commit, don't use -b
+                cmd.extend(["-b", ref, ref])
 
             result = subprocess.run(
                 cmd,
@@ -165,11 +173,11 @@ class GitWorktreeStrategy:
             raise WorktreeError(f"Failed to list worktrees: {e.stderr}") from e
 
     @contextmanager
-    def worktree(self, branch: str | None = None) -> Iterator[Path]:
+    def worktree(self, ref: str | None = None) -> Iterator[Path]:
         """Context manager for creating and automatically cleaning up a worktree.
 
         Args:
-            branch: Branch to checkout (default: current HEAD)
+            ref: Git ref (branch/tag/commit) to checkout (default: current HEAD)
 
         Yields:
             Path to created worktree
@@ -182,7 +190,7 @@ class GitWorktreeStrategy:
         worktree_path = None
         original_exception = None
         try:
-            worktree_path = self.create_worktree(branch)
+            worktree_path = self.create_worktree(ref)
             yield worktree_path
         except Exception as e:
             # Preserve original exception to re-raise after cleanup

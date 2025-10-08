@@ -26,6 +26,10 @@ class CodeExtractor:
         code content
         ```
 
+        Limitation: Nested code blocks are NOT supported. If the code content contains
+        triple backticks (```), the parser will incorrectly treat them as the end of
+        the block. This is a known limitation of the simple line-by-line parser.
+
         Args:
             text: Text containing markdown code blocks
 

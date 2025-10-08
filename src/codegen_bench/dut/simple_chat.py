@@ -258,7 +258,7 @@ int main() {{
     def _calculate_cost(self, input_tokens: int, output_tokens: int) -> float:
         """Calculate API cost based on token usage.
 
-        Uses pricing as of October 2025:
+        Uses pricing as of January 2025:
         - Claude Sonnet 4.5: $3/M input, $15/M output
 
         Args:
@@ -279,14 +279,34 @@ int main() {{
         Returns:
             ApproachMetadata for this DUT
         """
-        # Compute prompt hash from template
-        sample_task = type("Task", (), {
-            "name": "sample",
-            "specification": "sample spec",
-            "constraints": ["constraint1"],
-            "key_files": ["file.py"],
-        })()
-        prompt = self._build_prompt(sample_task)
+        # Compute prompt hash from static template string
+        # We don't use a real Task to avoid path dependencies in the hash
+        prompt_template = """You are a software engineer. Implement the following change:
+
+Task: {task.name}
+
+Specification:
+{task.specification}
+
+Constraints:
+{constraints_text}
+
+Key files to modify: {key_files}
+
+Provide the modified code for each file that needs to change.
+Format your response with code blocks like:
+
+```language:path/to/file.ext
+code content here
+```
+
+For example:
+```c:src/main.c
+int main() {{
+    return 0;
+}}
+```
+"""
 
         return ApproachMetadata(
             id="simple-chat",
@@ -296,5 +316,5 @@ int main() {{
             model=self.model,
             provider="anthropic",
             config=self.config,
-            prompt_hash=self._compute_prompt_hash(prompt),
+            prompt_hash=self._compute_prompt_hash(prompt_template),
         )

@@ -60,15 +60,18 @@ class JudgeOrchestrator:
         )
 
         # Randomize position to avoid position bias
-        swap = random.random() < 0.5
-        if swap:
-            solution_a, solution_b = solution_b, solution_a
+        # If swap=True, we present solutions in reversed order to judges
+        # then reverse the results back to match the original call signature
+        swap_positions = random.random() < 0.5
+        presented_solution_a, presented_solution_b = solution_a, solution_b
+        if swap_positions:
+            presented_solution_a, presented_solution_b = solution_b, solution_a
             logger.debug("position_swapped", arena=arena.name)
 
-        # Collect votes from all judges
+        # Collect votes from all judges (using presented order)
         votes: list[JudgeVote] = []
         for i, judge in enumerate(self.judges):
-            vote = judge.evaluate(solution_a, solution_b, arena, task)
+            vote = judge.evaluate(presented_solution_a, presented_solution_b, arena, task)
             votes.append(vote)
             logger.debug(
                 "judge_vote",
@@ -78,16 +81,16 @@ class JudgeOrchestrator:
                 arena=arena.name,
             )
 
-        # Compute consensus
+        # Compute consensus from votes (in presented order)
         consensus_vote = self._compute_consensus(votes)
 
-        # Swap back if needed - create normalized votes instead of mutating
+        # Swap back if needed - create normalized votes that match original order (solution_a, solution_b)
         normalized_votes = votes
-        if swap:
-            # Swap consensus
+        if swap_positions:
+            # Swap consensus: "A" in presented order -> "B" in original order, and vice versa
             if consensus_vote != "TIE":
                 consensus_vote = "B" if consensus_vote == "A" else "A"
-            # Create new votes with swapped positions instead of mutating
+            # Create new votes with swapped positions to match original parameter order
             normalized_votes = [
                 JudgeVote(
                     vote="B" if v.vote == "A" else "A" if v.vote == "B" else "TIE",

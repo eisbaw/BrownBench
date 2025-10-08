@@ -59,8 +59,14 @@ class ValidationExecutor:
     def _run_command(self, command: str, timeout: int) -> ValidationResult:
         """Run shell command in workspace.
 
+        Uses shlex.split() + shell=False for security. This prevents shell injection
+        attacks while still supporting quoted arguments and basic shell commands.
+
+        Note: Complex shell features (pipes, redirects, glob expansion) are NOT supported.
+        Task commands should be simple executables with arguments, not full shell scripts.
+
         Args:
-            command: Shell command to execute
+            command: Shell command to execute (simple command with args, no pipes/redirects)
             timeout: Timeout in seconds
 
         Returns:
@@ -69,11 +75,12 @@ class ValidationExecutor:
         try:
             # Parse command using shlex to avoid shell injection
             # This splits the command safely while respecting quotes
+            # Example: 'pytest -v "test file.py"' -> ['pytest', '-v', 'test file.py']
             cmd_list = shlex.split(command)
 
             result = subprocess.run(
                 cmd_list,
-                shell=False,
+                shell=False,  # SECURITY: shell=False prevents injection attacks
                 cwd=self.workspace,
                 capture_output=True,
                 text=True,

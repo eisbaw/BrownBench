@@ -172,8 +172,14 @@ class SolutionCache:
             try:
                 if Path(temp_path).exists():
                     os.unlink(temp_path)
-            except OSError:
-                pass
+                    logger.debug("cache_temp_file_cleanup", temp_file=temp_path, status="removed")
+            except OSError as cleanup_err:
+                logger.warning(
+                    "cache_temp_file_cleanup_failed",
+                    temp_file=temp_path,
+                    error=str(cleanup_err),
+                    error_type=type(cleanup_err).__name__,
+                )
 
     def clear(self) -> None:
         """Clear all cached solutions."""
