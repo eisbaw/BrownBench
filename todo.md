@@ -145,35 +145,47 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Record which prompt version used in judgments
 - [ ] Changelog for prompt evolution
 
-## Phase 4: Security & Robustness
+## Phase 4: Security & Robustness (Started)
 
+### Budget Management ✅
+- [x] BudgetEnforcer class
+- [x] Per-DUT cost limits
+- [x] Global tournament budget
+- [x] Warnings at thresholds
+- [x] Hard stops when exceeded
+- [x] Thread-safe cost tracking
+- [x] Budget unit tests (20 tests, 98% coverage)
+
+**Summary:** Complete budget enforcement system with pre-flight checks and configurable limits.
+
+### Container Isolation 📋
 - [ ] ContainerIsolation class
 - [ ] Build DUT container images
 - [ ] Network restriction (API proxy only)
 - [ ] Resource limits (CPU, memory)
 - [ ] Read-only mounts
 - [ ] Container cleanup after execution
+
+### API Proxy 📋
 - [ ] APIProxy server
 - [ ] Temporary key generation
 - [ ] Request forwarding with real key
-- [ ] Cost tracking per DUT
-- [ ] Budget enforcement
+- [ ] Cost tracking per DUT (integrated with BudgetEnforcer)
 - [ ] API proxy integration tests
+
+### DUT Auditing 📋
 - [ ] DUTAuditor class
 - [ ] Static analysis for dangerous patterns
 - [ ] Network access detection
 - [ ] Audit report generation
 - [ ] Integration with DUT loading
+
+### Tournament Checkpointing 📋
 - [ ] TournamentCheckpoint class
 - [ ] Serialize tournament state to disk
 - [ ] Resume from checkpoint
 - [ ] Handle partial results
 - [ ] Checkpointing integration tests
-- [ ] BudgetEnforcer class
-- [ ] Per-DUT cost limits
-- [ ] Global tournament budget
-- [ ] Warnings at thresholds
-- [ ] Hard stops when exceeded
 - [ ] Comprehensive error taxonomy
 - [ ] Actionable error messages
 - [ ] Retry strategies
