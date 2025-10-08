@@ -145,6 +145,60 @@ class RateLimiter:
                     while self._token_times and self._token_times[0][0] < cutoff:
                         self._token_times.popleft()
 
+                # Re-verify limits after sleep (race condition: another thread may have consumed slots)
+                # If still over limit, wait again
+                while True:
+                    # ALWAYS update timestamp and cleanup at start of each iteration
+                    now = time.time()
+                    cutoff = now - 60.0
+
+                    # Clean up ALL old records
+                    while self._request_times and self._request_times[0] < cutoff:
+                        self._request_times.popleft()
+
+                    if self.max_tokens_per_minute is not None:
+                        while self._token_times and self._token_times[0][0] < cutoff:
+                            self._token_times.popleft()
+
+                    # Check request limit
+                    if len(self._request_times) >= self.max_requests_per_minute:
+                        wait_time = self._request_times[0] + 60.0 - now
+                        if wait_time > 0:
+                            logger.debug("rate_limit_race_detected", reason="request_limit")
+                            self._lock.release()
+                            try:
+                                time.sleep(wait_time)
+                            finally:
+                                self._lock.acquire()
+                            continue  # Re-check from top with fresh timestamp
+
+                    # Check token limit
+                    if self.max_tokens_per_minute is not None and tokens > 0:
+                        current_tokens = sum(t[1] for t in self._token_times)
+                        if current_tokens + tokens > self.max_tokens_per_minute:
+                            # Find when we'll have enough tokens
+                            needed = current_tokens + tokens - self.max_tokens_per_minute
+                            freed = 0
+                            wait_time = 0.0
+
+                            for timestamp, token_count in self._token_times:
+                                freed += token_count
+                                if freed >= needed:
+                                    wait_time = timestamp + 60.0 - now
+                                    break
+
+                            if wait_time > 0:
+                                logger.debug("rate_limit_race_detected", reason="token_limit")
+                                self._lock.release()
+                                try:
+                                    time.sleep(wait_time)
+                                finally:
+                                    self._lock.acquire()
+                                continue  # Re-check from top with fresh timestamp
+
+                    # Both limits satisfied, break out
+                    break
+
             # Record this request with consistent timestamp
             self._request_times.append(now)
             if self.max_tokens_per_minute is not None and tokens > 0:
@@ -175,7 +229,14 @@ class RateLimiter:
             self._request_times.pop()
 
             # Remove the most recent token usage if applicable
-            if self.max_tokens_per_minute is not None and tokens > 0:
+            # Only validate/release tokens if token limiting is enabled AND tokens were used
+            if tokens > 0:
+                if self.max_tokens_per_minute is None:
+                    # Token limiting not enabled but caller tried to release tokens
+                    raise ValueError(
+                        f"Cannot release {tokens} tokens: token limiting is not enabled"
+                    )
+
                 if not self._token_times:
                     raise ValueError("No token requests to release")
 

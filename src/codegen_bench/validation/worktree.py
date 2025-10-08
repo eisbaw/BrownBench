@@ -180,9 +180,14 @@ class GitWorktreeStrategy:
                 # Automatic cleanup on exit
         """
         worktree_path = None
+        original_exception = None
         try:
             worktree_path = self.create_worktree(branch)
             yield worktree_path
+        except Exception as e:
+            # Preserve original exception to re-raise after cleanup
+            original_exception = e
+            raise
         finally:
             if worktree_path and worktree_path.exists():
                 try:
@@ -202,8 +207,18 @@ class GitWorktreeStrategy:
                             worktree_path=str(worktree_path),
                             error=str(cleanup_error),
                         )
-                        # Both git and manual cleanup failed - raise error
-                        raise WorktreeError(
-                            f"Failed to cleanup worktree at {worktree_path}. "
-                            f"Git remove failed: {e}. Manual cleanup failed: {cleanup_error}"
-                        ) from cleanup_error
+                        # Both git and manual cleanup failed
+                        # Only raise cleanup error if there was no original exception
+                        if original_exception is None:
+                            raise WorktreeError(
+                                f"Failed to cleanup worktree at {worktree_path}. "
+                                f"Git remove failed: {e}. Manual cleanup failed: {cleanup_error}"
+                            ) from cleanup_error
+                        else:
+                            # Log but don't raise - original exception takes precedence
+                            logger.error(
+                                "worktree_cleanup_failed_during_exception_handling",
+                                worktree_path=str(worktree_path),
+                                original_error=str(original_exception),
+                                cleanup_error=str(cleanup_error),
+                            )
