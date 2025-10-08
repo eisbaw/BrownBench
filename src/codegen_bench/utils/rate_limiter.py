@@ -161,7 +161,8 @@ class RateLimiter:
             tokens: Number of tokens to release (must match acquire call)
 
         Raises:
-            ValueError: If tokens is negative or if no requests to release
+            ValueError: If tokens is negative, no requests to release,
+                       or token mismatch
         """
         if tokens < 0:
             raise ValueError(f"Token count must be non-negative, got {tokens}")
@@ -175,11 +176,18 @@ class RateLimiter:
 
             # Remove the most recent token usage if applicable
             if self.max_tokens_per_minute is not None and tokens > 0:
-                if self._token_times:
-                    # Verify we're releasing the right amount
-                    _, recorded_tokens = self._token_times[-1]
-                    if recorded_tokens == tokens:
-                        self._token_times.pop()
+                if not self._token_times:
+                    raise ValueError("No token requests to release")
+
+                # Verify we're releasing the right amount
+                _, recorded_tokens = self._token_times[-1]
+                if recorded_tokens != tokens:
+                    raise ValueError(
+                        f"Token mismatch: tried to release {tokens} tokens, "
+                        f"but last request used {recorded_tokens} tokens"
+                    )
+
+                self._token_times.pop()
 
     def reset(self) -> None:
         """Reset all rate limit counters.

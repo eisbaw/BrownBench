@@ -247,6 +247,30 @@ def test_rate_limiter_release_negative_tokens() -> None:
         limiter.release(tokens=-1)
 
 
+def test_rate_limiter_release_tokens_when_empty() -> None:
+    """Test releasing tokens when no token requests were made."""
+    limiter = RateLimiter(max_requests_per_minute=10, max_tokens_per_minute=1000)
+
+    # Acquire with no tokens
+    limiter.acquire(tokens=0)
+
+    # Try to release with tokens - should raise error since _token_times is empty
+    with pytest.raises(ValueError, match="No token requests to release"):
+        limiter.release(tokens=100)
+
+
+def test_rate_limiter_release_wrong_token_amount() -> None:
+    """Test releasing with different token amount than acquired."""
+    limiter = RateLimiter(max_requests_per_minute=10, max_tokens_per_minute=1000)
+
+    # Acquire with 100 tokens
+    limiter.acquire(tokens=100)
+
+    # Try to release with different amount - should raise error
+    with pytest.raises(ValueError, match="Token mismatch"):
+        limiter.release(tokens=50)
+
+
 def test_rate_limiter_large_token_request() -> None:
     """Test requesting tokens larger than the limit in one call."""
     limiter = RateLimiter(max_requests_per_minute=100, max_tokens_per_minute=1000)
