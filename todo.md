@@ -284,6 +284,7 @@
 - [x] Rate limiter: Added token mismatch validation in release()
 - [x] SimpleChatDUT: Fixed rate limiter usage with @retry decorator (FIXED 2025-10-08)
 - [x] SimpleChatDUT: Added rate_limiter.release() on API failure
+- [x] Remove unused type ignore comments from retry decorators
 - [ ] Cache: Add lock-free concurrent write protection (currently uses atomic rename)
 - [ ] Cache: Consider TTL/expiration for stale cache entries
 - [ ] Worktree: Add retry logic for transient git failures
@@ -291,6 +292,45 @@
 - [ ] Tournament: Add checkpoint/resume functionality for long-running tournaments
 - [ ] DUT: Add timeout protection for solve() method
 - [ ] Judge: Add circuit breaker for repeated API failures
+
+## Architecture Review Findings (2025-10-08)
+
+### Critical Issues (Must Fix)
+- [ ] Rate limiter: Fix race condition in acquire() - re-verify limits after sleep (rate_limiter.py:116-133)
+- [ ] Worktree: Fix resource leak in cleanup - preserve original exceptions (worktree.py:186-209)
+- [ ] Rate limiter: Validate token limiting enabled in release() before checking tokens (rate_limiter.py:177-190)
+
+### High Priority Issues
+- [ ] Cache: Treat corruption as cache miss, not fatal error (store.py:74-105)
+- [ ] SimpleChatDUT: Add config validation for temperature/max_tokens at init (simple_chat.py:35-59)
+- [ ] Tournament: Move validation from run() to __init__() for fail-fast (tournament.py:338-346)
+- [ ] Tournament: Don't swallow save failures - re-raise if output_dir specified (tournament.py:386-400)
+- [ ] SimpleChatDUT: Separate exception types for better error context (simple_chat.py:134-157)
+- [ ] CodeExtractor: Warn on unclosed code blocks instead of silent truncation (extractor.py:36-54)
+- [ ] ValidationExecutor: Fix timeout exception handling for stdout/stderr (executor.py:91-98)
+- [ ] JudgeOrchestrator: Validate judges list is non-empty in __init__ (orchestrator.py:26-32)
+
+### Medium Priority Issues
+- [ ] Worktree: Separate git missing vs timeout vs not-a-repo errors (worktree.py:46-56)
+- [ ] Cache: Improve temp file cleanup logging (store.py:148-155)
+- [ ] Solution: Add validation for required fields in from_dict() (solution.py:68-74)
+- [ ] SimpleChatDUT: Fix cost calculation comment date (simple_chat.py:245-261)
+- [ ] Worktree: Clarify branch vs ref parameter in create_worktree (worktree.py:67-98)
+- [ ] ValidationExecutor: Document shell=True is intentional for task commands (executor.py:69-81)
+- [ ] Tournament: Add type for progress_callback instead of Any (tournament.py:266-268)
+- [ ] JudgeOrchestrator: Clarify position swap with better variable names (orchestrator.py:58-61)
+- [ ] Cache: Add size limits and LRU eviction (store.py:157-168)
+- [ ] CodeExtractor: Document nested block limitation (extractor.py:36-54)
+- [ ] SimpleChatDUT: Use real Task or hash template instead of synthetic (simple_chat.py:269-287)
+- [ ] Tournament: Document pipeline stages in run() docstring (tournament.py:229-305)
+
+### Low Priority Issues
+- [ ] Add missing logging: cache.clear(), cache.invalidate(), executor parsers (various)
+- [ ] Add __repr__ methods for Solution, Task, DUTRating (various)
+- [ ] Standardize error message formatting with quotes around paths (various)
+- [ ] Fix TournamentResult.duration_seconds fallback behavior (tournament.py:133-135)
+- [ ] Remove or use test_output field in Solution (solution.py:40)
+- [ ] Move pricing constants to config (simple_chat.py:22-25)
 
 ## Milestones
 
