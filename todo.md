@@ -333,7 +333,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 ## Technical Debt
 
 - [ ] Async support for API calls (3-5x speedup potential)
-- [ ] Graceful shutdown handling (SIGINT/SIGTERM)
+- [x] Graceful shutdown handling (SIGINT/SIGTERM) ✅
 - [ ] TournamentConfig dataclass for base_seed, consensus_threshold
 - [ ] TrueSkill defaults to configuration
 - [ ] Streaming approach for large tournaments
@@ -356,8 +356,8 @@ See `docs/PHASE2_PROGRESS.md` for full details
 ## Missing Functionality
 
 - [ ] No async support for concurrent API calls (3-5x speedup potential)
-- [ ] No graceful shutdown handling (SIGINT/SIGTERM signals)
-- [ ] No checkpoint/resume for long-running tournaments
+- [x] No graceful shutdown handling (SIGINT/SIGTERM signals) ✅
+- [~] No checkpoint/resume for long-running tournaments (CheckpointManager done, integration pending)
 - [ ] No timeout protection for DUT.solve() method
 - [ ] No circuit breaker pattern for repeated API failures
 - [ ] No metrics/observability for production deployments (DEFER - Phase 5+ feature)
