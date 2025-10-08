@@ -276,6 +276,19 @@
 - [x] Rate limiter: Add release() method for failed request idempotency
 - [ ] Rate limiter: Consider bucket-based O(1) implementation
 - [x] Rate limiter: Add observability logging when limits hit
+- [x] Rate limiter: Add missing error checks in release() method (FIXED 2025-10-08)
+
+## Code Quality Improvements (2025-10-08 Review)
+
+- [x] Rate limiter: Fixed silent failure bug in release() when _token_times empty
+- [x] Rate limiter: Added token mismatch validation in release()
+- [ ] Cache: Add lock-free concurrent write protection (currently uses atomic rename)
+- [ ] Cache: Consider TTL/expiration for stale cache entries
+- [ ] Worktree: Add retry logic for transient git failures
+- [ ] Worktree: Document manual cleanup procedure in case of failures
+- [ ] Tournament: Add checkpoint/resume functionality for long-running tournaments
+- [ ] DUT: Add timeout protection for solve() method
+- [ ] Judge: Add circuit breaker for repeated API failures
 
 ## Milestones
 
