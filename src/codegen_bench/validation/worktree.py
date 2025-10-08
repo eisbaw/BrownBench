@@ -52,7 +52,7 @@ class GitWorktreeStrategy:
             )
             # Success - path is a valid git repo
         except FileNotFoundError as e:
-            raise WorktreeError(f"git command not found in PATH. Is git installed?") from e
+            raise WorktreeError("git command not found in PATH. Is git installed?") from e
         except subprocess.TimeoutExpired as e:
             raise WorktreeError(f"git command timed out after 5s while checking {path}") from e
         except subprocess.CalledProcessError as e:

@@ -37,5 +37,7 @@ pkgs.mkShell {
     uv pip install -e ".[dev]" > /dev/null 2>&1
     export CODEGEN_BENCH_DEV=1
     export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.zlib}/lib:$LD_LIBRARY_PATH"
+    # Unset PYTHONPATH to avoid conflicts between nix and venv packages
+    unset PYTHONPATH
   '';
 }
