@@ -282,6 +282,8 @@
 
 - [x] Rate limiter: Fixed silent failure bug in release() when _token_times empty
 - [x] Rate limiter: Added token mismatch validation in release()
+- [x] SimpleChatDUT: Fixed rate limiter usage with @retry decorator (FIXED 2025-10-08)
+- [x] SimpleChatDUT: Added rate_limiter.release() on API failure
 - [ ] Cache: Add lock-free concurrent write protection (currently uses atomic rename)
 - [ ] Cache: Consider TTL/expiration for stale cache entries
 - [ ] Worktree: Add retry logic for transient git failures
