@@ -301,14 +301,14 @@
 - [x] Rate limiter: Validate token limiting enabled in release() before checking tokens (rate_limiter.py:177-190) (FIXED 2025-10-08)
 
 ### High Priority Issues
-- [ ] Cache: Treat corruption as cache miss, not fatal error (store.py:74-105)
-- [ ] SimpleChatDUT: Add config validation for temperature/max_tokens at init (simple_chat.py:35-59)
-- [ ] Tournament: Move validation from run() to __init__() for fail-fast (tournament.py:338-346)
-- [ ] Tournament: Don't swallow save failures - re-raise if output_dir specified (tournament.py:386-400)
-- [ ] SimpleChatDUT: Separate exception types for better error context (simple_chat.py:134-157)
-- [ ] CodeExtractor: Warn on unclosed code blocks instead of silent truncation (extractor.py:36-54)
-- [ ] ValidationExecutor: Fix timeout exception handling for stdout/stderr (executor.py:91-98)
-- [ ] JudgeOrchestrator: Validate judges list is non-empty in __init__ (orchestrator.py:26-32)
+- [x] Cache: Treat corruption as cache miss, not fatal error (store.py:74-105) (FIXED 2025-10-08)
+- [x] SimpleChatDUT: Add config validation for temperature/max_tokens at init (simple_chat.py:35-59) (FIXED 2025-10-08)
+- [x] Tournament: Move validation from run() to __init__() for fail-fast (tournament.py:338-346) (FIXED 2025-10-08)
+- [x] Tournament: Don't swallow save failures - re-raise if output_dir specified (tournament.py:386-400) (FIXED 2025-10-08)
+- [x] SimpleChatDUT: Separate exception types for better error context (simple_chat.py:134-157) (FIXED 2025-10-08)
+- [x] CodeExtractor: Warn on unclosed code blocks instead of silent truncation (extractor.py:36-54) (FIXED 2025-10-08)
+- [x] ValidationExecutor: Fix timeout exception handling for stdout/stderr (executor.py:91-98) (FIXED 2025-10-08)
+- [x] JudgeOrchestrator: Validate judges list is non-empty in __init__ (orchestrator.py:26-32) (FIXED 2025-10-08)
 
 ### Medium Priority Issues
 - [ ] Worktree: Separate git missing vs timeout vs not-a-repo errors (worktree.py:46-56)
