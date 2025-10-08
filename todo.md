@@ -285,6 +285,8 @@
 - [x] SimpleChatDUT: Fixed rate limiter usage with @retry decorator (FIXED 2025-10-08)
 - [x] SimpleChatDUT: Added rate_limiter.release() on API failure
 - [x] Remove unused type ignore comments from retry decorators
+- [x] Fix PYTHONPATH conflict in shell.nix (FIXED 2025-10-08)
+- [x] Remove unnecessary f-string prefix in worktree.py (FIXED 2025-10-08)
 - [ ] Cache: Add lock-free concurrent write protection (currently uses atomic rename)
 - [ ] Cache: Consider TTL/expiration for stale cache entries
 - [ ] Worktree: Add retry logic for transient git failures
@@ -292,6 +294,7 @@
 - [ ] Tournament: Add checkpoint/resume functionality for long-running tournaments
 - [ ] DUT: Add timeout protection for solve() method
 - [ ] Judge: Add circuit breaker for repeated API failures
+- [ ] Add tests for edge-case exception handlers in cache.py (lines 113-114, 120, 176-177, 192-194)
 
 ## Architecture Review Findings (2025-10-08)
 
