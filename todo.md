@@ -158,13 +158,19 @@ See `docs/PHASE2_PROGRESS.md` for full details
 
 **Summary:** Complete budget enforcement system with pre-flight checks and configurable limits.
 
-### Container Isolation 📋
-- [ ] ContainerIsolation class
-- [ ] Build DUT container images
-- [ ] Network restriction (API proxy only)
-- [ ] Resource limits (CPU, memory)
-- [ ] Read-only mounts
-- [ ] Container cleanup after execution
+### Container Isolation ✅ DONE
+- [x] ContainerIsolation class
+- [x] Build DUT container images
+- [x] Network restriction (API proxy only)
+- [x] Resource limits (CPU, memory)
+- [x] Read-only mounts
+- [x] Container cleanup after execution
+- [x] Validation of mount paths
+- [x] Immutable configuration dataclasses
+- [x] Unit tests (33 tests, 78% coverage)
+- [x] Docker file template and documentation
+
+**Summary:** Complete Docker-based container isolation with resource limits, network restrictions, and comprehensive testing.
 
 ### API Proxy 📋
 - [ ] APIProxy server
