@@ -304,13 +304,6 @@
 - [ ] Worktree: No retry logic for transient git failures
 - [ ] SimpleChatDUT: No request timeout configuration (DEFER - feature request)
 
-## Performance Concerns
-
-- [ ] RateLimiter: O(n) token checking - consider bucket-based O(1) implementation
-- [ ] Cache: No LRU eviction - memory usage unbounded (DEFER - major feature)
-- [ ] Tournament: Loads all solutions in memory - consider streaming for large tournaments
-- [ ] Solution storage: Store full objects - consider storing IDs and loading on demand
-
 ## Security/Safety
 
 - [ ] Worktree: git commands use user-provided paths - validate/sanitize inputs (DEFER - needs input sanitization framework)
