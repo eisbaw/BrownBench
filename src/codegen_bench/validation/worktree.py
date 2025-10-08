@@ -103,7 +103,7 @@ class GitWorktreeStrategy:
 
             if result.returncode != 0:
                 self._cleanup_temp_dir(temp_dir)
-                raise WorktreeError(f"Failed to create worktree at {temp_dir}: {result.stderr}")
+                raise WorktreeError(f"Failed to create worktree at '{temp_dir}': {result.stderr}")
 
             return temp_dir
 
@@ -137,7 +137,7 @@ class GitWorktreeStrategy:
 
             if result.returncode != 0:
                 raise WorktreeError(
-                    f"Failed to remove worktree at {worktree_path}: {result.stderr}"
+                    f"Failed to remove worktree at '{worktree_path}': {result.stderr}"
                 )
 
         except subprocess.TimeoutExpired as e:
@@ -219,7 +219,7 @@ class GitWorktreeStrategy:
                         # Only raise cleanup error if there was no original exception
                         if original_exception is None:
                             raise WorktreeError(
-                                f"Failed to cleanup worktree at {worktree_path}. "
+                                f"Failed to cleanup worktree at '{worktree_path}'. "
                                 f"Git remove failed: {e}. Manual cleanup failed: {cleanup_error}"
                             ) from cleanup_error
                         else:

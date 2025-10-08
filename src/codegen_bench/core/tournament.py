@@ -116,6 +116,13 @@ class DUTRating:
             "total_tokens": self.total_tokens,
         }
 
+    def __repr__(self) -> str:
+        """Readable string representation."""
+        return (
+            f"DUTRating(dut_id={self.dut_id!r}, elo={self.elo:.1f}±{self.elo_std:.1f}, "
+            f"W/L/T={self.wins}/{self.losses}/{self.ties}, cost=${self.total_cost_usd:.4f})"
+        )
+
 
 @dataclass
 class TournamentResult:
@@ -132,7 +139,13 @@ class TournamentResult:
 
     @property
     def duration_seconds(self) -> float:
-        """Get tournament duration in seconds."""
+        """Get tournament duration in seconds.
+
+        Returns 0.0 if start_time is not set (e.g., for deserialized results).
+        Returns elapsed time if end_time is not set (tournament in progress).
+        """
+        if not self.start_time:
+            return 0.0
         return self.end_time - self.start_time if self.end_time else time.time() - self.start_time
 
     def get_leaderboard(self) -> list[DUTRating]:

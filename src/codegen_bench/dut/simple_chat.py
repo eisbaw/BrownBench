@@ -21,6 +21,7 @@ logger = structlog.get_logger(__name__)
 
 # Pricing for Claude Sonnet 4.5 (as of January 2025)
 # Source: https://www.anthropic.com/pricing
+# TODO: Move these constants to a centralized config module when config system is implemented
 CLAUDE_SONNET_4_5_INPUT_COST_PER_1K_TOKENS = 0.003  # $3.00 per million tokens
 CLAUDE_SONNET_4_5_OUTPUT_COST_PER_1K_TOKENS = 0.015  # $15.00 per million tokens
 

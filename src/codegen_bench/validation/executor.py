@@ -5,7 +5,11 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+import structlog
+
 from codegen_bench.exceptions import ValidationError
+
+logger = structlog.get_logger(__name__)
 
 
 @dataclass
@@ -30,7 +34,7 @@ class ValidationExecutor:
         """
         self.workspace = Path(workspace).resolve()
         if not self.workspace.exists():
-            raise ValidationError(f"Workspace does not exist: {self.workspace}")
+            raise ValidationError(f"Workspace does not exist: '{self.workspace}'")
 
     def run_compile(self, compile_command: str, timeout: int = 300) -> ValidationResult:
         """Run compile command.
@@ -133,6 +137,7 @@ class ValidationExecutor:
         Returns:
             Dictionary with test metrics (passed, failed, skipped, etc.)
         """
+        logger.debug("parsing_test_output", framework=framework, workspace=str(self.workspace))
         if framework == "pytest":
             return self._parse_pytest_output(output)
         elif framework == "unittest":
@@ -173,6 +178,7 @@ class ValidationExecutor:
             elif status == "error":
                 metrics["errors"] = count
 
+        logger.debug("pytest_output_parsed", metrics=metrics)
         return metrics
 
     def _parse_unittest_output(self, output: str) -> dict[str, int | str]:
@@ -211,4 +217,5 @@ class ValidationExecutor:
                 errors_count = metrics["errors"] if isinstance(metrics["errors"], int) else 0
                 metrics["passed"] = total - failed_count - errors_count
 
+        logger.debug("unittest_output_parsed", metrics=metrics)
         return metrics

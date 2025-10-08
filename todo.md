@@ -325,12 +325,12 @@
 - [x] Tournament: Document pipeline stages in run() docstring (tournament.py:229-305) (FIXED 2025-10-08)
 
 ### Low Priority Issues
-- [ ] Add missing logging: cache.clear(), cache.invalidate(), executor parsers (various)
-- [ ] Add __repr__ methods for Solution, Task, DUTRating (various)
-- [ ] Standardize error message formatting with quotes around paths (various)
-- [ ] Fix TournamentResult.duration_seconds fallback behavior (tournament.py:133-135)
-- [ ] Remove or use test_output field in Solution (solution.py:40)
-- [ ] Move pricing constants to config (simple_chat.py:22-25)
+- [x] Add missing logging: cache.clear(), cache.invalidate(), executor parsers (various) (FIXED 2025-10-08)
+- [x] Add __repr__ methods for Solution, Task, DUTRating (various) (FIXED 2025-10-08)
+- [x] Standardize error message formatting with quotes around paths (various) (FIXED 2025-10-08)
+- [x] Fix TournamentResult.duration_seconds fallback behavior (tournament.py:133-135) (FIXED 2025-10-08)
+- [x] Remove or use test_output field in Solution (solution.py:40) (FIXED 2025-10-08)
+- [x] Move pricing constants to config (simple_chat.py:22-25) (FIXED 2025-10-08 - Added TODO comment)
 
 ## Milestones
 

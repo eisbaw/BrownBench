@@ -34,10 +34,10 @@ class Solution:
     reasoning_trace: str | None = None
     iterations: int = 1
 
-    # Validation results
+    # Validation results (populated by validation pipeline if enabled)
     compiles: bool | None = None
     tests_pass: bool | None = None
-    test_output: str | None = None
+    test_output: str | None = None  # TODO: Populate with test execution output for debugging
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to dict for caching."""
@@ -88,3 +88,17 @@ class Solution:
             data["timestamp"] = datetime.fromisoformat(data["timestamp"])
 
         return cls(**data)
+
+    def __repr__(self) -> str:
+        """Readable string representation."""
+        files_count = len(self.changed_files) + len(self.new_files)
+        status = []
+        if self.compiles is not None:
+            status.append(f"compiles={self.compiles}")
+        if self.tests_pass is not None:
+            status.append(f"tests_pass={self.tests_pass}")
+        status_str = ", ".join(status) if status else "unvalidated"
+        return (
+            f"Solution(approach={self.approach_id!r}, task={self.task_id!r}, "
+            f"seed={self.seed}, files={files_count}, {status_str})"
+        )

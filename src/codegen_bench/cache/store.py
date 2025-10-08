@@ -165,7 +165,7 @@ class SolutionCache:
                 error_type=type(e).__name__,
                 error=str(e),
             )
-            raise CacheError(f"Failed to write cache file {cache_file}: {e}") from e
+            raise CacheError(f"Failed to write cache file '{cache_file}': {e}") from e
         finally:
             # Always attempt cleanup of temp file if it still exists
             # This ensures no temp file leaks even for unexpected exceptions
@@ -183,8 +183,26 @@ class SolutionCache:
 
     def clear(self) -> None:
         """Clear all cached solutions."""
+        count = 0
+        failed = 0
         for cache_file in self.cache_dir.glob("*.json"):
-            cache_file.unlink()
+            try:
+                cache_file.unlink()
+                count += 1
+            except (OSError, FileNotFoundError) as e:
+                failed += 1
+                logger.warning(
+                    "cache_clear_file_failed",
+                    cache_file=str(cache_file),
+                    error=str(e),
+                    error_type=type(e).__name__,
+                )
+        logger.info(
+            "cache_cleared",
+            cache_dir=str(self.cache_dir),
+            files_removed=count,
+            files_failed=failed,
+        )
 
     def size(self) -> int:
         """Get number of cached solutions.
@@ -218,4 +236,11 @@ class SolutionCache:
                 cache_key=key,
             )
             return True
+        logger.debug(
+            "cache_invalidate_miss",
+            dut=dut.get_metadata().id,
+            task_id=task.id,
+            seed=seed,
+            cache_key=key,
+        )
         return False

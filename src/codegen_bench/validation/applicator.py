@@ -18,7 +18,7 @@ class SolutionApplicator:
         """
         self.workspace = Path(workspace).resolve()
         if not self.workspace.exists():
-            raise ValidationError(f"Workspace does not exist: {self.workspace}")
+            raise ValidationError(f"Workspace does not exist: '{self.workspace}'")
 
     def apply(self, solution: Solution) -> None:
         """Apply solution changes to workspace idempotently.
@@ -67,7 +67,7 @@ class SolutionApplicator:
         except (OSError, PermissionError) as e:
             # OSError: general file system errors (includes IOError in Python 3.3+)
             # PermissionError: insufficient permissions
-            raise ValidationError(f"Failed to write file {rel_path}: {e}") from e
+            raise ValidationError(f"Failed to write file '{rel_path}': {e}") from e
 
     def _delete_file(self, rel_path: str) -> None:
         """Delete file from workspace.
@@ -86,7 +86,7 @@ class SolutionApplicator:
         except (OSError, PermissionError) as e:
             # OSError: file system errors
             # PermissionError: insufficient permissions
-            raise ValidationError(f"Failed to delete file {rel_path}: {e}") from e
+            raise ValidationError(f"Failed to delete file '{rel_path}': {e}") from e
 
     def apply_diff(self, diff_content: str) -> None:
         """Apply a unified diff patch to workspace.

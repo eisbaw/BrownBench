@@ -78,14 +78,14 @@ class Task:
         if not self.codebase_path.exists():
             logger.error("codebase_not_found", task_id=self.id, path=str(self.codebase_path))
             raise ValidationError(
-                f"Task {self.id}: codebase path does not exist: {self.codebase_path}"
+                f"Task {self.id}: codebase path does not exist: '{self.codebase_path}'"
             )
 
         # Check test suite if specified
         if self.test_suite_path and not self.test_suite_path.exists():
             logger.error("test_suite_not_found", task_id=self.id, path=str(self.test_suite_path))
             raise ValidationError(
-                f"Task {self.id}: test suite path does not exist: {self.test_suite_path}"
+                f"Task {self.id}: test suite path does not exist: '{self.test_suite_path}'"
             )
 
         # Check reference solution if specified
@@ -96,7 +96,7 @@ class Task:
                 path=str(self.reference_solution_path),
             )
             raise ValidationError(
-                f"Task {self.id}: reference solution path does not exist: {self.reference_solution_path}"
+                f"Task {self.id}: reference solution path does not exist: '{self.reference_solution_path}'"
             )
 
         # Validate commands can be safely parsed
@@ -149,3 +149,10 @@ class Task:
                 str(self.reference_solution_path) if self.reference_solution_path else None
             ),
         }
+
+    def __repr__(self) -> str:
+        """Readable string representation."""
+        return (
+            f"Task(id={self.id!r}, name={self.name!r}, "
+            f"project={self.project!r}, difficulty={self.difficulty!r})"
+        )

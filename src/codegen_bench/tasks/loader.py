@@ -91,7 +91,7 @@ class TaskLoader:
                 # TypeError: missing required __init__ arguments
                 # yaml.YAMLError: YAML parsing errors (includes ParserError)
                 # ValidationError: task validation failures
-                raise TaskError(f"Failed to load task from {path}: {e}") from e
+                raise TaskError(f"Failed to load task from '{path}': {e}") from e
 
         return tasks
 
