@@ -1,5 +1,6 @@
 """Tests for ElaboratePromptDUT."""
 
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
@@ -31,7 +32,7 @@ def sample_task():
         project="test_project",
         domain="testing",
         difficulty="easy",
-        codebase_path="test_project",
+        codebase_path=Path("test_project"),
         specification="Add a test function",
         constraints=["Must use pytest", "Must be concise"],
         key_files=["test.py"],
@@ -45,9 +46,9 @@ def test_elaborate_prompt_metadata():
     metadata = dut.get_metadata()
 
     assert metadata.id == "elaborate-prompt"
-    assert metadata.name == "Elaborate Prompt"
-    assert "Enhanced" in metadata.description
-    assert metadata.version == "1.0.0"
+    assert "Elaborate Prompt" in metadata.name
+    assert "brownfield" in metadata.description.lower() or "Enhanced" in metadata.description
+    assert metadata.version == "2.0.0"
 
 
 def test_elaborate_prompt_build_prompt(sample_task):
@@ -55,11 +56,10 @@ def test_elaborate_prompt_build_prompt(sample_task):
     dut = ElaboratePromptDUT(config={"api_key": "test-key"})
     prompt = dut._build_prompt(sample_task)
 
-    # Check for enhanced content
-    assert "expert software engineer" in prompt.lower()
-    assert "CRITICAL PRINCIPLES" in prompt
-    assert "MAINTAINABILITY" in prompt
-    assert "CORRECTNESS" in prompt
+    # Check for brownfield-focused content
+    assert "brownfield" in prompt.lower() or "production code" in prompt.lower()
+    assert "CRITICAL PRINCIPLES" in prompt or "SURGICAL" in prompt
+    assert "PATTERN MATCHING" in prompt or "existing conventions" in prompt.lower()
 
     # Check task details included
     assert sample_task.name in prompt
@@ -69,7 +69,7 @@ def test_elaborate_prompt_build_prompt(sample_task):
     assert "test.py" in prompt
 
     # Check for workflow guidance
-    assert "WORKFLOW" in prompt or "Analyze" in prompt
+    assert "WORKFLOW" in prompt or "Analyze" in prompt or "Study" in prompt
 
 
 def test_elaborate_prompt_solve(mock_anthropic_client, sample_task):
@@ -133,3 +133,95 @@ def test_elaborate_prompt_includes_gotchas_in_hash():
     assert metadata.prompt_hash is not None
     assert len(metadata.prompt_hash) == 16
     assert all(c in "0123456789abcdef" for c in metadata.prompt_hash)
+
+
+def test_elaborate_prompt_codebase_context_disabled():
+    """Test ElaboratePromptDUT with codebase context disabled."""
+    dut = ElaboratePromptDUT(config={"api_key": "test-key", "include_codebase_context": False})
+
+    # Create task with fake codebase path
+    task = Task(
+        id="test",
+        name="Test",
+        project="test",
+        domain="test",
+        difficulty="easy",
+        codebase_path=Path("/nonexistent"),
+        specification="Test spec",
+        key_files=["test.py"],
+    )
+
+    prompt = dut._build_prompt(task)
+
+    # Should not include codebase context section
+    assert "CODEBASE CONTEXT" not in prompt
+    assert "current versions of the key files" not in prompt
+
+
+def test_elaborate_prompt_codebase_context_enabled(sample_task, tmp_path):
+    """Test ElaboratePromptDUT with codebase context enabled."""
+    # Create a real test file
+    test_file = tmp_path / "test.py"
+    test_file.write_text("def hello():\n    return 'world'\n")
+
+    # Update sample task to use tmp_path
+    sample_task.codebase_path = tmp_path
+    sample_task.key_files = ["test.py"]
+
+    dut = ElaboratePromptDUT(config={"api_key": "test-key", "include_codebase_context": True})
+    prompt = dut._build_prompt(sample_task)
+
+    # Should include codebase context
+    assert "CODEBASE CONTEXT" in prompt
+    assert "test.py" in prompt
+    assert "def hello():" in prompt
+    assert "return 'world'" in prompt
+
+
+def test_elaborate_prompt_read_file_safely():
+    """Test safe file reading with error handling."""
+    dut = ElaboratePromptDUT(config={"api_key": "test-key"})
+
+    # Test non-existent file
+    content = dut._read_file_safely(Path("/nonexistent/file.txt"))
+    assert "File not found" in content
+
+    # Test with actual file (using a temp file)
+    import tempfile
+
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
+        f.write("line 1\nline 2\nline 3\n")
+        f.flush()
+        temp_path = Path(f.name)
+
+    try:
+        content = dut._read_file_safely(temp_path)
+        assert "line 1" in content
+        assert "line 2" in content
+    finally:
+        temp_path.unlink()
+
+
+def test_elaborate_prompt_max_context_files(sample_task, tmp_path):
+    """Test that max_context_files limits files included."""
+    # Create multiple test files
+    for i in range(10):
+        (tmp_path / f"file{i}.py").write_text(f"# File {i}\n")
+
+    sample_task.codebase_path = tmp_path
+    sample_task.key_files = [f"file{i}.py" for i in range(10)]
+
+    # Configure to include max 3 files
+    dut = ElaboratePromptDUT(config={"api_key": "test-key", "max_context_files": 3})
+    prompt = dut._build_prompt(sample_task)
+
+    # Should include first 3 files
+    assert "file0.py" in prompt
+    assert "file1.py" in prompt
+    assert "file2.py" in prompt
+
+    # Should mention remaining files not shown
+    assert "7 more files" in prompt or "Plus 7" in prompt
+
+    # Later files should not have their content included
+    assert "# File 9" not in prompt

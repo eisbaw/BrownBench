@@ -1,0 +1,39 @@
+id: task_007
+name: 'ignore: fix parallel traversal'
+project: ripgrep
+domain: bugfix
+difficulty: medium
+codebase_path: submodules/ripgrep
+specification: 'Based on commit f314b0d55f from ripgrep:
+
+
+  ignore: fix parallel traversal
+
+
+  It turns out that the previous version wasn''t quite correct. Namely, it
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the ripgrep repository, representing a typical
+
+  refactoring/enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- crates/ignore/src/walk.rs
+gotchas:
+- This is a real commit from 2020-02-20
+- Review commit message carefully for context
+expected_human_time_minutes: 30
+compile_command: cargo build
+test_command: cargo test

@@ -1,0 +1,42 @@
+id: task_010
+name: 'builtin/reflog: implement subcommand to write new entries'
+project: git
+domain: feature
+difficulty: hard
+codebase_path: submodules/git
+specification: 'Based on commit 7aa619c36f from git:
+
+
+  builtin/reflog: implement subcommand to write new entries
+
+
+  While we provide a couple of subcommands in git-reflog(1) to remove
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the git repository, representing a typical
+
+  refactoring/enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- Documentation/git-reflog.adoc
+- builtin/reflog.c
+- t/meson.build
+- t/t1421-reflog-write.sh
+gotchas:
+- This is a real commit from 2025-08-06
+- Review commit message carefully for context
+expected_human_time_minutes: 60
+compile_command: make
+test_command: make test

@@ -1,0 +1,44 @@
+id: task_009
+name: 'Stream consumers: Re-purpose seen-time, add active-time (#11099)'
+project: redis
+domain: concurrent-data-structures
+difficulty: hard
+codebase_path: submodules/redis
+specification: 'Based on commit 72e90695ec from redis:
+
+
+  Stream consumers: Re-purpose seen-time, add active-time (#11099)
+
+
+  1. "Fixed" the current code so that seen-time/idle actually refers to interaction
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the redis repository, representing a typical
+
+  refactoring/enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- src/blocked.c
+- src/rdb.c
+- src/rdb.h
+- src/stream.h
+- src/t_stream.c
+- tests/unit/type/stream-cgroups.tcl
+gotchas:
+- This is a real commit from 2022-11-30
+- Review commit message carefully for context
+expected_human_time_minutes: 90
+compile_command: make
+test_command: make test

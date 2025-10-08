@@ -1,0 +1,46 @@
+id: task_006
+name: refactor timefn
+project: zstd
+domain: refactoring
+difficulty: medium
+codebase_path: submodules/zstd
+specification: 'Based on commit bcfb7ad03c from zstd:
+
+
+  refactor timefn
+
+
+  The timer storage type is no longer dependent on OS.
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the zstd repository, representing a typical
+
+  refactoring/enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- programs/benchzstd.c
+- programs/dibio.c
+- programs/fileio_common.h
+- programs/timefn.c
+- programs/timefn.h
+- tests/decodecorpus.c
+- tests/external_matchfinder.h
+- tests/fuzzer.c
+gotchas:
+- This is a real commit from 2023-01-12
+- Review commit message carefully for context
+expected_human_time_minutes: 90
+compile_command: make
+test_command: make test

@@ -1,0 +1,39 @@
+id: task_008
+name: 'Improve handling of non-integer numeric indices (fix #2815)'
+project: jq
+domain: bugfix
+difficulty: medium
+codebase_path: submodules/jq
+specification: 'Based on commit 0e067ef936 from jq:
+
+
+  Improve handling of non-integer numeric indices (fix #2815)
+
+
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the jq repository, representing a typical
+
+  refactoring/enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- src/jv_aux.c
+- tests/jq.test
+gotchas:
+- This is a real commit from 2023-08-04
+- Review commit message carefully for context
+expected_human_time_minutes: 30
+compile_command: make
+test_command: make check
