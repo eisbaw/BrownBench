@@ -94,7 +94,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Validate test suites for new tasks (deferred)
 - [ ] Update task set configurations (deferred)
 
-## Phase 3: Judge Calibration (30% Complete)
+## Phase 3: Judge Calibration (40% Complete)
 
 ### Calibration Metrics ✅
 - [x] Agreement rate calculation
@@ -105,6 +105,17 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [x] Calibration metrics unit tests (29 tests, 99% coverage)
 
 **Summary:** All statistical metrics for judge calibration implemented and tested.
+
+### CLI Integration ✅
+- [x] `codegen-bench calibrate` CLI command
+- [x] Ground truth YAML format definition
+- [x] Load ground truth file with validation
+- [x] Generate calibration report
+- [x] Calibration command integration tests (7 tests)
+- [x] Simulation mode (85% agreement rate)
+- [ ] Run judges on calibration set (requires judge implementation)
+
+**Summary:** CLI command complete with ground truth format, validation, and simulation mode.
 
 ### Web Interface & Data Collection 📋
 - [ ] Create web interface for comparisons
@@ -120,20 +131,9 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Set up payment system ($10 per comparison)
 - [ ] Limit sessions to 30 minutes
 - [ ] Rotate task order to prevent fatigue
-- [ ] Agreement rate with ground truth metric
-- [ ] Fleiss' Kappa (inter-rater reliability)
-- [ ] Per-judge accuracy tracking
-- [ ] Confusion matrix analysis
-- [ ] Calibration metrics unit tests
-- [ ] Position bias measurement (A vs B)
 - [ ] Length bias detection & correction
 - [ ] Regression-based adjustment
 - [ ] Bias reporting in results
-- [ ] `codegen-bench calibrate` CLI command
-- [ ] Load ground truth file
-- [ ] Run judges on calibration set
-- [ ] Generate calibration report
-- [ ] Calibration command integration tests
 - [ ] Identify disagreement patterns
 - [ ] Find ambiguous criteria
 - [ ] Document failure modes
