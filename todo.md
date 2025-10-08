@@ -296,9 +296,9 @@
 ## Architecture Review Findings (2025-10-08)
 
 ### Critical Issues (Must Fix)
-- [ ] Rate limiter: Fix race condition in acquire() - re-verify limits after sleep (rate_limiter.py:116-133)
-- [ ] Worktree: Fix resource leak in cleanup - preserve original exceptions (worktree.py:186-209)
-- [ ] Rate limiter: Validate token limiting enabled in release() before checking tokens (rate_limiter.py:177-190)
+- [x] Rate limiter: Fix race condition in acquire() - re-verify limits after sleep (rate_limiter.py:116-133) (FIXED 2025-10-08)
+- [x] Worktree: Fix resource leak in cleanup - preserve original exceptions (worktree.py:186-209) (FIXED 2025-10-08)
+- [x] Rate limiter: Validate token limiting enabled in release() before checking tokens (rate_limiter.py:177-190) (FIXED 2025-10-08)
 
 ### High Priority Issues
 - [ ] Cache: Treat corruption as cache miss, not fatal error (store.py:74-105)
