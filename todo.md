@@ -334,6 +334,60 @@
 - [x] Fix TournamentResult.duration_seconds fallback behavior (tournament.py:133-135) (FIXED 2025-10-08)
 - [x] Remove or use test_output field in Solution (solution.py:40) (FIXED 2025-10-08)
 - [x] Move pricing constants to config (simple_chat.py:22-25) (FIXED 2025-10-08 - Added TODO comment)
+- [x] Remove unused type: ignore comments (FIXED 2025-10-08)
+
+## Code Review Findings (2025-10-08 Session 2)
+
+### Test Coverage Gaps (Current: 94%, Target: >95%)
+- [ ] Arena: Test custom prompt_template_path (line 34) - 88% coverage
+- [ ] Arena: Test get_prompt_version() when prompt not loaded (lines 53-55) - 88% coverage
+- [ ] Solution: Test from_dict() with missing required fields (line 84) - 80% coverage
+- [ ] Solution: Test __repr__() edge cases (lines 94-101) - 80% coverage
+- [ ] Task: Test validation edge cases (lines 55, 57, 74-75, 86-87, 93-98) - 88% coverage
+- [ ] RateLimiter: Test token race condition paths (lines 180-197) - 85% coverage
+- [ ] RateLimiter: Test edge cases in release() validation (line 85, 97, 161, 236) - 85% coverage
+
+### Code Smells
+- [ ] SimpleChatDUT: Pricing constants hardcoded (lines 22-25) - should move to config
+- [ ] Solution: test_output field has TODO comment but unused (line 40)
+- [ ] __main__.py: Zero test coverage (0%) - add integration test for CLI entry point
+- [ ] Registry: Class-level state may cause issues in parallel testing - consider instance-based design
+- [ ] Cache: No TTL/expiration mechanism - stale cache could accumulate indefinitely
+
+### Missing Functionality
+- [ ] No async support for concurrent API calls (3-5x speedup potential)
+- [ ] No graceful shutdown handling (SIGINT/SIGTERM signals)
+- [ ] No checkpoint/resume for long-running tournaments
+- [ ] No timeout protection for DUT.solve() method
+- [ ] No circuit breaker pattern for repeated API failures
+- [ ] No metrics/observability for production deployments
+
+### Documentation Gaps
+- [ ] Worktree: No troubleshooting guide for manual cleanup
+- [ ] Cache: No documentation on size limits or cache management
+- [ ] RateLimiter: No explanation of bucket-based O(1) alternative
+- [ ] Tournament: No guide on cost estimation for different scales
+
+### Potential Bugs/Edge Cases
+- [ ] Arena.load_prompt(): FileNotFoundError not explicitly handled
+- [ ] Task.from_yaml(): Missing validation for empty/malformed YAML
+- [ ] Cache: No size limit enforcement - could fill disk
+- [ ] RateLimiter: Potential thundering herd on rate limit reset
+- [ ] Worktree: No retry logic for transient git failures
+- [ ] SimpleChatDUT: No request timeout configuration
+
+### Performance Concerns
+- [ ] RateLimiter: O(n) token checking - consider bucket-based O(1) implementation
+- [ ] Cache: No LRU eviction - memory usage unbounded
+- [ ] Tournament: Loads all solutions in memory - consider streaming for large tournaments
+- [ ] Solution storage: Store full objects - consider storing IDs and loading on demand
+
+### Security/Safety
+- [ ] Executor: shell=False is good, but document security rationale more prominently
+- [ ] Worktree: git commands use user-provided paths - validate/sanitize inputs
+- [ ] Cache: Temp file creation uses mkstemp but cleanup could be more robust
+- [ ] API keys: No key rotation mechanism
+- [ ] Rate limiting: No per-user quotas for shared deployments
 
 ## Milestones
 
