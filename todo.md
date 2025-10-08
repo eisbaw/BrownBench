@@ -173,22 +173,24 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Cost tracking per DUT (integrated with BudgetEnforcer)
 - [ ] API proxy integration tests
 
-### DUT Auditing 📋
-- [ ] DUTAuditor class
-- [ ] Static analysis for dangerous patterns
-- [ ] Network access detection
-- [ ] Audit report generation
-- [ ] Integration with DUT loading
+### DUT Auditing ✅
+- [x] DUTAuditor class
+- [x] Static analysis for dangerous patterns
+- [x] Network access detection
+- [x] Audit report generation
+- [x] Integration with DUT loading
+- [x] Unit tests for DUTAuditor (19 tests, 97% coverage)
+- [x] Integration tests with DUTRegistry (7 tests, 95% coverage)
 
-### Tournament Checkpointing ⏳ In Progress
+### Tournament Checkpointing ✅
 - [x] CheckpointManager class
 - [x] CheckpointState dataclass (immutable)
 - [x] Atomic save operations
 - [x] Progress tracking and resume support
 - [x] Checkpoint unit tests (19 tests, 90% coverage)
-- [ ] Integrate checkpointing into TournamentRunner
-- [ ] Handle resume from checkpoint in tournament
-- [ ] Checkpointing integration tests
+- [x] Integrate checkpointing into TournamentRunner
+- [x] Handle resume from checkpoint in tournament
+- [x] Checkpointing integration tests (6 tests, basic functionality verified)
 - [ ] Comprehensive error taxonomy
 - [ ] Actionable error messages
 - [ ] Retry strategies
