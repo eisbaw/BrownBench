@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import pytest
+
 from codegen_bench.core.arena import (
     ALL_ARENAS,
     ARCHITECTURAL_INTEGRITY,
@@ -190,3 +192,98 @@ def test_arena_descriptions_nonempty():
     for arena in ALL_ARENAS:
         assert len(arena.description) > 0
         assert len(arena.display_name) > 0
+
+
+def test_arena_with_absolute_prompt_path(tmp_path):
+    """Test Arena with absolute prompt_template_path."""
+    # Create a temporary prompt template file
+    prompt_file = tmp_path / "custom_prompt.txt"
+    prompt_file.write_text("Task: {task_spec}\nSolution A: {solution_a}\nSolution B: {solution_b}\nWINNER:")
+
+    arena = Arena(
+        name="custom",
+        display_name="Custom Arena",
+        description="Custom test arena",
+        criteria=["Test criterion"],
+        prompt_template_path=prompt_file,  # Absolute path
+    )
+
+    prompt = arena.load_prompt(
+        task_spec="Test task",
+        solution_a="Sol A",
+        solution_b="Sol B",
+    )
+
+    assert "Test task" in prompt
+    assert "Sol A" in prompt
+    assert "Sol B" in prompt
+    assert "WINNER:" in prompt
+    assert arena.prompt_version  # Should have computed hash
+
+
+def test_get_prompt_version_without_loading():
+    """Test get_prompt_version() loads prompt if not already loaded."""
+    arena = Arena(
+        name="test_version",
+        display_name="Test Version",
+        description="Test prompt version",
+        criteria=["Test"],
+        prompt_template_path=Path("judge/prompts/maintainability.txt"),
+    )
+
+    # Initially, prompt_version should be empty
+    assert arena.prompt_version == ""
+
+    # get_prompt_version should trigger load_prompt
+    version = arena.get_prompt_version()
+
+    # Version should now be set
+    assert version
+    assert len(version) > 0
+    assert arena.prompt_version == version
+
+
+def test_get_prompt_version_after_loading():
+    """Test get_prompt_version() returns cached version after load_prompt."""
+    arena = Arena(
+        name="test_cached",
+        display_name="Test Cached",
+        description="Test cached version",
+        criteria=["Test"],
+        prompt_template_path=Path("judge/prompts/safety.txt"),
+    )
+
+    # Load prompt first
+    arena.load_prompt(
+        task_spec="Test",
+        constraints="Test",
+        solution_a="A",
+        solution_b="B",
+    )
+
+    # Prompt version should be cached
+    first_version = arena.prompt_version
+    assert first_version
+
+    # get_prompt_version should return same cached value
+    version = arena.get_prompt_version()
+    assert version == first_version
+
+
+def test_load_prompt_file_not_found():
+    """Test load_prompt raises FileNotFoundError for missing template."""
+    arena = Arena(
+        name="missing",
+        display_name="Missing Prompt",
+        description="Test missing prompt",
+        criteria=["Test"],
+        prompt_template_path=Path("nonexistent/path/to/prompt.txt"),
+    )
+
+    with pytest.raises(FileNotFoundError, match="Prompt template not found"):
+        arena.load_prompt(
+            task_spec="Test",
+            constraints="Test",
+            solution_a="A",
+            solution_b="B",
+        )

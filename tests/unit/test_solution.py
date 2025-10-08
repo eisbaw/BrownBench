@@ -2,6 +2,8 @@
 
 from datetime import datetime
 
+import pytest
+
 from codegen_bench.core.solution import Solution
 
 
@@ -90,3 +92,88 @@ def test_solution_roundtrip() -> None:
     assert restored.approach_id == original.approach_id
     assert restored.task_id == original.task_id
     assert restored.seed == original.seed
+
+
+def test_solution_from_dict_missing_required_field() -> None:
+    """Test from_dict raises ValueError when required field is missing."""
+    # Missing approach_id
+    data = {
+        "task_id": "test_001",
+        "seed": 42,
+    }
+    with pytest.raises(ValueError, match="Missing required fields"):
+        Solution.from_dict(data)
+
+    # Missing task_id
+    data = {
+        "approach_id": "test-dut",
+        "seed": 42,
+    }
+    with pytest.raises(ValueError, match="Missing required fields"):
+        Solution.from_dict(data)
+
+    # Missing seed
+    data = {
+        "approach_id": "test-dut",
+        "task_id": "test_001",
+    }
+    with pytest.raises(ValueError, match="Missing required fields"):
+        Solution.from_dict(data)
+
+
+def test_solution_repr_unvalidated() -> None:
+    """Test __repr__ for unvalidated solution."""
+    solution = Solution(
+        approach_id="test-dut",
+        task_id="test_001",
+        seed=42,
+        changed_files={"main.py": "code"},
+        new_files={"test.py": "test code"},
+    )
+    repr_str = repr(solution)
+    assert "test-dut" in repr_str
+    assert "test_001" in repr_str
+    assert "seed=42" in repr_str
+    assert "files=2" in repr_str
+    assert "unvalidated" in repr_str
+
+
+def test_solution_repr_with_validation_results() -> None:
+    """Test __repr__ with validation results."""
+    solution = Solution(
+        approach_id="test-dut",
+        task_id="test_001",
+        seed=42,
+        changed_files={"main.py": "code"},
+        compiles=True,
+        tests_pass=False,
+    )
+    repr_str = repr(solution)
+    assert "compiles=True" in repr_str
+    assert "tests_pass=False" in repr_str
+    assert "unvalidated" not in repr_str
+
+
+def test_solution_repr_partial_validation() -> None:
+    """Test __repr__ with partial validation (only compiles set)."""
+    solution = Solution(
+        approach_id="test-dut",
+        task_id="test_001",
+        seed=42,
+        compiles=False,
+    )
+    repr_str = repr(solution)
+    assert "compiles=False" in repr_str
+    # tests_pass is None, so shouldn't appear
+    assert "tests_pass" not in repr_str
+
+
+def test_solution_repr_no_files() -> None:
+    """Test __repr__ with no files changed."""
+    solution = Solution(
+        approach_id="test-dut",
+        task_id="test_001",
+        seed=42,
+    )
+    repr_str = repr(solution)
+    assert "files=0" in repr_str

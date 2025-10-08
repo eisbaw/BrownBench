@@ -44,9 +44,30 @@ class Task:
 
     @classmethod
     def from_yaml(cls, path: Path) -> "Task":
-        """Load task from YAML file."""
-        with open(path) as f:
-            data = yaml.safe_load(f)
+        """Load task from YAML file.
+
+        Args:
+            path: Path to YAML file
+
+        Returns:
+            Task instance
+
+        Raises:
+            FileNotFoundError: If YAML file does not exist
+            yaml.YAMLError: If YAML is malformed
+            ValueError: If YAML is empty or invalid
+        """
+        try:
+            with open(path) as f:
+                data = yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            raise yaml.YAMLError(f"Failed to parse YAML file '{path}': {e}") from e
+
+        if data is None:
+            raise ValueError(f"YAML file '{path}' is empty or contains only null")
+
+        if not isinstance(data, dict):
+            raise ValueError(f"YAML file '{path}' must contain a mapping/dict, got {type(data).__name__}")
 
         # Convert path strings to Path objects
         if "codebase_path" in data:

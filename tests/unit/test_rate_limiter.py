@@ -332,3 +332,15 @@ def test_rate_limiter_mixed_zero_and_nonzero_tokens() -> None:
     limiter.acquire(tokens=1)
     elapsed = time.time() - start
     assert elapsed > 58, f"Expected wait for token limit, got {elapsed}s"
+
+
+def test_rate_limiter_release_tokens_without_token_limiting() -> None:
+    """Test releasing tokens when token limiting is not enabled."""
+    limiter = RateLimiter(max_requests_per_minute=10)  # No max_tokens_per_minute
+
+    # Acquire a request
+    limiter.acquire(tokens=0)
+
+    # Try to release with tokens when token limiting is not enabled
+    with pytest.raises(ValueError, match="token limiting is not enabled"):
+        limiter.release(tokens=100)

@@ -17,12 +17,14 @@ class Arena:
     prompt_template_path: Path
     prompt_version: str = field(default="", init=False)
 
-    def load_prompt(self, **kwargs: str) -> str:
-        """Load and format prompt template.
+    def _load_template_file(self) -> str:
+        """Load the raw template file content.
 
-        Loads the prompt template from the package resources,
-        resolving the path relative to the codegen_bench package.
-        Also computes and caches the SHA-256 hash of the template.
+        Returns:
+            Raw template string
+
+        Raises:
+            FileNotFoundError: If the prompt template file does not exist
         """
         # Convert relative path to absolute by resolving from package
         if not self.prompt_template_path.is_absolute():
@@ -33,8 +35,25 @@ class Arena:
         else:
             template_path = self.prompt_template_path
 
-        with open(template_path) as f:
-            template = f.read()
+        try:
+            with open(template_path) as f:
+                return f.read()
+        except FileNotFoundError as e:
+            raise FileNotFoundError(
+                f"Prompt template not found: '{template_path}'"
+            ) from e
+
+    def load_prompt(self, **kwargs: str) -> str:
+        """Load and format prompt template.
+
+        Loads the prompt template from the package resources,
+        resolving the path relative to the codegen_bench package.
+        Also computes and caches the SHA-256 hash of the template.
+
+        Raises:
+            FileNotFoundError: If the prompt template file does not exist
+        """
+        template = self._load_template_file()
 
         # Compute and cache prompt version hash if not already set
         if not self.prompt_version:
@@ -45,13 +64,16 @@ class Arena:
     def get_prompt_version(self) -> str:
         """Get the current prompt version hash.
 
-        Loads the prompt if not already loaded to compute the hash.
+        Loads the prompt template if not already loaded to compute the hash.
+        Note: Only loads the template file, does not format it.
 
         Returns:
             SHA-256 hash (truncated) of the prompt template
         """
         if not self.prompt_version:
-            self.load_prompt()
+            template = self._load_template_file()
+            self.prompt_version = compute_prompt_hash(template)
+
         return self.prompt_version
 
 
