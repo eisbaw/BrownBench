@@ -230,5 +230,99 @@ def validate(
         console.print("[dim]Cleaned up worktree[/dim]")
 
 
+@cli.command()
+@click.argument("ground_truth_file", type=Path)
+@click.option("--judge", default="claude", help="Judge to calibrate (default: claude)")
+@click.option("--output", "-o", type=Path, help="Output file for calibration report")
+@click.option("--verbose-report", is_flag=True, help="Include detailed comparison-by-comparison results")
+@click.option("--simulate", is_flag=True, help="Use simulated judge decisions (for testing)")
+@click.pass_context
+def calibrate(
+    ctx: click.Context,
+    ground_truth_file: Path,
+    judge: str,
+    output: Path | None,
+    verbose_report: bool,
+    simulate: bool,
+) -> None:
+    """Calibrate a judge against ground truth judgments.
+
+    This command loads a ground truth dataset, runs the specified judge on
+    each comparison, and generates a calibration report showing agreement
+    rate, bias detection, and accuracy metrics.
+
+    Example:
+        codegen-bench calibrate ground_truth.yaml --judge claude --simulate
+    """
+    from codegen_bench.stats.calibration import generate_calibration_report
+    from codegen_bench.stats.ground_truth import GroundTruthDataset
+
+    console.print(f"[bold]Calibrating judge: {judge}[/bold]")
+    console.print(f"Ground truth: {ground_truth_file}")
+
+    # Load ground truth dataset
+    if not ground_truth_file.exists():
+        console.print(f"[red]Error: Ground truth file not found: {ground_truth_file}[/red]")
+        raise click.Abort()
+
+    try:
+        dataset = GroundTruthDataset.from_yaml(ground_truth_file)
+        console.print(f"\nDataset: {dataset.name} (v{dataset.version})")
+        console.print(f"Description: {dataset.description}")
+        console.print(f"Comparisons: {len(dataset.comparisons)}")
+    except (ValueError, FileNotFoundError) as e:
+        console.print(f"[red]Error loading ground truth: {e}[/red]")
+        raise click.Abort() from e
+
+    # Check if judge execution is implemented
+    if not simulate:
+        console.print("\n[red]Error: Judge execution not yet implemented.[/red]")
+        console.print("[yellow]Use --simulate flag to test with simulated decisions.[/yellow]")
+        raise click.Abort()
+
+    # Simulate judge decisions with realistic error rate
+    console.print("\n[yellow]Simulating judge decisions (85% agreement rate)...[/yellow]")
+
+    import random
+
+    random.seed(42)  # Reproducible simulation
+    judge_decisions = []
+    for comp in dataset.comparisons:
+        # 85% agreement rate simulation
+        if random.random() < 0.85:
+            judge_decisions.append(comp.ground_truth)
+        else:
+            # Random wrong decision
+            alternatives = [d for d in ["A", "B", "TIE"] if d != comp.ground_truth]
+            judge_decisions.append(random.choice(alternatives))
+
+    ground_truth = [c.ground_truth for c in dataset.comparisons]
+
+    # Generate calibration report
+    console.print("\n[bold]Calibration Results:[/bold]")
+    console.print("=" * 60)
+
+    report = generate_calibration_report(judge_decisions, ground_truth, judge_name=judge)
+    console.print(report)
+
+    # Save to file if requested
+    if output:
+        with open(output, "w") as f:
+            f.write(report)
+        console.print(f"\n[green]Report saved to: {output}[/green]")
+
+    # Verbose output
+    if verbose_report:
+        console.print("\n[bold]Detailed Comparison Results:[/bold]")
+        console.print("-" * 60)
+        for i, comp in enumerate(dataset.comparisons):
+            judge_decision = judge_decisions[i]
+            match = "✓" if judge_decision == comp.ground_truth else "✗"
+            console.print(
+                f"{match} {comp.id}: Judge={judge_decision}, Truth={comp.ground_truth} "
+                f"(Task: {comp.task_id}, Arena: {comp.arena})"
+            )
+
+
 if __name__ == "__main__":
     cli()

@@ -18,7 +18,7 @@ References:
 """
 
 from dataclasses import dataclass
-from typing import Literal, Optional
+from typing import Literal
 
 import numpy as np
 from scipy import stats
@@ -68,10 +68,10 @@ class BiasMetrics:
 
     position_bias: float
     position_bias_pvalue: float
-    length_correlation: Optional[float]
-    length_correlation_pvalue: Optional[float]
+    length_correlation: float | None
+    length_correlation_pvalue: float | None
     has_significant_position_bias: bool
-    has_significant_length_bias: Optional[bool]
+    has_significant_length_bias: bool | None
 
     def __str__(self) -> str:
         """String representation."""
