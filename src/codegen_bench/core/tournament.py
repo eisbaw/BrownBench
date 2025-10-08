@@ -12,6 +12,7 @@ import structlog
 import yaml
 
 from codegen_bench.cache.store import SolutionCache
+from codegen_bench.checkpoint import CheckpointManager, CheckpointState
 from codegen_bench.core.arena import Arena
 from codegen_bench.core.judgment import JudgmentResult
 from codegen_bench.core.solution import Solution
@@ -19,6 +20,7 @@ from codegen_bench.core.task import Task
 from codegen_bench.dut.base import CodeGenerationApproach
 from codegen_bench.judge.orchestrator import JudgeOrchestrator
 from codegen_bench.stats.ratings.bayesian_elo import BayesianELO
+from codegen_bench.utils import ShutdownHandler
 
 logger = structlog.get_logger()
 
@@ -292,6 +294,9 @@ class TournamentRunner:
         self,
         solutions: dict[tuple[str, str, int], Solution],
         progress_callback: Callable[[int], None] | None = None,
+        checkpoint_manager: CheckpointManager | None = None,
+        shutdown_handler: ShutdownHandler | None = None,
+        checkpoint_interval: int = 10,
     ) -> list[tuple[str, str, str, JudgmentResult]]:
         """Compare all solution pairs across arenas.
 
@@ -299,12 +304,17 @@ class TournamentRunner:
             solutions: Dictionary mapping (dut_id, task_id, sample_index) to Solution
             progress_callback: Optional callback called with total comparison count.
                              Signature: callback(total_comparisons: int) -> None
+            checkpoint_manager: Optional checkpoint manager for saving progress
+            shutdown_handler: Optional shutdown handler to check for interruption
+            checkpoint_interval: Save checkpoint every N comparisons (default: 10)
 
         Returns:
             List of comparisons: (dut_a_id, dut_b_id, arena_name, judgment)
         """
         comparisons: list[tuple[str, str, str, JudgmentResult]] = []
+        completed_for_checkpoint: list[tuple[str, str, str, str]] = []  # (dut_a, dut_b, task_id, arena)
         total_comparisons = 0
+        comparisons_since_checkpoint = 0
 
         for arena in self.arenas:
             for task in self.tasks:
@@ -315,6 +325,32 @@ class TournamentRunner:
 
                     # Compare all sample pairs
                     for i in range(self.samples_per_pairing):
+                        # Check for shutdown request
+                        if shutdown_handler and shutdown_handler.shutdown_requested:
+                            logger.info(
+                                "shutdown_requested",
+                                completed_comparisons=total_comparisons,
+                                message="Saving checkpoint before shutdown",
+                            )
+                            if checkpoint_manager:
+                                self._save_checkpoint(
+                                    checkpoint_manager,
+                                    comparisons,
+                                    completed_for_checkpoint,
+                                    solutions,
+                                    total_comparisons,
+                                )
+                            return comparisons
+
+                        # Skip if already completed (from checkpoint)
+                        if checkpoint_manager and checkpoint_manager.is_comparison_completed(
+                            dut_a_id, dut_b_id, task.id, arena.name
+                        ):
+                            total_comparisons += 1
+                            if progress_callback:
+                                progress_callback(total_comparisons)
+                            continue
+
                         sol_a = solutions[(dut_a_id, task.id, i)]
                         sol_b = solutions[(dut_b_id, task.id, i)]
 
@@ -324,10 +360,32 @@ class TournamentRunner:
                         # Record comparison
                         comparison = (dut_a_id, dut_b_id, arena.name, judgment)
                         comparisons.append(comparison)
+                        completed_for_checkpoint.append((dut_a_id, dut_b_id, task.id, arena.name))
                         total_comparisons += 1
+                        comparisons_since_checkpoint += 1
 
                         if progress_callback:
                             progress_callback(total_comparisons)
+
+                        # Save checkpoint periodically
+                        if (
+                            checkpoint_manager
+                            and comparisons_since_checkpoint >= checkpoint_interval
+                        ):
+                            self._save_checkpoint(
+                                checkpoint_manager,
+                                comparisons,
+                                completed_for_checkpoint,
+                                solutions,
+                                total_comparisons,
+                            )
+                            comparisons_since_checkpoint = 0
+
+        # Final checkpoint save
+        if checkpoint_manager:
+            self._save_checkpoint(
+                checkpoint_manager, comparisons, completed_for_checkpoint, solutions, total_comparisons
+            )
 
         logger.info("comparisons_complete", total_comparisons=total_comparisons)
         return comparisons
@@ -345,12 +403,78 @@ class TournamentRunner:
             dut_a_id, dut_b_id, _, judgment = comparison
             self._update_ratings(dut_a_id, dut_b_id, judgment.winner, comparison)
 
+    def _save_checkpoint(
+        self,
+        checkpoint_manager: CheckpointManager,
+        comparisons: list[tuple[str, str, str, JudgmentResult]],
+        completed_for_checkpoint: list[tuple[str, str, str, str]],
+        solutions: dict[tuple[str, str, int], Solution],
+        total_comparisons: int,
+    ) -> None:
+        """Save tournament checkpoint.
+
+        Args:
+            checkpoint_manager: Checkpoint manager to save to
+            comparisons: List of completed comparisons (for ratings)
+            completed_for_checkpoint: List of (dut_a, dut_b, task_id, arena) tuples for resume tracking
+            solutions: Dictionary of all solutions (for metrics)
+            total_comparisons: Total number of comparisons completed
+        """
+        # Extract ratings snapshot
+        ratings_snapshot = {
+            dut_id: {"mean": rating.rating.mean, "std": rating.rating.std}
+            for dut_id, rating in self.ratings.items()
+        }
+
+        # Extract DUT metrics
+        dut_metrics = {
+            dut_id: {
+                "cost": rating.total_cost_usd,
+                "time": rating.total_time_seconds,
+                "tokens": rating.total_tokens,
+            }
+            for dut_id, rating in self.ratings.items()
+        }
+
+        # Calculate totals
+        total_cost = sum(r.total_cost_usd for r in self.ratings.values())
+        total_time = sum(r.total_time_seconds for r in self.ratings.values())
+
+        # Create checkpoint state
+        state = CheckpointState(
+            completed_comparisons=tuple(completed_for_checkpoint),
+            ratings_snapshot=ratings_snapshot,
+            dut_metrics=dut_metrics,
+            total_cost_usd=total_cost,
+            total_time_seconds=total_time,
+            checkpoint_time=datetime.now(UTC).isoformat(),
+            tournament_start_time=self._tournament_start_time,
+        )
+
+        try:
+            checkpoint_manager.save(state)
+            logger.info(
+                "checkpoint_saved",
+                completed_comparisons=len(comparisons),
+                total_cost_usd=total_cost,
+            )
+        except Exception as e:
+            logger.error(
+                "checkpoint_save_failed",
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            # Don't fail the tournament if checkpoint save fails
+            # Just log the error and continue
+
     def run(
         self,
         progress_callback: Callable[[int], None] | None = None,
         output_dir: Path | None = None,
+        checkpoint_dir: Path | None = None,
+        checkpoint_interval: int = 10,
     ) -> TournamentResult:
-        """Run full tournament.
+        """Run full tournament with optional checkpointing and resume support.
 
         Tournament execution pipeline:
         1. Solution Generation: Call each DUT on each task (with samples_per_pairing iterations)
@@ -359,45 +483,131 @@ class TournamentRunner:
         2. Pairwise Comparison: Compare all DUT pairs across all arenas
            - Judges evaluate solution pairs
            - Results in n*(n-1)/2 comparisons per task per arena
+           - Saves checkpoints periodically for resumability
+           - Respects shutdown signals (SIGINT/SIGTERM) for graceful termination
         3. Rating Update: Update Bayesian ELO ratings based on comparison results
            - Tracks win/loss/tie for each DUT
            - Maintains uncertainty estimates (mean and variance)
         4. Result Aggregation: Package all results into TournamentResult
         5. Optional: Save results to disk if output_dir is specified
 
+        Checkpointing:
+        - If checkpoint_dir is provided, tournament can be resumed after interruption
+        - Checkpoints are saved every checkpoint_interval comparisons
+        - On SIGINT/SIGTERM, saves checkpoint before exiting
+        - Completed comparisons are skipped when resuming
+
         Args:
             progress_callback: Optional callback called with total comparison count.
                              Signature: callback(total_comparisons: int) -> None
             output_dir: Optional directory to save results. If provided, results will be
                        saved to {output_dir}/tournament-{timestamp}/tournament.yaml
+            checkpoint_dir: Optional directory for saving checkpoints. Enables resume
+                          functionality if tournament is interrupted.
+            checkpoint_interval: Save checkpoint every N comparisons (default: 10)
 
         Returns:
             TournamentResult with all comparisons and ratings
+
+        Raises:
+            ValueError: If checkpoint_dir exists but checkpoint is invalid
         """
-        logger.info(
-            "tournament_start",
-            num_duts=len(self.duts),
-            num_tasks=len(self.tasks),
-            num_arenas=len(self.arenas),
-            samples_per_pairing=self.samples_per_pairing,
-        )
+        # Setup checkpoint manager and shutdown handler
+        checkpoint_manager = CheckpointManager(checkpoint_dir) if checkpoint_dir else None
+        shutdown_handler = ShutdownHandler() if checkpoint_dir else None
 
-        start_time = time.time()
+        # Load checkpoint if resuming
+        resumed_comparisons: list[tuple[str, str, str, JudgmentResult]] = []
+        if checkpoint_manager and checkpoint_manager.checkpoint_exists():
+            try:
+                checkpoint_state = checkpoint_manager.load()
+                logger.info(
+                    "resuming_from_checkpoint",
+                    completed_comparisons=len(checkpoint_state.completed_comparisons),
+                    total_cost_usd=checkpoint_state.total_cost_usd,
+                    checkpoint_age_seconds=checkpoint_manager.get_checkpoint_age(),
+                )
+                self._tournament_start_time = checkpoint_state.tournament_start_time
 
-        # Step 1: Generate all solutions and collect metrics
-        solutions, metrics = self.generate_solutions()
+                # Restore ratings from checkpoint
+                for dut_id, rating_data in checkpoint_state.ratings_snapshot.items():
+                    if dut_id in self.ratings:
+                        self.ratings[dut_id].rating.mean = rating_data["mean"]
+                        self.ratings[dut_id].rating.std = rating_data["std"]
 
-        # Apply metrics to ratings
-        for dut_id, m in metrics.items():
-            self.ratings[dut_id].total_cost_usd += m.cost_usd
-            self.ratings[dut_id].total_time_seconds += m.time_seconds
-            self.ratings[dut_id].total_tokens += m.tokens
+                # Restore metrics from checkpoint
+                for dut_id, metrics_data in checkpoint_state.dut_metrics.items():
+                    if dut_id in self.ratings:
+                        self.ratings[dut_id].total_cost_usd = metrics_data["cost"]
+                        self.ratings[dut_id].total_time_seconds = metrics_data["time"]
+                        self.ratings[dut_id].total_tokens = int(metrics_data["tokens"])
 
-        # Step 2: Compare all solution pairs
-        comparisons = self.compare_solutions(solutions, progress_callback)
+            except Exception as e:
+                logger.error(
+                    "checkpoint_load_failed",
+                    error=str(e),
+                    error_type=type(e).__name__,
+                )
+                raise ValueError(f"Failed to load checkpoint: {e}") from e
+        else:
+            self._tournament_start_time = time.time()
+            logger.info(
+                "tournament_start",
+                num_duts=len(self.duts),
+                num_tasks=len(self.tasks),
+                num_arenas=len(self.arenas),
+                samples_per_pairing=self.samples_per_pairing,
+            )
 
-        # Step 3: Update ratings
-        self.update_ratings(comparisons)
+        # Register shutdown handler if checkpointing enabled
+        if shutdown_handler:
+            shutdown_handler.register()
+
+        try:
+            # Step 1: Generate all solutions and collect metrics
+            solutions, metrics = self.generate_solutions()
+
+            # Apply metrics to ratings
+            for dut_id, m in metrics.items():
+                self.ratings[dut_id].total_cost_usd += m.cost_usd
+                self.ratings[dut_id].total_time_seconds += m.time_seconds
+                self.ratings[dut_id].total_tokens += m.tokens
+
+            # Step 2: Compare all solution pairs
+            comparisons = self.compare_solutions(
+                solutions,
+                progress_callback,
+                checkpoint_manager,
+                shutdown_handler,
+                checkpoint_interval,
+            )
+
+            # Check if shutdown was requested
+            if shutdown_handler and shutdown_handler.shutdown_requested:
+                logger.warning(
+                    "tournament_interrupted",
+                    completed_comparisons=len(comparisons),
+                    message="Tournament interrupted by shutdown signal, checkpoint saved",
+                )
+                # Return partial result
+                return TournamentResult(
+                    ratings=self.ratings,
+                    comparisons=comparisons,
+                    tasks_evaluated=[t.id for t in self.tasks],
+                    arenas=[a.name for a in self.arenas],
+                    total_comparisons=len(comparisons),
+                    total_cost_usd=sum(r.total_cost_usd for r in self.ratings.values()),
+                    start_time=self._tournament_start_time,
+                    end_time=time.time(),
+                )
+
+            # Step 3: Update ratings
+            self.update_ratings(comparisons)
+
+        finally:
+            # Always unregister shutdown handler
+            if shutdown_handler:
+                shutdown_handler.unregister()
 
         logger.info("tournament_complete", total_comparisons=len(comparisons))
 
@@ -408,9 +618,21 @@ class TournamentRunner:
             arenas=[a.name for a in self.arenas],
             total_comparisons=len(comparisons),
             total_cost_usd=sum(r.total_cost_usd for r in self.ratings.values()),
-            start_time=start_time,
+            start_time=self._tournament_start_time,
             end_time=time.time(),
         )
+
+        # Delete checkpoint after successful completion
+        if checkpoint_manager:
+            try:
+                checkpoint_manager.delete()
+                logger.info("checkpoint_deleted", message="Tournament completed successfully")
+            except Exception as e:
+                logger.warning(
+                    "checkpoint_delete_failed",
+                    error=str(e),
+                    message="Failed to delete checkpoint, but tournament completed",
+                )
 
         # Save results if output directory provided
         if output_dir is not None:
