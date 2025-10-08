@@ -34,9 +34,6 @@
 - [ ] Validate tournament outputs
 - [ ] Fix bugs discovered in tournament
 - [ ] Document edge cases from tournament
-- DONE [x] Retry logic with tenacity
-- DONE [x] Rate limiting implementation
-- DONE [x] Prompt versioning with SHA-256
 
 ## Phase 2: Statistical Rigor
 
@@ -264,7 +261,6 @@
 ## Technical Debt
 
 - [ ] Async support for API calls (3-5x speedup potential)
-- DONE [x] Rate limiting implementation
 - [ ] Graceful shutdown handling (SIGINT/SIGTERM)
 - [ ] TournamentConfig dataclass for base_seed, consensus_threshold
 - [ ] TrueSkill defaults to configuration
@@ -272,21 +268,7 @@
 - [ ] Store solution IDs and load from cache on demand
 - [ ] Troubleshooting guide for worktree issues
 - [ ] Manual cleanup commands documentation
-- DONE [x] Rate limiter: Single-lock design for atomic acquire() operations
-- DONE [x] Rate limiter: Add release() method for failed request idempotency
 - [ ] Rate limiter: Consider bucket-based O(1) implementation
-- DONE [x] Rate limiter: Add observability logging when limits hit
-- DONE [x] Rate limiter: Add missing error checks in release() method (FIXED 2025-10-08)
-
-## Code Quality Improvements (2025-10-08 Review)
-
-- DONE [x] Rate limiter: Fixed silent failure bug in release() when _token_times empty
-- DONE [x] Rate limiter: Added token mismatch validation in release()
-- DONE [x] SimpleChatDUT: Fixed rate limiter usage with @retry decorator (FIXED 2025-10-08)
-- DONE [x] SimpleChatDUT: Added rate_limiter.release() on API failure
-- DONE [x] Remove unused type ignore comments from retry decorators
-- DONE [x] Fix PYTHONPATH conflict in shell.nix (FIXED 2025-10-08)
-- DONE [x] Remove unnecessary f-string prefix in worktree.py (FIXED 2025-10-08)
 - [ ] Cache: Add lock-free concurrent write protection (currently uses atomic rename)
 - [ ] Cache: Consider TTL/expiration for stale cache entries
 - [ ] Worktree: Add retry logic for transient git failures
@@ -295,98 +277,43 @@
 - [ ] DUT: Add timeout protection for solve() method
 - [ ] Judge: Add circuit breaker for repeated API failures
 - [ ] Add tests for edge-case exception handlers in cache.py (lines 113-114, 120, 176-177, 192-194)
-
-## Architecture Review Findings (2025-10-08)
-
-### Critical Issues (Must Fix)
-- DONE [x] Rate limiter: Fix race condition in acquire() - re-verify limits after sleep (rate_limiter.py:116-133) (FIXED 2025-10-08)
-- DONE [x] Worktree: Fix resource leak in cleanup - preserve original exceptions (worktree.py:186-209) (FIXED 2025-10-08)
-- DONE [x] Rate limiter: Validate token limiting enabled in release() before checking tokens (rate_limiter.py:177-190) (FIXED 2025-10-08)
-
-### High Priority Issues
-- DONE [x] Cache: Treat corruption as cache miss, not fatal error (store.py:74-105) (FIXED 2025-10-08)
-- DONE [x] SimpleChatDUT: Add config validation for temperature/max_tokens at init (simple_chat.py:35-59) (FIXED 2025-10-08)
-- DONE [x] Tournament: Move validation from run() to __init__() for fail-fast (tournament.py:338-346) (FIXED 2025-10-08)
-- DONE [x] Tournament: Don't swallow save failures - re-raise if output_dir specified (tournament.py:386-400) (FIXED 2025-10-08)
-- DONE [x] SimpleChatDUT: Separate exception types for better error context (simple_chat.py:134-157) (FIXED 2025-10-08)
-- DONE [x] CodeExtractor: Warn on unclosed code blocks instead of silent truncation (extractor.py:36-54) (FIXED 2025-10-08)
-- DONE [x] ValidationExecutor: Fix timeout exception handling for stdout/stderr (executor.py:91-98) (FIXED 2025-10-08)
-- DONE [x] JudgeOrchestrator: Validate judges list is non-empty in __init__ (orchestrator.py:26-32) (FIXED 2025-10-08)
-
-### Medium Priority Issues
-- DONE [x] Worktree: Separate git missing vs timeout vs not-a-repo errors (worktree.py:46-56) (FIXED 2025-10-08)
-- DONE [x] Cache: Improve temp file cleanup logging (store.py:148-155) (FIXED 2025-10-08)
-- DONE [x] Solution: Add validation for required fields in from_dict() (solution.py:68-74) (FIXED 2025-10-08)
-- DONE [x] SimpleChatDUT: Fix cost calculation comment date (simple_chat.py:245-261) (FIXED 2025-10-08)
-- DONE [x] Worktree: Clarify branch vs ref parameter in create_worktree (worktree.py:67-98) (FIXED 2025-10-08)
-- DONE [x] ValidationExecutor: Document shell=False security rationale (executor.py:69-81) (FIXED 2025-10-08)
-- DONE [x] Tournament: Add type for progress_callback instead of Any (tournament.py:266-268) (FIXED 2025-10-08)
-- DONE [x] JudgeOrchestrator: Clarify position swap with better variable names (orchestrator.py:58-61) (FIXED 2025-10-08)
-- [ ] Cache: Add size limits and LRU eviction (store.py:157-168) (DEFER - major feature)
-- DONE [x] CodeExtractor: Document nested block limitation (extractor.py:36-54) (FIXED 2025-10-08)
-- DONE [x] SimpleChatDUT: Use real Task or hash template instead of synthetic (simple_chat.py:269-287) (FIXED 2025-10-08)
-- DONE [x] Tournament: Document pipeline stages in run() docstring (tournament.py:229-305) (FIXED 2025-10-08)
-
-### Low Priority Issues
-- DONE [x] Add missing logging: cache.clear(), cache.invalidate(), executor parsers (various) (FIXED 2025-10-08)
-- DONE [x] Add __repr__ methods for Solution, Task, DUTRating (various) (FIXED 2025-10-08)
-- DONE [x] Standardize error message formatting with quotes around paths (various) (FIXED 2025-10-08)
-- DONE [x] Fix TournamentResult.duration_seconds fallback behavior (tournament.py:133-135) (FIXED 2025-10-08)
-- DONE [x] Remove or use test_output field in Solution (solution.py:40) (FIXED 2025-10-08)
-- DONE [x] Move pricing constants to config (simple_chat.py:22-25) (FIXED 2025-10-08 - Added TODO comment)
-- DONE [x] Remove unused type: ignore comments (FIXED 2025-10-08)
-
-## Code Review Findings (2025-10-08 Session 2)
-
-### Test Coverage Gaps (Current: 95%, Target: >95%)
-- DONE [x] Arena: Test custom prompt_template_path (line 34) - 100% coverage (FIXED 2025-10-08)
-- DONE [x] Arena: Test get_prompt_version() when prompt not loaded (lines 53-55) - 100% coverage (FIXED 2025-10-08)
-- DONE [x] Solution: Test from_dict() with missing required fields (line 84) - 100% coverage (FIXED 2025-10-08)
-- DONE [x] Solution: Test __repr__() edge cases (lines 94-101) - 100% coverage (FIXED 2025-10-08)
-- DONE [x] Task: Test validation edge cases (lines 55, 57, 74-75, 86-87, 93-98) - 100% coverage (FIXED 2025-10-08)
-- DONE [x] RateLimiter: Test token race condition paths (lines 180-197) - existing tests adequate (VERIFIED 2025-10-08)
-- DONE [x] RateLimiter: Test edge cases in release() validation (line 85, 97, 161, 236) - 78% coverage (FIXED 2025-10-08)
-
-### Code Smells
-- [ ] SimpleChatDUT: Pricing constants hardcoded (lines 22-25) - TODO comment exists (simple_chat.py:24) - needs config system
-- [ ] Solution: test_output field has TODO comment but unused (line 40) - TODO comment exists (solution.py:40) - remove or implement
-- [ ] __main__.py: Zero test coverage (0% verified in QA report) - integration tests exist but don't cover entry point directly
-- REVIEWED [x] Registry: Class-level state acceptable - thread-safe with RLock, optional convenience registry, documented testing limitations
+- [ ] Cache: Add size limits and LRU eviction (DEFER - major feature)
+- [ ] Registry: Class-level state may cause issues in parallel testing - consider instance-based design
 - [ ] Cache: No TTL/expiration mechanism - stale cache could accumulate indefinitely (DEFER - major feature)
 
-### Missing Functionality
-- [ ] No async support for concurrent API calls (3-5x speedup potential) (tracked in line 266)
-- [ ] No graceful shutdown handling (SIGINT/SIGTERM signals) (tracked in line 268)
-- [ ] No checkpoint/resume for long-running tournaments (tracked in line 294)
-- [ ] No timeout protection for DUT.solve() method (tracked in line 295)
-- [ ] No circuit breaker pattern for repeated API failures (tracked in line 296)
+## Missing Functionality
+
+- [ ] No async support for concurrent API calls (3-5x speedup potential)
+- [ ] No graceful shutdown handling (SIGINT/SIGTERM signals)
+- [ ] No checkpoint/resume for long-running tournaments
+- [ ] No timeout protection for DUT.solve() method
+- [ ] No circuit breaker pattern for repeated API failures
 - [ ] No metrics/observability for production deployments (DEFER - Phase 5+ feature)
 
-### Documentation Gaps
-- [ ] Worktree: No troubleshooting guide for manual cleanup (tracked in line 273)
+## Documentation Gaps
+
+- [ ] Worktree: No troubleshooting guide for manual cleanup
 - [ ] Cache: No documentation on size limits or cache management (DEFER - pending cache size feature)
-- [ ] RateLimiter: No explanation of bucket-based O(1) alternative (tracked in line 277)
+- [ ] RateLimiter: No explanation of bucket-based O(1) alternative
 - [ ] Tournament: No guide on cost estimation for different scales (DEFER - Phase 5 documentation)
 
-### Potential Bugs/Edge Cases
-- DONE [x] Arena.load_prompt(): FileNotFoundError not explicitly handled (FIXED 2025-10-08)
-- DONE [x] Task.from_yaml(): Missing validation for empty/malformed YAML (FIXED 2025-10-08)
-- DONE [x] Arena: Code duplication in get_prompt_version() (FIXED 2025-10-08 - refactored with _load_template_file helper)
-- [ ] Cache: No size limit enforcement - could fill disk (DEFER - major feature, see line 325)
+## Potential Bugs/Edge Cases
+
+- [ ] Cache: No size limit enforcement - could fill disk (DEFER - major feature)
 - [ ] RateLimiter: Potential thundering herd on rate limit reset (DEFER - edge case optimization)
-- [ ] Worktree: No retry logic for transient git failures (tracked in line 292)
+- [ ] Worktree: No retry logic for transient git failures
 - [ ] SimpleChatDUT: No request timeout configuration (DEFER - feature request)
 
-### Performance Concerns
-- [ ] RateLimiter: O(n) token checking - consider bucket-based O(1) implementation (tracked in line 277)
-- [ ] Cache: No LRU eviction - memory usage unbounded (DEFER - major feature, see line 325)
-- [ ] Tournament: Loads all solutions in memory - consider streaming for large tournaments (tracked in line 271)
-- [ ] Solution storage: Store full objects - consider storing IDs and loading on demand (tracked in line 272)
+## Performance Concerns
 
-### Security/Safety
-- DONE [x] Executor: shell=False is good, but document security rationale more prominently (FIXED 2025-10-08, see line 322)
+- [ ] RateLimiter: O(n) token checking - consider bucket-based O(1) implementation
+- [ ] Cache: No LRU eviction - memory usage unbounded (DEFER - major feature)
+- [ ] Tournament: Loads all solutions in memory - consider streaming for large tournaments
+- [ ] Solution storage: Store full objects - consider storing IDs and loading on demand
+
+## Security/Safety
+
 - [ ] Worktree: git commands use user-provided paths - validate/sanitize inputs (DEFER - needs input sanitization framework)
-- DONE [x] Cache: Temp file creation uses mkstemp but cleanup could be more robust (FIXED 2025-10-08, see lines 318, 170-182)
 - [ ] API keys: No key rotation mechanism (DEFER - feature request)
 - [ ] Rate limiting: No per-user quotas for shared deployments (DEFER - feature request)
 
