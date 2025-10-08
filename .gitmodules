@@ -1,0 +1,39 @@
+[submodule "submodules/git"]
+	path = submodules/git
+	url = https://github.com/git/git.git
+[submodule "submodules/nginx"]
+	path = submodules/nginx
+	url = https://github.com/nginx/nginx.git
+[submodule "submodules/redis"]
+	path = submodules/redis
+	url = https://github.com/redis/redis.git
+[submodule "submodules/openssh"]
+	path = submodules/openssh
+	url = https://github.com/openssh/openssh-portable.git
+[submodule "submodules/tmux"]
+	path = submodules/tmux
+	url = https://github.com/tmux/tmux.git
+[submodule "submodules/jq"]
+	path = submodules/jq
+	url = https://github.com/jqlang/jq.git
+[submodule "submodules/curl"]
+	path = submodules/curl
+	url = https://github.com/curl/curl.git
+[submodule "submodules/ripgrep"]
+	path = submodules/ripgrep
+	url = https://github.com/BurntSushi/ripgrep.git
+[submodule "submodules/zstd"]
+	path = submodules/zstd
+	url = https://github.com/facebook/zstd.git
+[submodule "submodules/haproxy"]
+	path = submodules/haproxy
+	url = https://github.com/haproxy/haproxy.git
+[submodule "submodules/containerd"]
+	path = submodules/containerd
+	url = https://github.com/containerd/containerd.git
+[submodule "submodules/etcd"]
+	path = submodules/etcd
+	url = https://github.com/etcd-io/etcd.git
+[submodule "submodules/sqlite"]
+	path = submodules/sqlite
+	url = https://github.com/sqlite/sqlite.git

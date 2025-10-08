@@ -1,0 +1,243 @@
+Commit candidates for sqlite
+================================================================================
+
+SHA: 32933278fda156647540f553ed074b2649b6f5d6
+Author: drh
+Date: 2025-01-31
+Subject: Three new options to sqlite3_db_config():  ATTACH_CREATE, ATTACH_WRITE, and COMMENTS.
+Changes: +153/-48 (total: 201, files: 10)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 56da8772bdd414e68cdb6b79ca6a761418e09e06
+Author: stephan
+Date: 2025-04-15
+Subject: Further cleanups and code consolidation between teaish.tcl and sqlite-config.tcl parts.
+Changes: +94/-109 (total: 203, files: 7)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 7b9407af9037776d7bb3dc4ae50fa92875dabf2e
+Author: stephan
+Date: 2025-03-07
+Subject: os_win.c patches for Cygwin (described in the cygwin-fixes branch wiki page). Makefile.msc's test target on trunk fails the same 13 tests as this branch.
+Changes: +116/-81 (total: 197, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 5c945264b0dd500f2d301b2fb82394d20af5bb85
+Author: stephan
+Date: 2024-11-22
+Subject: Move handling of the tempstore feature flag into the OPT_FEATURE_FLAGS list and remove the CFLAGS.libsqlite3 makefile var which exists solely to account for the tempstore being tracked separately from the other feature flags.
+Changes: +96/-107 (total: 203, files: 5)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: bcd6d5d393ddcce137156a7f73d723e4d3e9ca3f
+Author: dan
+Date: 2024-09-27
+Subject: Allow UPDATEs of unindexed columns in fts5 contentless_unindexed=1 tables. Testing to come.
+Changes: +146/-51 (total: 197, files: 6)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 7cf1b290652ff8cfc1c6bac052c6ed9c74017777
+Author: stephan
+Date: 2025-04-05
+Subject: Refactor proj-make-from-dot-in and friends to be more useful and remove some annoying limitations.
+Changes: +148/-48 (total: 196, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 5d60f47001bf64b48abac68ed59621e528144ea4
+Author: stephan
+Date: 2025-02-25
+Subject: Approximately 50 typo fixes, spanning the whole tree, contributed via [forum:006c8fa165083ac3|forum post 006c8fa165083ac3] and individually checked for correctness. Affects only code comments, docs, and a single line of debug output in a test app.
+Changes: +98/-98 (total: 196, files: 44)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: ef86b942b9ffbfc2086da7865effea3e7950c7a0
+Author: drh
+Date: 2025-02-17
+Subject: Code changes that make it easier to prove that no 32-bit integer overflows happen during memory allocation.  No problems fixed; this change is just to make future maintenance easier.
+Changes: +111/-85 (total: 196, files: 21)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: d2a88e961a78582050bd56e3676bf54fef01fb3f
+Author: dan
+Date: 2024-10-01
+Subject: Rationalize code further. And add tests.
+Changes: +151/-53 (total: 204, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 3a94a007686ae46ae32d1740609293b5aeb55f20
+Author: stephan
+Date: 2025-09-26
+Subject: Get wasmfs build working in the new setup. Disable the custom wasm loader because its generated makefile code is currently broken.
+Changes: +45/-160 (total: 205, files: 5)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 522ce567348a34e5e7dd02ea0d18b6d63c4f8d1a
+Author: stephan
+Date: 2025-07-16
+Subject: wasm: remove some extraneous levels of makefile var and fix the (unsupported) wasmfs speedtest1 build to account for var renaming which happened long before this.
+Changes: +103/-92 (total: 195, files: 6)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 08f1ba0767d6bfe1cf098e8e81aa74681277ec0f
+Author: dan
+Date: 2024-09-27
+Subject: Fix a problem with UPDATEs that do not modify all UNINDEXED columns of a contentless_delete=1, contentless_unindexed=1 table.
+Changes: +174/-32 (total: 206, files: 5)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 22f9ca64dbc0dabda72f8b1b5305c8d846d8e7a7
+Author: stephan
+Date: 2025-09-20
+Subject: Get about 1/3rd of the tests running with MEMORY64=1, but the code noise level added by the BigInt/Number discrepancy is making this very unattractive. There are apparently irreconcilable differences between MEMORY64=1 and 2, in that they have different argument type expectations for methods such as WebAssembly.Table.get(), where MEMORY64=1 requires a BigInt a MEMORY64=2 requires a Number. We have no way to make that distinction from the JS code, and don't know what other APIs are affected by that quirk.
+Changes: +113/-80 (total: 193, files: 9)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: cf0ba9465708025ffcf04c3ca3629704ca7e4e80
+Author: dan
+Date: 2025-09-08
+Subject: Merge trunk changes into this branch.
+Changes: +171/-36 (total: 207, files: 6)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 1e3a862b79ebf4314f0d61674f9382913a653a68
+Author: drh
+Date: 2025-07-03
+Subject: Merge the latest trunk fixes and enhancements into the empty-table-optimizations branch
+Changes: +165/-28 (total: 193, files: 7)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: d7324103b196c572a98724a5658970b4000b8c39
+Author: drh
+Date: 2025-05-03
+Subject: Enhance sqlite3_rsync so that if the first attempt to invoke a copy of itself on the remote system using ssh fails, try again after augmenting the PATH.  This enables sqlite3_rsync to work without the --exe option when the remote system is a Mac.
+Changes: +143/-64 (total: 207, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: a55901a27cf3de084c906466f0e126e76be0de64
+Author: drh
+Date: 2024-09-24
+Subject: Port sqldiff over to use sqlite3_stdio.
+Changes: +106/-102 (total: 208, files: 8)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: ef565295f56e125894d36a26437500c122bd94bd
+Author: stephan
+Date: 2025-09-25
+Subject: Wasm build deps fixes.
+Changes: +115/-76 (total: 191, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 50815f8ba4e19f6f2268a6f04d45309727340932
+Author: stephan
+Date: 2025-09-21
+Subject: Fix a StructType.dispose()/ondispose() memleak in Jaccwabyt bindings in 64-bit builds and update its docs for 64-bit additions. Remove the parts of tester1.js related to skipping specific tests in 64-bit builds.
+Changes: +93/-98 (total: 191, files: 5)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 0247e15f69b0733a661bb08d4e9c1c62b7b39fdd
+Author: dan
+Date: 2025-09-13
+Subject: Updates to where.c to handle vtabs in joins more similarly to regular tables.
+Changes: +156/-35 (total: 191, files: 10)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 752df4c49b92ff78ff86a5fa33759da6d08b5d9b
+Author: stephan
+Date: 2024-11-14
+Subject: Remove unused sqlite_cfg.h.in (sqlite_cfg.h gets generated without an input template).
+Changes: +7/-202 (total: 209, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 1ab3d7eafde74b4c39b2c3e7c29201bb805f198b
+Author: stephan
+Date: 2025-09-22
+Subject: Cleanups and docs in the internal parts of the JS lib bootstrapping. More tinkering with the custom (but still disabled) wasm file loader.
+Changes: +130/-80 (total: 210, files: 10)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 7423ecb0a9cf5a0998b605067617dd6a15f82c77
+Author: dan
+Date: 2025-07-29
+Subject: Fix SQLITE_OMIT_WAL builds on windows.
+Changes: +105/-105 (total: 210, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: a20c09c477da10497459093cd6fc92f097378d69
+Author: stephan
+Date: 2025-04-29
+Subject: Upstream teaish for a tcl portability fix on Haiku and a much nicer impl of proj-tclConfig-sh-to-autosetup.
+Changes: +122/-88 (total: 210, files: 8)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 816f4b9cc1db6aa6b55a8455f3a982133fcd3cde
+Author: stephan
+Date: 2024-10-19
+Subject: Generic build cleanups.
+Changes: +87/-103 (total: 190, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: ad8ec9db63f0da294625211d6f261d99685fb971
+Author: drh
+Date: 2024-08-31
+Subject: Avoid unnecessary sort operations when running one of the percentile aggregates as a window function.
+Changes: +149/-61 (total: 210, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: e4f7af190824bfaeeb81f47fbbed5d9588cd3f8a
+Author: drh
+Date: 2025-02-24
+Subject: Only use unistr() in columnar formats when strictly needed. Do not use unistr() in insert mode when --escape is off. More test cases.
+Changes: +199/-12 (total: 211, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 51770439ffb74a9470b2acc860f3f95442653bd1
+Author: stephan
+Date: 2025-02-24
+Subject: Slightly simplify auto.def and autoconf/auto.def.
+Changes: +108/-104 (total: 212, files: 5)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 87b90921b6e0bd0c415bd6723a9d90b50bfd2747
+Author: jan.nijtmans
+Date: 2025-03-27
+Subject: In Tcl, always use eq/ne for comparing strings, not ==/!=
+Changes: +93/-93 (total: 186, files: 38)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 17e7e16b3b09867ce07f701722414e009e1d7164
+Author: stephan
+Date: 2024-11-14
+Subject: Remove unused sqlite_cfg.h.in from the build.
+Changes: +10/-204 (total: 214, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+

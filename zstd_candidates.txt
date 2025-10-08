@@ -1,0 +1,243 @@
+Commit candidates for zstd
+================================================================================
+
+SHA: bcfb7ad03c47d3018eeaec2c68be9d37dc114151
+Author: Yann Collet
+Date: 2023-01-12
+Subject: refactor timefn
+Changes: +94/-106 (total: 200, files: 8)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 2d4cff69c439d40b2bb39300f003522da8f2c6ab
+Author: Dave Vasilevsky
+Date: 2025-05-06
+Subject: seekable_format: Make parallel_compression use memory properly
+Changes: +119/-80 (total: 199, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: d9553fd2180535a11dcb4e2f5a3197202befc2c0
+Author: Yann Collet
+Date: 2024-10-31
+Subject: elevated ZSTD_getErrorCode() to stable status
+Changes: +109/-92 (total: 201, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 15f32ad74ccf1f10efc93fdc4a180e7eba3e387e
+Author: Nick Terrell
+Date: 2022-12-14
+Subject: [fileio] Separate parameter adaption from display update rate
+Changes: +108/-93 (total: 201, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 07a2a33135a5f5fd99c7f69e7dc0147c6894d252
+Author: Nick Terrell
+Date: 2023-03-07
+Subject: Add ZSTD_set{C,F,}Params() helper functions
+Changes: +178/-20 (total: 198, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 97f63ce2b558edb44c290b0d3a3385f7abe809c4
+Author: Yann Collet
+Date: 2022-12-16
+Subject: added unit tests for compressBound()
+Changes: +109/-89 (total: 198, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: a5bce4ae84daa5885e61753fa98903964c3348bd
+Author: Yann Collet
+Date: 2024-09-03
+Subject: XP: add a pre-splitter
+Changes: +188/-8 (total: 196, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 47edd0acf4ec6a6c2c9b4fc05fbd3de2d2252c59
+Author: Yann Collet
+Date: 2024-12-16
+Subject: removed fullbench-dll project from visual solutions
+Changes: +0/-195 (total: 195, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: ebba9ff4259d874030cce14c6a34e988e5679a50
+Author: Yann Collet
+Date: 2023-01-03
+Subject: update regression results
+Changes: +105/-102 (total: 207, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 678335c4f30a05857a94ac285c1d2eb6ce52cb88
+Author: Jon Palmisciano
+Date: 2022-12-20
+Subject: Rewrite help output to improve readability
+Changes: +103/-90 (total: 193, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 8c38bda9357d9b84e03a1c634090cedcc2ada939
+Author: Yann Collet
+Date: 2024-10-11
+Subject: Merge pull request #4165 from facebook/cspeed_cmov
+Changes: +120/-72 (total: 192, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 81b86a2024c80c1fc69bb6a76407628e063917ed
+Author: W. Felix Handte
+Date: 2023-04-19
+Subject: NULL Out Block Compressor Table Entries When Excluded
+Changes: +176/-15 (total: 191, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 7616e39f3b5618a20d2c8d059f1369283838cbce
+Author: Yann Collet
+Date: 2022-01-20
+Subject: adding traces to better track processing of literals
+Changes: +135/-55 (total: 190, files: 5)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 165e52ce627169e285c06d1d7879623fb75fcadd
+Author: Yann Collet
+Date: 2025-03-24
+Subject: first implementation supporting Process Substitution
+Changes: +117/-72 (total: 189, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 7630870b4747bc90cba2aa90fea0df4a89bfabc3
+Author: Yann Collet
+Date: 2025-03-24
+Subject: second implementation, better structured for improved maintenance
+Changes: +104/-84 (total: 188, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 50cdf84f58e1d8f989877db453fdfe9d63c1925e
+Author: W. Felix Handte
+Date: 2023-04-19
+Subject: Macro-Exclude Block Compressors from Declaration/Definition
+Changes: +185/-3 (total: 188, files: 8)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 0cda0100ea4b9d87eeaaf68e7d192fbbff4f2ab2
+Author: Pavel P
+Date: 2025-01-24
+Subject: fix formatting
+Changes: +92/-95 (total: 187, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 8e4400463adc7bc7633641d6a485cfef4f28bc31
+Author: Arpad Panyik
+Date: 2025-07-08
+Subject: Improve ZSTD_get1BlockSummary
+Changes: +171/-13 (total: 184, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 1c42844668a4e269b5b656270ed61d2e51991c6a
+Author: Felix Handte
+Date: 2023-02-16
+Subject: Merge pull request #3479 from felixhandte/faster-file-ops
+Changes: +152/-64 (total: 216, files: 11)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 8c85b29e3236d0f0be00e59de004d7297c4fddf0
+Author: Yann Collet
+Date: 2023-01-23
+Subject: disable --rm on -o command
+Changes: +118/-66 (total: 184, files: 8)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 7fbe60d577802394137201b689263e8aa9a62080
+Author: Dirk Müller
+Date: 2022-03-10
+Subject: Split help in long and short version, cleanup formatting
+Changes: +101/-116 (total: 217, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: a5a2418df4e41a826e87ef8ea2205fc2041ac0d2
+Author: W. Felix Handte
+Date: 2023-02-03
+Subject: Introduce Variants of Some Functions that Take Optional File Descriptors
+Changes: +129/-53 (total: 182, files: 10)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 9f58241dcc9f0f7882347ec5dc5560e41727b8c4
+Author: Yann Collet
+Date: 2023-03-28
+Subject: updated version number to v1.5.5
+Changes: +132/-88 (total: 220, files: 5)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: c60dcedcc91da9bb7550f237f79ee001ca6d1a75
+Author: Yann Collet
+Date: 2023-06-16
+Subject: adapted long decoder to new decodeSequences
+Changes: +21/-158 (total: 179, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: c7269add7eaf028ed828d9af41e732cf01993aad
+Author: Nick Terrell
+Date: 2023-11-17
+Subject: [huf] Improve fast huffman decoding speed in linux kernel
+Changes: +109/-66 (total: 175, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: e0fc9fd90b56fe0aa35b5dece85a45478b05f7de
+Author: daniellerozenblit
+Date: 2023-03-09
+Subject: Merge pull request #3486 from daniellerozenblit/patch-from-low-memory-mode
+Changes: +149/-26 (total: 175, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 3d25502c2d29b0f755519ae4276b7aaf2ce28d88
+Author: Felix Handte
+Date: 2023-01-20
+Subject: Merge pull request #3432 from felixhandte/fix-perms
+Changes: +142/-83 (total: 225, files: 12)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: b772f53952fa167e3c8d5630b26397e8d4fb4c5b
+Author: Dominique Pelle
+Date: 2022-03-12
+Subject: Typo and grammar fixes
+Changes: +113/-113 (total: 226, files: 52)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: e9dd923fa4b87db64ff6c3681194967d5eaaa264
+Author: Yann Collet
+Date: 2022-01-21
+Subject: only declare debug functions in debug mode
+Changes: +99/-75 (total: 174, files: 5)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 482689b995bd6afb4a7b335bb80b9e60f501e3c2
+Author: Danielle Rozenblit
+Date: 2022-12-20
+Subject: huf log speed optimization: unidirectional scan of logs + break when regressing
+Changes: +96/-77 (total: 173, files: 21)
+Size: medium
+--------------------------------------------------------------------------------
+

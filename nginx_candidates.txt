@@ -1,0 +1,243 @@
+Commit candidates for nginx
+================================================================================
+
+SHA: ae58d87c0151551a269b2b00697c1deb607de11e
+Author: Sergey Kandaurov
+Date: 2021-06-16
+Subject: QUIC: updated specification references.
+Changes: +128/-70 (total: 198, files: 11)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 013880bbdaa220aa245a327f16b5bf5a608bfd98
+Author: Roman Arutyunyan
+Date: 2021-04-19
+Subject: QUIC: renamed stream variables from sn to qs.
+Changes: +99/-99 (total: 198, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 812a0b69a072119de75d57ebdb222f540952c423
+Author: Sergey Kandaurov
+Date: 2020-02-28
+Subject: QUIC add_handshake_data callback, varint routines.
+Changes: +153/-45 (total: 198, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: f9a7e7cc11e71b2c62d4c5b9ac4feb7e92913c64
+Author: Roman Arutyunyan
+Date: 2024-11-07
+Subject: QUIC: CUBIC congestion control.
+Changes: +185/-12 (total: 197, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: c67400316626a7375b15dc3068fa8c291e3838d9
+Author: Vladimir Homutov
+Date: 2022-01-25
+Subject: Core: made the ngx_sendmsg() function non-static.
+Changes: +127/-70 (total: 197, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: fef33604662c4722a2bf0d682f4a0526eb20a692
+Author: Roman Arutyunyan
+Date: 2021-01-28
+Subject: QUIC: refactored packet processing.
+Changes: +107/-96 (total: 203, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: e4a062b18699c18f570c736e7cbb4245b0659bb6
+Author: Sergey Kandaurov
+Date: 2024-03-22
+Subject: Stream: using ngx_stream_ssl_srv_conf_t *sscf naming convention.
+Changes: +98/-98 (total: 196, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: fac4c7bdf53ee7d8fec6568f1e9fecefcde6feba
+Author: Maxim Dounin
+Date: 2019-10-17
+Subject: Events: available bytes calculation via ioctl(FIONREAD).
+Changes: +193/-12 (total: 205, files: 17)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 20c35434ef8d185cc70e8d68ef4730ce08f8b7d6
+Author: Maxim Dounin
+Date: 2021-12-27
+Subject: Simplified sendfile(SF_NODISKIO) usage.
+Changes: +33/-174 (total: 207, files: 8)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 5e31cdbb98466055ce27d4596b5e5a1406fc83d4
+Author: Roman Arutyunyan
+Date: 2022-01-31
+Subject: QUIC: introduced explicit stream states.
+Changes: +117/-75 (total: 192, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: a6fb8fe85077bd10e11231c70ece803284890520
+Author: Roman Arutyunyan
+Date: 2021-10-18
+Subject: HTTP/3: allowed QUIC stream connection reuse.
+Changes: +154/-38 (total: 192, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 67d160bf25e02ba6679bb6c3b9cbdfeb29b759de
+Author: Maxim Dounin
+Date: 2021-08-29
+Subject: Request body: reading body buffering in filters.
+Changes: +182/-26 (total: 208, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 105de9762f840bf97d939a931b47bba9a9bfe226
+Author: Vladimir Homutov
+Date: 2021-07-15
+Subject: Core: made the ngx_sendmsg() function non-static.
+Changes: +124/-68 (total: 192, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: eae5e4dd01dfaff9d15c3dd7818f082e2995cc74
+Author: Maxim Dounin
+Date: 2019-07-12
+Subject: Perl: reworked perl module to pass ctx instead of request.
+Changes: +114/-94 (total: 208, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: f29e48f7eed3e0593098818b42bd17dee17cc601
+Author: Sergey Kandaurov
+Date: 2021-04-16
+Subject: Merged with the default branch.
+Changes: +166/-43 (total: 209, files: 17)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 1d572e359a210dcb27e5e073c016c1768c435263
+Author: Maxim Dounin
+Date: 2022-10-12
+Subject: SSL: automatic rotation of session ticket keys.
+Changes: +160/-30 (total: 190, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: cc3752ce8e7d2ff93df3da054cec2cccbbcfe260
+Author: Vladimir Homutov
+Date: 2021-07-28
+Subject: QUIC: handle EAGAIN properly on UDP sockets.
+Changes: +135/-55 (total: 190, files: 5)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 72e5d6ac19a93c9fb64678dd33ea185757a6021a
+Author: Roman Arutyunyan
+Date: 2023-12-13
+Subject: Stream: socket peek in preread phase.
+Changes: +146/-43 (total: 189, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: aefd862ab197c3ab49001fcf69be478aab5b0f4e
+Author: Roman Arutyunyan
+Date: 2023-05-16
+Subject: HTTP/2: "http2" directive.
+Changes: +127/-62 (total: 189, files: 7)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 6c3a9d561271ec451f479a84fbe54c81a63dad2e
+Author: Sergey Kandaurov
+Date: 2025-02-05
+Subject: Upstream: fixed passwords support for dynamic certificates.
+Changes: +144/-43 (total: 187, files: 6)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 5917e9de5a45bb7288c1c433db840d1a4c6290f3
+Author: Sergey Kandaurov
+Date: 2024-09-09
+Subject: SSL: caching CA certificates.
+Changes: +185/-28 (total: 213, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 16bb8459d0118a7745751efd3388e117ee69146c
+Author: Vladimir Homutov
+Date: 2022-07-27
+Subject: QUIC: fixed-length buffers for secrets.
+Changes: +89/-98 (total: 187, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: baea97bc543d68ea2cc3a5dc96363777204f99bd
+Author: Roman Arutyunyan
+Date: 2021-12-24
+Subject: QUIC: refactored ngx_quic_order_bufs() and ngx_quic_split_bufs().
+Changes: +117/-96 (total: 213, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: de75c7e3e21822a909391a4b3ccaac7914c8641d
+Author: Roman Arutyunyan
+Date: 2021-05-05
+Subject: HTTP/3: separate header files for existing source files.
+Changes: +139/-75 (total: 214, files: 5)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: ed461dbff70d5962e58cd894b77e7bd478daacb9
+Author: Vladimir Homutov
+Date: 2020-04-30
+Subject: Reworked macros for parsing/assembling packet types.
+Changes: +105/-110 (total: 215, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 3c1707212273182c60560d980cb2b3f95f702d74
+Author: Sergey Kandaurov
+Date: 2020-03-03
+Subject: QUIC handshake final bits.
+Changes: +207/-9 (total: 216, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 1c6183725247024f1bca73ac9a833098af7558af
+Author: Gena Makhomed
+Date: 2023-07-24
+Subject: Contrib: vim syntax, update core and 3rd party module directives.
+Changes: +93/-124 (total: 217, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: b20b58ca7d1323664c5e8f91231ade0edf0d0f31
+Author: Vladimir Homutov
+Date: 2020-12-15
+Subject: Core: added interface to linux bpf() system call.
+Changes: +217/-0 (total: 217, files: 5)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: fbcb0c8a33c7168aad3b1474d4cd8cde3486e155
+Author: Maxim Dounin
+Date: 2019-02-25
+Subject: SSL: dynamic certificate loading in the stream module.
+Changes: +179/-4 (total: 183, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 5f9c4e15a398bc10e23c7d366d181380135e2503
+Author: Vladimir Homutov
+Date: 2021-10-07
+Subject: QUIC: refactored packet creation.
+Changes: +108/-74 (total: 182, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+

@@ -1,0 +1,243 @@
+Commit candidates for etcd
+================================================================================
+
+SHA: a594a62eab8846294e0bd8a5b26ec40c1e0de9fc
+Author: Benjamin Wang
+Date: 2024-10-25
+Subject: Merge pull request #18649 from ivanvc/use-gh-to-publish-releases
+Changes: +184/-16 (total: 200, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 88d2d2472c32e4cfa0e7223fa0b173865f0ddf3c
+Author: Ivan Valdes
+Date: 2024-09-20
+Subject: release: use GitHub's gh to create GitHub release
+Changes: +184/-16 (total: 200, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: ebb0d07894ff8b27f7e12bac8146cd45f0f07df1
+Author: Ravi Sastry Kadali
+Date: 2025-07-19
+Subject: Refactor IPv6 address comparison logic
+Changes: +198/-3 (total: 201, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: e2459c03237148fc18d861065ea4bf05a2600064
+Author: Benjamin Wang
+Date: 2025-03-04
+Subject: Bump grpc-gateway to v2.26.3
+Changes: +101/-100 (total: 201, files: 17)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: dec5fe49cc1a3e853ca3cc0b1a670279ff29b725
+Author: ArkaSaha30
+Date: 2025-07-17
+Subject: dependency: bump golang.org/x/net, text, crypto, sync, term
+Changes: +99/-99 (total: 198, files: 24)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 2eca68e345b265d313d8aa360bcbbb879a54c487
+Author: Benjamin Wang
+Date: 2025-01-26
+Subject: Add DowngradeVersionTestRequest as a field into InternalRaftRequest
+Changes: +130/-68 (total: 198, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 5eeacec0877957493169bfe70f09656a384ff092
+Author: ArkaSaha30
+Date: 2025-03-13
+Subject: dependency: bump github.com/alexfalkowski/gocovmerge from 1.4.0 to 1.6.0
+Changes: +102/-102 (total: 204, files: 22)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: f43c6815b12de9b23a0f0c711fc255cfa88040f5
+Author: ArkaSaha30
+Date: 2024-11-05
+Subject: dependency: bump github.com/grpc-ecosystem/grpc-gateway/v2 from 2.22.0 to 2.23.0
+Changes: +114/-90 (total: 204, files: 21)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: a090db470b59ef217d5e961a4348c7e735077698
+Author: Benjamin Wang
+Date: 2025-02-07
+Subject: Merge pull request #19356 from siyuanfoundation/lease-checkpoint
+Changes: +114/-92 (total: 206, files: 8)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 2cd8fcce5de5ee06676ce0066851e5cf6a97232d
+Author: Siyuan Zhang
+Date: 2025-02-06
+Subject: migrate experimental-enable-lease-checkpoint and experimental-enable-lease-checkpoint-persist flag to feature gate.
+Changes: +114/-92 (total: 206, files: 8)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 8ec90c6088e55d59185e60eb9ee1051b9c403551
+Author: Benjamin Wang
+Date: 2024-10-30
+Subject: Merge pull request #18780 from mmorel-35/server/errorlint
+Changes: +106/-87 (total: 193, files: 30)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 3abdf612b3b8cb2d5b90899610460d0a38a9e38e
+Author: Matthieu MOREL
+Date: 2024-10-20
+Subject: fix: enable errorlint in server directory
+Changes: +106/-87 (total: 193, files: 30)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: a756eaf122f7547a6255d21fa69705af0162a4b0
+Author: James Blair
+Date: 2025-06-04
+Subject: Merge pull request #20108 from ArkaSaha30/deps_mgmt_03_06_25
+Changes: +96/-96 (total: 192, files: 20)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 3084319165f3b798d46fd472f8957f9bd09618dc
+Author: Chun-Hung Tseng
+Date: 2025-04-08
+Subject: bump golang.org/x/crypto from 0.36.0 to 0.37.0, bump golang.org/x/sys from 0.31.0 to 0.32.0, bump golang.org/x/text from 0.23.0 to 0.24.0, and bump golang.org/x/sys from 0.31.0 to 0.32.0
+Changes: +96/-96 (total: 192, files: 24)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 2c7504fd80f2d30088583d002e54bc96733b0626
+Author: ArkaSaha30
+Date: 2024-12-12
+Subject: dependency: bump golang.org/x packages
+Changes: +96/-96 (total: 192, files: 24)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: cf0369e4ad43463f6d3b1e3745b21e6fcc9ffe7d
+Author: Marek Siarkowicz
+Date: 2025-07-04
+Subject: Avoid lowering revision of watchers in the future after restore
+Changes: +100/-87 (total: 187, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: d42b0434a65d7a82516d3fb07a6a1eb8c72fbe97
+Author: ah8ad3
+Date: 2024-07-23
+Subject: Copy cobra helper of etcdctl from main pkg to etcdctl pkg and add a deprecation note for UsageFunc.
+Changes: +184/-1 (total: 185, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 04cce9759ba680e6e1cca3e5c25406f7efca8a67
+Author: Chun-Hung Tseng
+Date: 2025-02-10
+Subject: dependency: bump github.com/grpc-ecosystem/grpc-gateway/v2 from 2.26.0 to 2.26.1, bump google.golang.org/genproto/googleapis/rpc from v0.0.0-20250115164207-1a7da9e5054f to v0.0.0-20250204164813-702378808489, and google.golang.org/protobuf from v1.36.4 to v1.36.5
+Changes: +108/-108 (total: 216, files: 20)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: ec52e35871847a384d699c5a39b19db669ad353e
+Author: Benjamin Wang
+Date: 2025-01-06
+Subject: Update etcdutl migrate command: load wal records from the latest snapshot
+Changes: +173/-10 (total: 183, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: cc240d6c0836d9a3407409489397149b12c7c36f
+Author: Marek Siarkowicz
+Date: 2025-06-24
+Subject: Merge pull request #20151 from kishen-v/benchmark-perfdash
+Changes: +140/-40 (total: 180, files: 17)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: aa8238f511c16058235a998de0f4a0971519bac6
+Author: Fu Wei
+Date: 2025-04-25
+Subject: Merge pull request #19608 from miancheng7/e2etestforissue19406
+Changes: +156/-23 (total: 179, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 03839c99c74ca2a56b749226ba65a23ec40bb2c9
+Author: Miancheng Lin
+Date: 2025-03-14
+Subject: Add e2e test to reproduce issue #19406
+Changes: +156/-23 (total: 179, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 42ba3043c2935a0f0bcebfcb2fc52d787a4477b9
+Author: Marek Siarkowicz
+Date: 2025-09-27
+Subject: Move v2 apply logic into apply directory
+Changes: +95/-83 (total: 178, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 6784151a1bed869727adfcefb7cba4a968f36336
+Author: Chun-Hung Tseng
+Date: 2025-02-22
+Subject: dependency: bump github.com/golangci/golangci-lint from 1.63.4 to 1.64.5
+Changes: +82/-96 (total: 178, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 395a03843d292f7f8866689ca65dc0559094063d
+Author: Kieran Gorman
+Date: 2025-03-14
+Subject: mvcc: avoid double decrement of watcher gauge on close/cancel race
+Changes: +174/-3 (total: 177, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 4957e5670e81afb68eeecca07f937b3f977ae256
+Author: Benjamin Wang
+Date: 2024-10-14
+Subject: update epHealthCommandFunc to reuse clientConfigFromCmd
+Changes: +161/-13 (total: 174, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 9da01a8275c4b8e1b3838ef92cf74d00e41b2edf
+Author: Benjamin Wang
+Date: 2025-01-17
+Subject: Merge pull request #19196 from gangli113/main
+Changes: +132/-41 (total: 173, files: 9)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 33d65fc90bcb1e9a284ee6c2eaa0179d0b9cdbe2
+Author: Gang Li
+Date: 2025-01-14
+Subject: TestConfigFileDeprecatedOptions
+Changes: +132/-41 (total: 173, files: 9)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 7b6786efbc09ad49e7c346ed0c5bd1b06de13172
+Author: Chun-Hung Tseng
+Date: 2025-01-10
+Subject: dependency: bump github.com/golangci/golangci-lint from 1.62.2 to 1.63.4
+Changes: +124/-103 (total: 227, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 267020e9405846ee5d180c0984f60374cc1a283a
+Author: Gang Li
+Date: 2025-01-23
+Subject: migrate to use bootstrap-defrag-threshold-megabytes flag
+Changes: +125/-45 (total: 170, files: 7)
+Size: medium
+--------------------------------------------------------------------------------
+

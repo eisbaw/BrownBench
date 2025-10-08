@@ -1,0 +1,243 @@
+Commit candidates for tmux
+================================================================================
+
+SHA: 326d2ef234cd8838700e914a0d780f46be50904c
+Author: nicm
+Date: 2021-08-21
+Subject: Pass typed arguments out of the parser into the arguments list and let it convert them into strings.
+Changes: +149/-52 (total: 201, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: f4c0fe2edec355143fe938fd73dd96c2a49ce926
+Author: Thomas Adam
+Date: 2025-08-22
+Subject: Merge branch 'obsd-master'
+Changes: +174/-28 (total: 202, files: 13)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: b4f8340f16fc6e0108f9af5ef7d4ee093eac8a8c
+Author: Thomas Adam
+Date: 2025-04-22
+Subject: Merge branch 'obsd-master'
+Changes: +119/-83 (total: 202, files: 7)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 479c9563c70343af7c8afc3f6bd02599d1fd1269
+Author: Thomas Adam
+Date: 2021-10-05
+Subject: Merge branch 'obsd-master' into master
+Changes: +101/-97 (total: 198, files: 7)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 8f34504736cf3547992c4ba948c1e65f3813715c
+Author: nicm
+Date: 2023-04-25
+Subject: Tidy tparm wrapper functions to have more obvious names and check tparm return value.
+Changes: +111/-86 (total: 197, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 2e9bafaf14ed255eb3f3ef36202f3f4d2c9eca39
+Author: nicm
+Date: 2021-08-22
+Subject: Fix handling of leading #s when working out width.
+Changes: +82/-115 (total: 197, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: c3c4524def6efefb0f3ae1932031ab8c4f8a8b1d
+Author: Thomas Adam
+Date: 2025-03-21
+Subject: Merge branch 'obsd-master'
+Changes: +195/-10 (total: 205, files: 9)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 84e22168a52f8fe0fa0ef0431d1752273f53e8bd
+Author: nicm
+Date: 2021-06-10
+Subject: Change resize timers and flags into one timer and a queue which is simpler and fixes problems with vim when resized multiple times. GitHub issue 2677.
+Changes: +96/-99 (total: 195, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: cb2943faab2053719b13306f95ed58a2dae64e81
+Author: Nicholas Marriott
+Date: 2021-04-28
+Subject: Change resize timers and flags into one timer and a queue to fix problems with vim when resized multiple times. GitHub issue 2677.
+Changes: +94/-99 (total: 193, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: cf6034da92df1dec0a2ea6230bd7a424d0d181a8
+Author: Nicholas Marriott
+Date: 2021-04-28
+Subject: Change resize timers and flags into one timer and a queue to fix problems with vim when resized multiple times. GitHub issue 2677.
+Changes: +94/-99 (total: 193, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 303d342d5fa5903983c08e4cae429e4f9480eea3
+Author: nicm
+Date: 2020-05-16
+Subject: Add a client flag 'active-pane' which stores the active pane in the client and allows it to be changed independently from the real active pane stored in the window. This is can be used with session groups which allow an independent current window (although it would be nice to have a flag for this too and remove session groups). The client active pane is only really useful interactively, many things (hooks, window-style, zooming) still use the window active pane.
+Changes: +164/-26 (total: 190, files: 15)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 0bdbf47ef946b3535cc32b45ea8d971de5baddb5
+Author: Nicholas Marriott
+Date: 2020-05-14
+Subject: Add a client flag 'active-pane' which stores the active pane in the client and allows it to be changed independently from the real active pane stored in the window. This is can be used with session groups which allow an independent current window (although it would be nice to have a flag for this too and remove session groups). The client active pane is only really useful interactively, many things (hooks, window-style, zooming) still use the window active pane.
+Changes: +164/-26 (total: 190, files: 15)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 9b1fdb291ee8e940311a51cf41f97b07930b4688
+Author: nicm
+Date: 2021-10-05
+Subject: Separate "very visible" flag from blinking flag, it should not affect DECSCUSR. GitHub issue 2891.
+Changes: +93/-96 (total: 189, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 28cd956729c13f8f66e26d438592df9c9930e7b8
+Author: nicm
+Date: 2021-04-01
+Subject: Change search-again with vi keys to work like actual vi(1), also some other fixes. From Aaron Jensen with help from Anindya Mukherjee.
+Changes: +161/-50 (total: 211, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: a06cf900c7f8443a63005b6a2c59d11095d2a259
+Author: Thomas Adam
+Date: 2020-06-05
+Subject: Merge branch 'obsd-master'
+Changes: +138/-51 (total: 189, files: 7)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: ea6c5053c8a5aac760531a7985fcdfc81516cc03
+Author: Thomas Adam
+Date: 2024-11-21
+Subject: Merge branch 'obsd-master'
+Changes: +102/-84 (total: 186, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 9ef854f5a9112a7d50c382dec403432dea2c3579
+Author: Thomas Adam
+Date: 2022-09-28
+Subject: Merge branch 'obsd-master'
+Changes: +130/-56 (total: 186, files: 6)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: cf9baddd6f844e8a26f1e7c59ba1c9eb3358571f
+Author: nicm
+Date: 2020-05-16
+Subject: Change the existing client flags for control mode to apply for any client, use the same mechanism for the read-only flag and add an ignore-size flag.
+Changes: +136/-50 (total: 186, files: 10)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 2f89d2e7d816918e152aacfee85fab45ee2057b9
+Author: Nicholas Marriott
+Date: 2020-05-05
+Subject: Change the existing client flags for control mode to apply for any client, use the same mechanism for the read-only flag and add an ignore-size flag.
+Changes: +136/-50 (total: 186, files: 10)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: b307fc8cd5de31fc7038c9899328ca620f85c25a
+Author: Thomas Adam
+Date: 2021-04-01
+Subject: Merge branch 'obsd-master' into master
+Changes: +163/-52 (total: 215, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 7c7e88253ea3f661c321937a9d35093d2da0d972
+Author: nicm
+Date: 2024-11-21
+Subject: When the mouse clicked on the border between two horizontal panes, the location was not being set properly. Pulled the checking of this into separate function for clarity. Fixes dragging on horizontal pane border. From Michael Grant.
+Changes: +101/-83 (total: 184, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: cd692b5a68be0eb95252380db97fbbec587d6350
+Author: nicm
+Date: 2022-05-30
+Subject: Add an ACL list for users connecting to the tmux socket. Users may be forbidden from attaching, forced to attach read-only, or allowed to attach read-write. A new command, server-access, configures the list. tmux gets the user using getpeereid(3) of the client socket. Users must still configure file system permissions manually. From Dallas Lyons and others.
+Changes: +211/-6 (total: 217, files: 8)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: fd756a150b43d319d08ac4117f34edef9e0438c4
+Author: nicm
+Date: 2021-08-27
+Subject: Allow control mode clients to set a hard limit on the window width and height, GitHub issue 2594.
+Changes: +174/-44 (total: 218, files: 7)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 61e55fa50dc7119a8c88bb385e615a8e6c8d6a85
+Author: nicm
+Date: 2020-11-09
+Subject: Change how escaping is processed for formats so that ## and # can be used in styles. Also add a 'w' format modifier for the width. From Chas J Owens IV in GitHub issue 2389.
+Changes: +201/-17 (total: 218, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 5ddbf0c91839e76a3db72f184950928818c4b02d
+Author: Thomas Adam
+Date: 2020-11-09
+Subject: Merge branch 'obsd-master'
+Changes: +201/-18 (total: 219, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 78595457f965975cf5a24e8bbab6dcb153020b6e
+Author: nicm
+Date: 2020-05-16
+Subject: Add 'e' key in buffer mode to open the buffer in an editor.
+Changes: +177/-4 (total: 181, files: 11)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 3f55d05386a1620d19420c1cdccf33c45ca6b641
+Author: Nicholas Marriott
+Date: 2020-05-13
+Subject: Tidy up border redrawing, fix some errors in how the window border connects with panes.
+Changes: +124/-95 (total: 219, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 08e6360f23284c9e2e521cb466002bdd9350a63d
+Author: nicm
+Date: 2021-08-21
+Subject: Add args parsing callback for some future work, currently unused.
+Changes: +91/-89 (total: 180, files: 61)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: b9524f5b72d16bd634fc47ad1a4a9d3240bd4370
+Author: Nicholas Marriott
+Date: 2023-04-03
+Subject: Add support for spawning panes in separate cgroups with systemd and a configure flag to disable. From Eric T Johnson yut23 AT gvljohnsons DOT com in GitHub issue 3514.
+Changes: +178/-1 (total: 179, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 2391fe23ab09cfe8667abdcc3338a958ab3da31d
+Author: nicm
+Date: 2020-05-16
+Subject: Copy mode search improvements:
+Changes: +167/-54 (total: 221, files: 5)
+Size: medium
+--------------------------------------------------------------------------------
+

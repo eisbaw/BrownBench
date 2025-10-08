@@ -1,0 +1,243 @@
+Commit candidates for haproxy
+================================================================================
+
+SHA: 194e3bc2d5ba46c00c750d6e6bf8bf1cd19b7608
+Author: Frederic Lecaille
+Date: 2025-06-25
+Subject: MINOR: quic-be: address validation support implementation (RETRY)
+Changes: +175/-24 (total: 199, files: 9)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 706b008429220e011f3ac9a074ff0e8c83492fb7
+Author: Olivier Houchard
+Date: 2025-02-06
+Subject: MEDIUM: servers: Add strict-maxconn.
+Changes: +187/-14 (total: 201, files: 6)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 3a6ea8b959d5a05063fd5836c855fdba590db37a
+Author: William Lallemand
+Date: 2025-09-28
+Subject: ADMIN: haproxy-dump-certs: implement a certificate dumper
+Changes: +198/-0 (total: 198, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 26b3e5236fc93baeec0df7c6c4c23a20d1985749
+Author: Olivier Houchard
+Date: 2025-01-15
+Subject: MEDIUM: servers/proxies: Switch to using per-tgroup queues.
+Changes: +139/-63 (total: 202, files: 7)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: f1210ee7c67ef30cf8a8f91ec2cf7d2af6b6c37e
+Author: Willy Tarreau
+Date: 2023-07-20
+Subject: MEDIUM: cfgparse: remove now unused numa & thread-count detection
+Changes: +4/-192 (total: 196, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 3e05e20029566d5543311610648f54c4a4e8d191
+Author: William Lallemand
+Date: 2025-02-05
+Subject: MEDIUM: httpclient: implement a way to use directly htx data
+Changes: +125/-70 (total: 195, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: b3ac1a636c109c7272eb3eaf65940c429d98431b
+Author: Frederic Lecaille
+Date: 2025-05-19
+Subject: MINOR: quic: implement all remaining callbacks for OpenSSL 3.5 QUIC API
+Changes: +194/-11 (total: 205, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 471290458e3117ade13cf376e3d7a2c22cb63fc9
+Author: William Lallemand
+Date: 2025-04-09
+Subject: MINOR: acme: get the ACME directory
+Changes: +193/-2 (total: 195, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: cd6a02ace9fcf7ace2816a81846872346d22a9c0
+Author: William Lallemand
+Date: 2025-02-11
+Subject: MEDIUM: ssl/crtlist: "crt" keyword in frontend
+Changes: +205/-0 (total: 205, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 8919a80da9391e348aa325b44fdae40a35f48dcf
+Author: Aurelien DARRAGON
+Date: 2025-01-14
+Subject: BUG/MEDIUM: stktable: fix missing lock on some table converters
+Changes: +167/-28 (total: 195, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: c91d93ed1c03d2b50d65c83de3d2d9b87657de08
+Author: Aurelien DARRAGON
+Date: 2025-08-27
+Subject: MINOR: stats-file: introduce shm-stats-file directive
+Changes: +207/-0 (total: 207, files: 7)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: dcd4d3672396a90ed54ebb113846a5585665cd49
+Author: Willy Tarreau
+Date: 2025-06-11
+Subject: IMPORT: ebtree: delete unusable ebpttree.c
+Changes: +0/-208 (total: 208, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: dc6a3c329a4c385d34f40877f1e768bbc068a113
+Author: Frederic Lecaille
+Date: 2025-05-13
+Subject: MINOR: quic: Allow the use of the new OpenSSL 3.5.0 QUIC TLS API (to be completed)
+Changes: +169/-23 (total: 192, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 3abb428fc8a001649758585990093ee6da56fc81
+Author: William Lallemand
+Date: 2025-03-06
+Subject: MINOR: jws: implement JWS signing
+Changes: +208/-0 (total: 208, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: c7457427ab00045a81ca0bde6021e04ebdf00132
+Author: Christopher Faulet
+Date: 2025-01-21
+Subject: MINOR: tevt/dev: Add term_events tool
+Changes: +190/-1 (total: 191, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 982805e6a3a08121bf7588199c5ca3df95a6e1fc
+Author: Christopher Faulet
+Date: 2025-09-08
+Subject: BUG/MINOR: pools: Fix the dump of pools info to deal with buffers limitations
+Changes: +118/-71 (total: 189, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 4842c5ea8c950724963625303bd21ada45160e32
+Author: William Lallemand
+Date: 2025-04-09
+Subject: MINOR: acme: newOrder request retrieve authorizations URLs
+Changes: +180/-9 (total: 189, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 5232df57abe1d4ff1513e4642f1e247c399ebc64
+Author: Christopher Faulet
+Date: 2025-07-03
+Subject: MINOR: proto-tcp: Add support for TCP MD5 signature for listeners and servers
+Changes: +186/-0 (total: 186, files: 9)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 1adc796c4bc0a77560e580ff6dbcd05d0c1fa8fa
+Author: Aurelien DARRAGON
+Date: 2025-03-17
+Subject: MEDIUM: promex: switch to using stat_cols_info for global metrics
+Changes: +109/-77 (total: 186, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 0846638f7fe4f271287ab2b982925e5114e6cfde
+Author: Aurelien DARRAGON
+Date: 2025-01-30
+Subject: MEDIUM: stream: interrupt costly rulesets after too many evaluations
+Changes: +165/-21 (total: 186, files: 10)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 4dc0ba233ef7fcdd77dba6edb12a32b8347c7acb
+Author: William Lallemand
+Date: 2025-02-28
+Subject: MINOR: jws: implement a JWK public key converter
+Changes: +214/-1 (total: 215, files: 4)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 7f9bf4d5f73f6d28fe2c2bb27410ae38fe0f08e3
+Author: William Lallemand
+Date: 2025-04-09
+Subject: MINOR: acme: check if the account exist
+Changes: +180/-4 (total: 184, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 990854ee0dae529e361a9c70d32126d335bc92e0
+Author: Christopher Faulet
+Date: 2025-01-21
+Subject: REORG: tevt/connection: Move enums at the end of the header file
+Changes: +92/-92 (total: 184, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: b734d7c156fbd00d83392b8b394a15c48555d5dc
+Author: Christopher Faulet
+Date: 2025-04-24
+Subject: MINOR: cli/applet: Move appctx fields only used by the CLI in a private context
+Changes: +112/-105 (total: 217, files: 12)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 5d1b30d6b84bc544b8eda846a632f2b55a19bb51
+Author: William Lallemand
+Date: 2024-12-06
+Subject: MEDIUM: ssl/cli: "show ssl sni" list the loaded SNI in frontends
+Changes: +218/-0 (total: 218, files: 2)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 7cb274439bb40b432f3a2abac650e811b5631299
+Author: Willy Tarreau
+Date: 2023-07-12
+Subject: MINOR: cpu-topo: add CPU topology detection for linux
+Changes: +181/-0 (total: 181, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 48df877dab64bbe6580064bc7ce1c28270ad3884
+Author: Christopher Faulet
+Date: 2025-07-18
+Subject: MEDIUM: hlua: Update the http applet to use its own buffers
+Changes: +89/-90 (total: 179, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 3500865bc112633b9c946a51be8f35f06fa4b2fc
+Author: Valentine Krasnobaeva
+Date: 2024-11-22
+Subject: REORG: startup: move mworker_apply_master_worker_mode in mworker.c
+Changes: +111/-110 (total: 221, files: 3)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 747a812066464d58a5192594a644212fe6703f2f
+Author: Aurelien DARRAGON
+Date: 2025-04-15
+Subject: MEDIUM: stats: add persistent state to typed output format
+Changes: +96/-81 (total: 177, files: 6)
+Size: medium
+--------------------------------------------------------------------------------
+
+SHA: 15080d9aae44f80cc9ee1e316128a3fde4b1b805
+Author: Christopher Faulet
+Date: 2025-07-17
+Subject: MINOR: hlua: Fill the request array on the first HTTP applet run
+Changes: +94/-82 (total: 176, files: 1)
+Size: medium
+--------------------------------------------------------------------------------
+
