@@ -28,7 +28,12 @@ class JudgeOrchestrator:
 
         Args:
             judges: List of judge instances
+
+        Raises:
+            ValueError: If judges list is empty
         """
+        if not judges:
+            raise ValueError("Cannot create JudgeOrchestrator with empty judges list")
         self.judges = judges
 
     def compare(

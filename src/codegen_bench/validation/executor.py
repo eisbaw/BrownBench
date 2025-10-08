@@ -89,10 +89,18 @@ class ValidationExecutor:
             )
 
         except subprocess.TimeoutExpired as e:
+            # Handle stdout/stderr which may be bytes, str, or None
+            stdout = ""
+            stderr = ""
+            if e.stdout:
+                stdout = e.stdout.decode("utf-8", errors="replace") if isinstance(e.stdout, bytes) else str(e.stdout)
+            if e.stderr:
+                stderr = e.stderr.decode("utf-8", errors="replace") if isinstance(e.stderr, bytes) else str(e.stderr)
+
             return ValidationResult(
                 success=False,
-                output=e.stdout.decode() if e.stdout else "",
-                error=e.stderr.decode() if e.stderr else "",
+                output=stdout,
+                error=stderr,
                 returncode=-1,
                 timed_out=True,
             )

@@ -533,71 +533,63 @@ def test_tournament_composable_methods(tmp_path, mock_task, mock_arena, mock_jud
 
 
 def test_tournament_run_with_zero_duts(tmp_path, mock_task, mock_arena, mock_judge_orchestrator):
-    """Test that running tournament with zero DUTs raises ValueError."""
+    """Test that creating tournament with zero DUTs raises ValueError."""
     cache = SolutionCache(tmp_path / "cache")
 
-    runner = TournamentRunner(
-        duts=[],  # Empty list
-        tasks=[mock_task],
-        judges=mock_judge_orchestrator,
-        arenas=[mock_arena],
-        cache=cache,
-        samples_per_pairing=1,
-    )
-
-    with pytest.raises(ValueError, match="Cannot run tournament with zero DUTs"):
-        runner.run()
+    with pytest.raises(ValueError, match="Cannot create tournament with zero DUTs"):
+        TournamentRunner(
+            duts=[],  # Empty list
+            tasks=[mock_task],
+            judges=mock_judge_orchestrator,
+            arenas=[mock_arena],
+            cache=cache,
+            samples_per_pairing=1,
+        )
 
 
 def test_tournament_run_with_zero_tasks(tmp_path, mock_arena, mock_judge_orchestrator):
-    """Test that running tournament with zero tasks raises ValueError."""
+    """Test that creating tournament with zero tasks raises ValueError."""
     dut = MockDUT("dut1", {})
     cache = SolutionCache(tmp_path / "cache")
 
-    runner = TournamentRunner(
-        duts=[dut],
-        tasks=[],  # Empty list
-        judges=mock_judge_orchestrator,
-        arenas=[mock_arena],
-        cache=cache,
-        samples_per_pairing=1,
-    )
-
-    with pytest.raises(ValueError, match="Cannot run tournament with zero tasks"):
-        runner.run()
+    with pytest.raises(ValueError, match="Cannot create tournament with zero tasks"):
+        TournamentRunner(
+            duts=[dut],
+            tasks=[],  # Empty list
+            judges=mock_judge_orchestrator,
+            arenas=[mock_arena],
+            cache=cache,
+            samples_per_pairing=1,
+        )
 
 
 def test_tournament_run_with_zero_arenas(tmp_path, mock_task, mock_judge_orchestrator):
-    """Test that running tournament with zero arenas raises ValueError."""
+    """Test that creating tournament with zero arenas raises ValueError."""
     dut = MockDUT("dut1", {})
     cache = SolutionCache(tmp_path / "cache")
 
-    runner = TournamentRunner(
-        duts=[dut],
-        tasks=[mock_task],
-        judges=mock_judge_orchestrator,
-        arenas=[],  # Empty list
-        cache=cache,
-        samples_per_pairing=1,
-    )
-
-    with pytest.raises(ValueError, match="Cannot run tournament with zero arenas"):
-        runner.run()
+    with pytest.raises(ValueError, match="Cannot create tournament with zero arenas"):
+        TournamentRunner(
+            duts=[dut],
+            tasks=[mock_task],
+            judges=mock_judge_orchestrator,
+            arenas=[],  # Empty list
+            cache=cache,
+            samples_per_pairing=1,
+        )
 
 
 def test_tournament_run_with_zero_samples(tmp_path, mock_task, mock_arena, mock_judge_orchestrator):
-    """Test that running tournament with samples_per_pairing=0 raises ValueError."""
+    """Test that creating tournament with samples_per_pairing=0 raises ValueError."""
     dut = MockDUT("dut1", {})
     cache = SolutionCache(tmp_path / "cache")
 
-    runner = TournamentRunner(
-        duts=[dut],
-        tasks=[mock_task],
-        judges=mock_judge_orchestrator,
-        arenas=[mock_arena],
-        cache=cache,
-        samples_per_pairing=0,  # Invalid value
-    )
-
     with pytest.raises(ValueError, match="samples_per_pairing must be >= 1"):
-        runner.run()
+        TournamentRunner(
+            duts=[dut],
+            tasks=[mock_task],
+            judges=mock_judge_orchestrator,
+            arenas=[mock_arena],
+            cache=cache,
+            samples_per_pairing=0,  # Invalid value
+        )

@@ -209,7 +209,20 @@ class TournamentRunner:
             arenas: List of arenas (quality dimensions) to evaluate
             cache: Solution cache
             samples_per_pairing: Number of samples per (DUT, task) pair
+
+        Raises:
+            ValueError: If duts, tasks, or arenas lists are empty, or if samples_per_pairing < 1
         """
+        # Validate inputs at construction time for fail-fast behavior
+        if not duts:
+            raise ValueError("Cannot create tournament with zero DUTs")
+        if not tasks:
+            raise ValueError("Cannot create tournament with zero tasks")
+        if not arenas:
+            raise ValueError("Cannot create tournament with zero arenas")
+        if samples_per_pairing < 1:
+            raise ValueError(f"samples_per_pairing must be >= 1, got {samples_per_pairing}")
+
         self.duts = duts
         self.tasks = tasks
         self.judges = judges
@@ -331,20 +344,7 @@ class TournamentRunner:
 
         Returns:
             TournamentResult with all comparisons and ratings
-
-        Raises:
-            ValueError: If duts, tasks, or arenas lists are empty, or if samples_per_pairing < 1
         """
-        # Validate inputs
-        if not self.duts:
-            raise ValueError("Cannot run tournament with zero DUTs")
-        if not self.tasks:
-            raise ValueError("Cannot run tournament with zero tasks")
-        if not self.arenas:
-            raise ValueError("Cannot run tournament with zero arenas")
-        if self.samples_per_pairing < 1:
-            raise ValueError(f"samples_per_pairing must be >= 1, got {self.samples_per_pairing}")
-
         logger.info(
             "tournament_start",
             num_duts=len(self.duts),
@@ -396,7 +396,9 @@ class TournamentRunner:
                     error_type=type(e).__name__,
                     result_dir=str(result_dir),
                 )
-                # Don't raise - tournament succeeded, just save failed
+                # Re-raise if output_dir was explicitly specified by user
+                # This is a user expectation - they want results saved
+                raise
 
         return result
 

@@ -13,7 +13,7 @@ from tenacity import RetryError, retry, stop_after_attempt, wait_exponential
 from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
 from codegen_bench.dut.base import ApproachMetadata, CodeGenerationApproach
-from codegen_bench.exceptions import DUTError
+from codegen_bench.exceptions import DUTAPIError, DUTConfigError, DUTParsingError
 from codegen_bench.parsing.extractor import CodeExtractor
 from codegen_bench.utils.rate_limiter import RateLimiter
 
@@ -44,16 +44,29 @@ class SimpleChatDUT(CodeGenerationApproach):
                 - max_requests_per_minute: Rate limit for API calls (default: 50)
 
         Raises:
-            DUTError: If API key not found
+            DUTConfigError: If API key not found or config validation fails
         """
         super().__init__(config)
         self.model = config.get("model", "claude-sonnet-4-20250514")
         self.api_key = config.get("api_key") or os.getenv("ANTHROPIC_API_KEY")
         if not self.api_key:
-            raise DUTError("ANTHROPIC_API_KEY not found in config or environment")
+            raise DUTConfigError("ANTHROPIC_API_KEY not found in config or environment")
         self.client = anthropic.Anthropic(api_key=self.api_key)
+
+        # Validate and set max_tokens
         self.max_tokens = config.get("max_tokens", 8000)
+        if not isinstance(self.max_tokens, int) or self.max_tokens < 1:
+            raise DUTConfigError(f"max_tokens must be a positive integer, got {self.max_tokens}")
+        if self.max_tokens > 100000:
+            raise DUTConfigError(f"max_tokens exceeds reasonable limit (100k), got {self.max_tokens}")
+
+        # Validate and set temperature
         self.temperature = config.get("temperature", 0.3)
+        if not isinstance(self.temperature, int | float):
+            raise DUTConfigError(f"temperature must be a number, got {type(self.temperature).__name__}")
+        if not 0.0 <= self.temperature <= 1.0:
+            raise DUTConfigError(f"temperature must be in range [0.0, 1.0], got {self.temperature}")
+
         self.rate_limiter = RateLimiter(
             max_requests_per_minute=config.get("max_requests_per_minute", 50)
         )
@@ -93,7 +106,7 @@ class SimpleChatDUT(CodeGenerationApproach):
             if isinstance(first_block, TextBlock):
                 response_text = first_block.text
             else:
-                raise DUTError(f"Unexpected response type: {type(first_block)}")
+                raise DUTParsingError(f"Unexpected response type: {type(first_block)}")
 
             changed_files = self._parse_code_changes(response_text)
             logger.debug(
@@ -142,9 +155,9 @@ class SimpleChatDUT(CodeGenerationApproach):
             )
             # Extract original error from RetryError if applicable
             if isinstance(e, RetryError):
-                raise DUTError(f"API call failed for task {task.id} after retries: {e}") from e
+                raise DUTAPIError(f"API call failed for task {task.id} after retries: {e}") from e
             else:
-                raise DUTError(f"API call failed for task {task.id}: {e}") from e
+                raise DUTAPIError(f"API call failed for task {task.id}: {e}") from e
         except (KeyError, AttributeError, ValueError) as e:
             logger.error(
                 "response_parsing_failed",
@@ -154,7 +167,7 @@ class SimpleChatDUT(CodeGenerationApproach):
                 error=str(e),
                 error_type=type(e).__name__,
             )
-            raise DUTError(f"Failed to parse API response for task {task.id}: {e}") from e
+            raise DUTParsingError(f"Failed to parse API response for task {task.id}: {e}") from e
 
     def _call_api_with_retry(self, prompt: str) -> anthropic.types.Message:
         """Call Anthropic API with retry logic and rate limiting.

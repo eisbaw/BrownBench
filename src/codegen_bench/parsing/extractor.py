@@ -47,9 +47,20 @@ class CodeExtractor:
                     # Collect code until closing ```
                     code_lines = []
                     i += 1
+                    start_line = i
                     while i < len(lines) and not lines[i].strip().startswith("```"):
                         code_lines.append(lines[i])
                         i += 1
+
+                    # Warn if code block was never closed
+                    if i >= len(lines):
+                        logger.warning(
+                            "unclosed_code_block",
+                            file_path=path,
+                            start_line=start_line,
+                            message="Code block was not closed with ```, content may be truncated",
+                        )
+
                     files[path] = "\n".join(code_lines)
             i += 1
 

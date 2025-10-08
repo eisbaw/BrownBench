@@ -178,9 +178,7 @@ def test_cache_invalidate_nonexistent(solution_cache, mock_dut, simple_task):
 
 
 def test_cache_corrupted_file(solution_cache, mock_dut, simple_task, sample_solution, cache_dir):
-    """Test handling of corrupted cache file - should raise CacheError and delete corrupt file."""
-    from codegen_bench.exceptions import CacheError
-
+    """Test handling of corrupted cache file - should treat as cache miss and delete corrupt file."""
     # Store valid solution
     solution_cache.put(mock_dut, simple_task, 42, sample_solution)
 
@@ -190,9 +188,9 @@ def test_cache_corrupted_file(solution_cache, mock_dut, simple_task, sample_solu
     with open(cache_file, "w") as f:
         f.write("{ invalid json }")
 
-    # Should raise CacheError for corrupted cache
-    with pytest.raises(CacheError, match="Corrupted cache file"):
-        solution_cache.get(mock_dut, simple_task, 42)
+    # Should treat corrupted cache as cache miss (returns None)
+    result = solution_cache.get(mock_dut, simple_task, 42)
+    assert result is None
 
     # Cache file should have been deleted
     assert not cache_file.exists()

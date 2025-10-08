@@ -23,14 +23,19 @@ class SolutionCache:
     Cache keys are SHA-256 hashes of (dut_id, dut_version, task_id, seed).
     """
 
-    def __init__(self, cache_dir: Path):
+    def __init__(self, cache_dir: Path, fail_on_corruption: bool = False):
         """Initialize solution cache.
 
         Args:
             cache_dir: Directory to store cached solutions
+            fail_on_corruption: If True, raise CacheError on corrupted cache files.
+                               If False (default), treat corruption as cache miss.
+                               Set to True for debugging cache issues.
         """
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.fail_on_corruption = fail_on_corruption
+        self._corruption_count = 0  # Track corruption frequency for observability
 
     def _cache_key(self, dut: CodeGenerationApproach, task: Task, seed: int) -> str:
         """Generate unique cache key.
@@ -84,25 +89,41 @@ class SolutionCache:
             )
             return solution
         except (json.JSONDecodeError, KeyError, ValueError, OSError) as e:
-            # Cache file corrupted - delete and fail fast
-            logger.error(
-                "cache_corrupted_deleting",
+            # Track corruption for observability
+            self._corruption_count += 1
+
+            # Log corruption with metrics
+            logger.warning(
+                "cache_corrupted",
                 dut=dut.get_metadata().id,
                 task_id=task.id,
                 seed=seed,
                 cache_key=key,
                 cache_file=str(cache_file),
                 error=str(e),
+                error_type=type(e).__name__,
+                corruption_count=self._corruption_count,
+                fail_on_corruption=self.fail_on_corruption,
             )
-            # Delete corrupt cache file
+
+            # Attempt to delete corrupt cache file for cleanup
             try:
                 cache_file.unlink()
+                logger.info("cache_corrupted_file_deleted", cache_file=str(cache_file))
             except OSError as unlink_error:
                 logger.warning(
                     "cache_deletion_failed", cache_file=str(cache_file), error=str(unlink_error)
                 )
 
-            raise CacheError(f"Corrupted cache file {cache_file}: {e}") from e
+            # Fail-fast mode for debugging - raise error instead of treating as miss
+            if self.fail_on_corruption:
+                raise CacheError(
+                    f"Corrupted cache file {cache_file}: {e} "
+                    f"(fail_on_corruption=True, total corruptions: {self._corruption_count})"
+                ) from e
+
+            # Default: treat as cache miss for production resilience
+            return None
 
     def put(self, dut: CodeGenerationApproach, task: Task, seed: int, solution: Solution) -> None:
         """Store solution in cache using atomic write.
