@@ -156,9 +156,11 @@ class SimpleChatDUT(CodeGenerationApproach):
             )
             raise DUTError(f"Failed to parse API response for task {task.id}: {e}") from e
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))  # type: ignore[misc]
     def _call_api_with_retry(self, prompt: str) -> anthropic.types.Message:
         """Call Anthropic API with retry logic and rate limiting.
+
+        Rate limiting is applied once before retries begin. If the API call fails
+        after all retries, the rate limiter slot is released for idempotency.
 
         Args:
             prompt: The prompt to send
@@ -169,15 +171,25 @@ class SimpleChatDUT(CodeGenerationApproach):
         Raises:
             anthropic.APIError: If all retry attempts fail
         """
-        # Apply rate limiting before API call
+        # Apply rate limiting before any retry attempts
         self.rate_limiter.acquire()
 
-        return self.client.messages.create(
-            model=self.model,
-            max_tokens=self.max_tokens,
-            temperature=self.temperature,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))  # type: ignore[misc]
+        def _call_api() -> anthropic.types.Message:
+            """Inner function with retry logic that doesn't re-acquire rate limit."""
+            return self.client.messages.create(
+                model=self.model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                messages=[{"role": "user", "content": prompt}],
+            )
+
+        try:
+            return _call_api()
+        except Exception:
+            # Release rate limiter slot on failure for idempotency
+            self.rate_limiter.release()
+            raise
 
     def _build_prompt(self, task: Task) -> str:
         """Build minimal prompt for task.
