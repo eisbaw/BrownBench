@@ -198,69 +198,70 @@ duts:
 Configure tournament behavior (currently via Python API).
 
 ```python
-from codegen_bench.tournament.config import TournamentConfig
+from codegen_bench.core.config import TournamentConfig, TrueSkillConfig
 
+# Tournament configuration
 config = TournamentConfig(
-    # DUTs to compare
-    dut_ids=["simple-chat", "elaborate-prompt"],
+    # Randomization seed for reproducibility
+    base_seed=42,
 
-    # Tasks to evaluate
-    task_ids=["task_001", "task_002", "task_003"],
+    # Number of solution samples per (DUT, task) pairing
+    samples_per_pairing=3,
 
-    # Randomization
-    base_seed=42,  # Reproducibility seed
+    # Save checkpoint every N comparisons
+    checkpoint_interval=10
+)
 
-    # Arenas (quality dimensions)
-    arenas=[
-        "maintainability",
-        "architecture",
-        "surgical_precision",
-        "testability",
-        "performance",
-        "safety"
-    ],
+# TrueSkill rating configuration (optional, for rating systems)
+trueskill_config = TrueSkillConfig(
+    # Initial skill parameters
+    initial_mu=25.0,       # Mean skill rating for new players
+    initial_sigma=8.33,    # Skill uncertainty (standard deviation)
 
-    # Judge consensus
-    consensus_threshold=0.7,  # Require 70% agreement
-    num_judges=3,             # Use 3 judges per comparison
-
-    # Execution
-    parallel_workers=4,       # Concurrent solution generation
-    timeout_seconds=300,      # Max time per solution
-
-    # Budget limits
-    max_cost_per_dut=10.0,    # $10 per DUT
-    max_total_cost=50.0,      # $50 total tournament
+    # Match parameters
+    beta=4.17,            # Distance guaranteeing ~76% win probability
+    tau=0.0833,           # Skill dynamics factor (drift over time)
+    draw_probability=0.1  # Expected probability of draws (10%)
 )
 ```
 
 ### Tournament Parameters
 
-**Selection**:
-- **dut_ids** (list[str]): DUTs to evaluate
-- **task_ids** (list[str]): Tasks for evaluation
-- **arenas** (list[str]): Quality dimensions to judge
-
-**Randomization**:
+**TournamentConfig Parameters**:
 - **base_seed** (int): Master seed for reproducibility
-  - Derived seeds used for each solution
+  - Default: `42`
+  - Derived seeds used for each solution sample
 
-**Consensus**:
-- **consensus_threshold** (float): Required agreement rate (0.0-1.0)
-  - `0.7` means 70% of judges must agree
-- **num_judges** (int): Judges per comparison
-  - Odd numbers recommended (3, 5, 7)
+- **samples_per_pairing** (int): Number of solution samples per (DUT, task) pair
+  - Default: `3`
+  - Higher values increase statistical power but also increase cost
 
-**Execution**:
-- **parallel_workers** (int): Concurrent generation processes
-  - Default: `4`
-  - More workers = faster but higher memory usage
-- **timeout_seconds** (int): Max time for solution generation
-  - Default: `300` (5 minutes)
+- **checkpoint_interval** (int): Save checkpoint every N comparisons
+  - Default: `10`
+  - Allows resuming interrupted tournaments
 
-**Budget**:
-- **max_cost_per_dut** (float): Per-DUT spending limit (USD)
-- **max_total_cost** (float): Total tournament budget (USD)
+### TrueSkill Rating Configuration
+
+**TrueSkillConfig Parameters**:
+- **initial_mu** (float): Initial mean skill rating for new players
+  - Default: `25.0` (standard TrueSkill value)
+  - Higher values indicate higher initial skill estimate
+
+- **initial_sigma** (float): Initial skill uncertainty (standard deviation)
+  - Default: `8.33` (roughly 1/3 of skill range)
+  - Higher values indicate more uncertainty about true skill
+
+- **beta** (float, optional): Distance that guarantees ~76% win probability
+  - Default: `initial_sigma / 2`
+  - Controls how much randomness affects match outcomes
+
+- **tau** (float, optional): Skill dynamics factor
+  - Default: `initial_sigma / 100`
+  - Models skill drift over time (use 0 for static skills)
+
+- **draw_probability** (float): Expected probability of draws
+  - Default: `0.1` (10% draws expected)
+  - Affects how conservatively skills are updated
 
 ## Judge Configuration
 

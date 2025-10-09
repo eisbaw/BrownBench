@@ -16,6 +16,7 @@ from codegen_bench.dut.base import ApproachMetadata, CodeGenerationApproach
 from codegen_bench.exceptions import DUTAPIError, DUTConfigError, DUTParsingError
 from codegen_bench.parsing.extractor import CodeExtractor
 from codegen_bench.utils.rate_limiter import RateLimiter
+from codegen_bench.utils.timeout import timeout_context
 
 logger = structlog.get_logger(__name__)
 
@@ -43,6 +44,7 @@ class SimpleChatDUT(CodeGenerationApproach):
                 - max_tokens: Max tokens for response (default: 8000)
                 - temperature: Sampling temperature (default: 0.3)
                 - max_requests_per_minute: Rate limit for API calls (default: 50)
+                - timeout_seconds: Timeout for solve() in seconds (default: 300)
 
         Raises:
             DUTConfigError: If API key not found or config validation fails
@@ -59,12 +61,16 @@ class SimpleChatDUT(CodeGenerationApproach):
         if not isinstance(self.max_tokens, int) or self.max_tokens < 1:
             raise DUTConfigError(f"max_tokens must be a positive integer, got {self.max_tokens}")
         if self.max_tokens > 100000:
-            raise DUTConfigError(f"max_tokens exceeds reasonable limit (100k), got {self.max_tokens}")
+            raise DUTConfigError(
+                f"max_tokens exceeds reasonable limit (100k), got {self.max_tokens}"
+            )
 
         # Validate and set temperature
         self.temperature = config.get("temperature", 0.3)
         if not isinstance(self.temperature, int | float):
-            raise DUTConfigError(f"temperature must be a number, got {type(self.temperature).__name__}")
+            raise DUTConfigError(
+                f"temperature must be a number, got {type(self.temperature).__name__}"
+            )
         if not 0.0 <= self.temperature <= 1.0:
             raise DUTConfigError(f"temperature must be in range [0.0, 1.0], got {self.temperature}")
 
@@ -81,6 +87,11 @@ class SimpleChatDUT(CodeGenerationApproach):
 
         Returns:
             Solution with generated code
+
+        Raises:
+            DUTTimeoutError: If solve() exceeds configured timeout
+            DUTAPIError: If API call fails
+            DUTParsingError: If response parsing fails
         """
         logger.info(
             "starting_solution_generation",
@@ -88,87 +99,96 @@ class SimpleChatDUT(CodeGenerationApproach):
             task_id=task.id,
             seed=seed,
             model=self.model,
+            timeout_seconds=self.timeout_seconds,
         )
 
-        try:
-            start_time = time.time()
+        # Wrap entire solve logic with timeout protection
+        with timeout_context(self.timeout_seconds, f"solve task {task.id}"):
+            try:
+                start_time = time.time()
 
-            # Build simple prompt
-            prompt = self._build_prompt(task)
-            logger.debug("prompt_built", task_id=task.id, prompt_length=len(prompt))
+                # Build simple prompt
+                prompt = self._build_prompt(task)
+                logger.debug("prompt_built", task_id=task.id, prompt_length=len(prompt))
 
-            # Single API call with retry
-            response = self._call_api_with_retry(prompt)
+                # Single API call with retry
+                response = self._call_api_with_retry(prompt)
 
-            elapsed = time.time() - start_time
+                elapsed = time.time() - start_time
 
-            # Parse response to extract code changes - extract text from first content block
-            first_block = response.content[0]
-            if isinstance(first_block, TextBlock):
-                response_text = first_block.text
-            else:
-                raise DUTParsingError(f"Unexpected response type: {type(first_block)}")
+                # Parse response to extract code changes - extract text from first content block
+                first_block = response.content[0]
+                if isinstance(first_block, TextBlock):
+                    response_text = first_block.text
+                else:
+                    raise DUTParsingError(f"Unexpected response type: {type(first_block)}")
 
-            changed_files = self._parse_code_changes(response_text)
-            logger.debug(
-                "code_extracted",
-                task_id=task.id,
-                num_files=len(changed_files),
-                files=list(changed_files.keys()),
-            )
+                changed_files = self._parse_code_changes(response_text)
+                logger.debug(
+                    "code_extracted",
+                    task_id=task.id,
+                    num_files=len(changed_files),
+                    files=list(changed_files.keys()),
+                )
 
-            # Calculate cost
-            cost = self._calculate_cost(response.usage.input_tokens, response.usage.output_tokens)
+                # Calculate cost
+                cost = self._calculate_cost(
+                    response.usage.input_tokens, response.usage.output_tokens
+                )
 
-            logger.info(
-                "solution_generated",
-                dut=self.get_metadata().id,
-                task_id=task.id,
-                seed=seed,
-                elapsed_seconds=elapsed,
-                input_tokens=response.usage.input_tokens,
-                output_tokens=response.usage.output_tokens,
-                cost_usd=cost,
-                num_files=len(changed_files),
-            )
+                logger.info(
+                    "solution_generated",
+                    dut=self.get_metadata().id,
+                    task_id=task.id,
+                    seed=seed,
+                    elapsed_seconds=elapsed,
+                    input_tokens=response.usage.input_tokens,
+                    output_tokens=response.usage.output_tokens,
+                    cost_usd=cost,
+                    num_files=len(changed_files),
+                )
 
-            return Solution(
-                approach_id=self.get_metadata().id,
-                task_id=task.id,
-                seed=seed,
-                timestamp=datetime.now(UTC),
-                changed_files=changed_files,
-                generation_time_seconds=elapsed,
-                total_tokens=response.usage.input_tokens + response.usage.output_tokens,
-                prompt_tokens=response.usage.input_tokens,
-                completion_tokens=response.usage.output_tokens,
-                api_calls=1,
-                cost_usd=cost,
-            )
-        except (anthropic.APIError, RetryError) as e:
-            logger.error(
-                "api_error",
-                dut=self.get_metadata().id,
-                task_id=task.id,
-                seed=seed,
-                error=str(e),
-                error_type=type(e).__name__,
-            )
-            # Extract original error from RetryError if applicable
-            if isinstance(e, RetryError):
-                raise DUTAPIError(f"API call failed for task {task.id} after retries: {e}") from e
-            else:
-                raise DUTAPIError(f"API call failed for task {task.id}: {e}") from e
-        except (KeyError, AttributeError, ValueError) as e:
-            logger.error(
-                "response_parsing_failed",
-                dut=self.get_metadata().id,
-                task_id=task.id,
-                seed=seed,
-                error=str(e),
-                error_type=type(e).__name__,
-            )
-            raise DUTParsingError(f"Failed to parse API response for task {task.id}: {e}") from e
+                return Solution(
+                    approach_id=self.get_metadata().id,
+                    task_id=task.id,
+                    seed=seed,
+                    timestamp=datetime.now(UTC),
+                    changed_files=changed_files,
+                    generation_time_seconds=elapsed,
+                    total_tokens=response.usage.input_tokens + response.usage.output_tokens,
+                    prompt_tokens=response.usage.input_tokens,
+                    completion_tokens=response.usage.output_tokens,
+                    api_calls=1,
+                    cost_usd=cost,
+                )
+            except (anthropic.APIError, RetryError) as e:
+                logger.error(
+                    "api_error",
+                    dut=self.get_metadata().id,
+                    task_id=task.id,
+                    seed=seed,
+                    error=str(e),
+                    error_type=type(e).__name__,
+                )
+                # Extract original error from RetryError if applicable
+                if isinstance(e, RetryError):
+                    raise DUTAPIError(
+                        f"API call failed for task {task.id} after retries: {e}"
+                    ) from e
+                else:
+                    raise DUTAPIError(f"API call failed for task {task.id}: {e}") from e
+            except (KeyError, AttributeError, ValueError) as e:
+                logger.error(
+                    "response_parsing_failed",
+                    dut=self.get_metadata().id,
+                    task_id=task.id,
+                    seed=seed,
+                    error=str(e),
+                    error_type=type(e).__name__,
+                )
+                raise DUTParsingError(
+                    f"Failed to parse API response for task {task.id}: {e}"
+                ) from e
 
     def _call_api_with_retry(self, prompt: str) -> anthropic.types.Message:
         """Call Anthropic API with retry logic and rate limiting.

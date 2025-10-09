@@ -26,6 +26,8 @@ class ElaboratePromptDUT(SimpleChatDUT):
             config: Configuration dictionary with optional keys:
                 - include_codebase_context: Whether to read existing files (default: True)
                 - max_context_files: Maximum files to include in context (default: 5)
+                - timeout_seconds: Timeout for solve() in seconds (default: 300)
+                - All SimpleChatDUT config options (model, api_key, max_tokens, etc.)
         """
         super().__init__(config)
         self.include_codebase_context = config.get("include_codebase_context", True)

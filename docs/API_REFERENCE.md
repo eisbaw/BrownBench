@@ -65,6 +65,20 @@ You can browse the generated documentation by opening `docs/api/index.html` in a
 - **`codegen_bench.judge.orchestrator`**: Judge orchestration
   - `JudgeOrchestrator`: Manages multiple judges and consensus
 
+### Configuration
+
+- **`codegen_bench.core.config`**: Configuration dataclasses
+  - `TournamentConfig`: Tournament-level configuration
+    - `base_seed`: Master seed for reproducibility
+    - `samples_per_pairing`: Number of samples per (DUT, task) pair
+    - `checkpoint_interval`: How often to save checkpoints
+  - `TrueSkillConfig`: TrueSkill rating system configuration
+    - `initial_mu`: Initial mean skill rating
+    - `initial_sigma`: Initial skill uncertainty
+    - `beta`: Distance for 76% win probability
+    - `tau`: Skill dynamics factor
+    - `draw_probability`: Expected probability of draws
+
 ### Tournament
 
 - **`codegen_bench.core.tournament`**: Tournament execution
@@ -240,10 +254,18 @@ from pathlib import Path
 from codegen_bench.core.task import Task
 from codegen_bench.core.arena import Arena
 from codegen_bench.core.tournament import TournamentRunner
+from codegen_bench.core.config import TournamentConfig
 from codegen_bench.dut.simple_chat import SimpleChatDUT
 from codegen_bench.judge.orchestrator import JudgeOrchestrator
 from codegen_bench.judge.claude_judge import ClaudeJudge
 from codegen_bench.cache.store import SolutionCache
+
+# Configure tournament
+config = TournamentConfig(
+    base_seed=42,
+    samples_per_pairing=3,
+    checkpoint_interval=10
+)
 
 # Load tasks
 task = Task.from_yaml(Path("tasks/task-001.yaml"))
@@ -274,11 +296,38 @@ runner = TournamentRunner(
     judges=judges,
     arenas=[arena],
     cache=cache,
-    samples_per_pairing=3
+    config=config  # Pass the config
 )
 
 result = runner.run(output_dir=Path("results"))
 print(result.get_leaderboard())
+```
+
+### TrueSkill Rating Example
+
+```python
+from codegen_bench.core.config import TrueSkillConfig
+from codegen_bench.stats.ratings.trueskill_rating import TrueSkillRating
+
+# Configure TrueSkill for your environment
+config = TrueSkillConfig(
+    initial_mu=30.0,
+    initial_sigma=10.0,
+    draw_probability=0.15  # 15% draws expected
+)
+
+# Set as default for all new ratings
+TrueSkillRating.set_default_config(config)
+
+# Create players
+player_a = TrueSkillRating()  # Uses config defaults
+player_b = TrueSkillRating()
+
+# After match (A beats B)
+player_a.update(player_b, "win")
+
+print(f"Player A: {player_a}")  # Higher mu, lower sigma
+print(f"Player B: {player_b}")  # Lower mu, lower sigma
 ```
 
 ### Export Results
