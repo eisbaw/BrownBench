@@ -873,6 +873,11 @@ def tournament(
         raise click.Abort() from None
 
 
+# Import and register the estimate command
+from codegen_bench.cli.estimate import estimate
+cli.add_command(estimate)
+
+
 @cli.command()
 @click.argument("ground_truth_file", type=Path)
 @click.option("--judge", default="claude", help="Judge to calibrate (default: claude)")

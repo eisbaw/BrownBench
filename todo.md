@@ -394,7 +394,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [x] DONE: Worktree: No troubleshooting guide for manual cleanup (now in TROUBLESHOOTING.md)
 - [x] DONE: Cache: No documentation on size limits or cache management ✅
 - [x] DONE: RateLimiter: No explanation of bucket-based O(1) alternative ✅
-- [ ] Tournament: No guide on cost estimation for different scales (DEFER - Phase 5 documentation)
+- [x] DONE: Tournament: Cost estimation guide with calculator (TOURNAMENT_COST_ESTIMATION.md, estimate CLI command) ✅
 
 ## Potential Bugs/Edge Cases
 
