@@ -208,31 +208,33 @@ See `docs/PHASE2_PROGRESS.md` for full details
 ## Phase 5: Usability & Polish
 
 ### Additional DUT and Judge Implementations 📋
-- [ ] ClaudeCodeDUT - Use Claude Code as a code generation approach
-  - [ ] Implement ClaudeCodeDUT class
-  - [ ] Handle tool use and file operations
-  - [ ] Capture generated code from Claude Code
-  - [ ] Unit tests for ClaudeCodeDUT
-  - [ ] Integration tests with real tasks
-- [ ] ClaudeCodeJudge - Use Claude Code as a judge
-  - [ ] Implement ClaudeCodeJudge class
-  - [ ] Provide comparison context to Claude Code
-  - [ ] Extract judgment from Claude Code output
-  - [ ] Unit tests for ClaudeCodeJudge
-  - [ ] Calibration testing with ground truth
+- [x] SKIPPED: ClaudeCodeDUT - Not feasible (circular dependency, no non-interactive CLI mode)
+  - [x] SKIPPED: Implement ClaudeCodeDUT class
+  - [x] SKIPPED: Handle tool use and file operations
+  - [x] SKIPPED: Capture generated code from Claude Code
+  - [x] SKIPPED: Unit tests for ClaudeCodeDUT
+  - [x] SKIPPED: Integration tests with real tasks
+- [x] SKIPPED: ClaudeCodeJudge - Not feasible (same reasons as ClaudeCodeDUT)
+  - [x] SKIPPED: Implement ClaudeCodeJudge class
+  - [x] SKIPPED: Provide comparison context to Claude Code
+  - [x] SKIPPED: Extract judgment from Claude Code output
+  - [x] SKIPPED: Unit tests for ClaudeCodeJudge
+  - [x] SKIPPED: Calibration testing with ground truth
 
-### Visualization & Reporting 📋
-- [ ] Jinja2 template for HTML output
-- [ ] Interactive Plotly charts
-- [ ] Sortable leaderboard tables
-- [ ] Per-arena breakdowns
-- [ ] Cost analysis charts
+### Visualization & Reporting ✅ DONE
+- [x] DONE: Jinja2 template for HTML output
+- [x] DONE: Interactive Plotly charts
+- [x] DONE: Sortable leaderboard tables
+- [x] DONE: Per-arena breakdowns
+- [x] DONE: Cost analysis charts
 - [x] DONE: Multi-objective optimization with pymoo
 - [x] DONE: Pareto frontier calculation
 - [x] DONE: Hypervolume metric
 - [x] DONE: Dominated solution identification
 - [x] DONE: Pareto visualization with Plotly
 - [x] DONE: Pareto frontier unit tests
+- [x] DONE: HTMLReporter class with comprehensive test suite (17 tests, 94% coverage)
+- [x] DONE: Fixed Pareto reference point calculation for numerical stability
 
 ### Export Formats ✅ DONE
 - [x] DONE: JSON exporter with schema
@@ -250,11 +252,11 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [x] DONE: CLI reference
 - [x] DONE: Configuration guide
 - [x] DONE: Troubleshooting guide
-- [ ] Architecture overview
-- [ ] Adding new DUTs guide (include ClaudeCodeDUT example)
-- [ ] Adding new arenas guide
-- [ ] Adding new judges guide (include ClaudeCodeJudge example)
-- [ ] Contributing guidelines
+- [x] DONE: Architecture overview
+- [x] DONE: Adding new DUTs guide (include ClaudeCodeDUT example)
+- [x] DONE: Adding new arenas guide
+- [x] DONE: Adding new judges guide (include ClaudeCodeJudge example)
+- [x] DONE: Contributing guidelines (with MPED architectural principles)
 - [ ] API reference (auto-generated)
 - [ ] Explain rating systems
 - [ ] Effect size interpretation
