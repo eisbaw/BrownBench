@@ -367,7 +367,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Store solution IDs and load from cache on demand
 - [x] DONE: Troubleshooting guide for worktree issues
 - [x] DONE: Manual cleanup commands documentation
-- [ ] Rate limiter: Consider bucket-based O(1) implementation
+- [x] DONE: Rate limiter: Bucket-based O(1) implementation (BucketRateLimiter, MultiTierRateLimiter) ✅
 - [x] DONE: Cache: Add lock-free concurrent write protection ✅ (uses atomic rename - documented)
 - [ ] Cache: Consider TTL/expiration for stale cache entries
 - [x] DONE: Worktree: Add retry logic for transient git failures ✅
