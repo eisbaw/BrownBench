@@ -369,7 +369,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [x] DONE: Manual cleanup commands documentation
 - [x] DONE: Rate limiter: Bucket-based O(1) implementation (BucketRateLimiter, MultiTierRateLimiter) ✅
 - [x] DONE: Cache: Add lock-free concurrent write protection ✅ (uses atomic rename - documented)
-- [ ] Cache: Consider TTL/expiration for stale cache entries
+- [x] DONE: Cache: TTL/expiration for stale cache entries (TTLSolutionCache, 7 day default, auto cleanup) ✅
 - [x] DONE: Worktree: Add retry logic for transient git failures ✅
 - [x] DONE: Worktree: Document manual cleanup procedure in case of failures (duplicate - see line 369) ✅
 - [x] DONE: Tournament: Add checkpoint/resume functionality for long-running tournaments ✅
@@ -378,7 +378,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [x] DONE: Add tests for edge-case exception handlers in cache.py (lines 113-114, 120, 176-177, 192-194) ✅
 - [ ] Cache: Add size limits and LRU eviction (DEFER - major feature)
 - [x] DONE: Registry: Class-level state may cause issues in parallel testing ✅ (refactored to support instance-based design)
-- [ ] Cache: No TTL/expiration mechanism - stale cache could accumulate indefinitely (DEFER - major feature)
+- [x] DONE: Cache: No TTL/expiration mechanism - resolved with TTLSolutionCache implementation ✅
 
 ## Missing Functionality
 
