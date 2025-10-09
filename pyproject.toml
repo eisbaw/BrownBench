@@ -47,6 +47,9 @@ dependencies = [
     "seaborn>=0.13.0",
     "plotly>=5.18.0",
 
+    # Templating
+    "jinja2>=3.1.0",
+
     # Utilities
     "tqdm>=4.66.0",
     "tenacity>=8.2.0",
@@ -63,6 +66,7 @@ dev = [
     "ruff>=0.1.0",
     "ipython>=8.20.0",
     "build>=1.0.0",  # PEP 517 build frontend for 'just build' workflow
+    "pdoc>=14.1.0",  # API documentation generation
     # Type stubs
     "types-PyYAML>=6.0.0",
 ]
@@ -105,6 +109,8 @@ module = [
     "click",
     "httpx",
     "httpx.*",
+    "jinja2",
+    "jinja2.*",
     "numpy",
     "numpy.typing",
     "pandas",

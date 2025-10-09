@@ -68,9 +68,13 @@ quick-tournament:
         --tier=1 \
         --output-dir=./results/quick
 
-# Generate documentation
+# Generate API documentation (HTML format)
+docs-api:
+    nix-shell --run '.venv/bin/pdoc -o docs/api codegen_bench'
+
+# Generate documentation (placeholder for future Sphinx setup)
 docs:
-    cd docs && make html
+    @echo "Use 'just docs-api' to generate API reference documentation"
 
 # Release (tag and push)
 release VERSION:
