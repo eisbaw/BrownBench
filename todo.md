@@ -352,9 +352,9 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Monitor spending weekly
 - [ ] Optimize prompts for token efficiency
 - [ ] Budget reviews at phase boundaries
-- [ ] Update docs with new features
-- [ ] Fix outdated information
-- [ ] Add examples as features stabilize
+- [x] DONE: Update docs with new features ✅ (PricingConfig, DUTRegistry improvements documented)
+- [x] DONE: Fix outdated information ✅ (checked and updated)
+- [x] DONE: Add examples as features stabilize ✅ (added 3 new example files)
 - [x] DONE: Maintain changelog ✅
 
 ## Technical Debt
