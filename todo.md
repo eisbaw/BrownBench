@@ -344,8 +344,8 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Add integration tests for new features
 - [ ] Run test suite before all commits
 - [ ] Fix flaky tests immediately
-- [ ] Run ruff linter regularly
-- [ ] Type check with mypy
+- [x] DONE: Run ruff linter regularly ✅
+- [x] DONE: Type check with mypy ✅
 - [ ] Review code for maintainability
 - [ ] Refactor technical debt
 - [ ] Use record/replay for development
@@ -355,7 +355,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Update docs with new features
 - [ ] Fix outdated information
 - [ ] Add examples as features stabilize
-- [ ] Maintain changelog
+- [x] DONE: Maintain changelog ✅
 
 ## Technical Debt
 
