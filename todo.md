@@ -377,7 +377,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [x] DONE: Judge: Add circuit breaker for repeated API failures ✅
 - [x] DONE: Add tests for edge-case exception handlers in cache.py (lines 113-114, 120, 176-177, 192-194) ✅
 - [ ] Cache: Add size limits and LRU eviction (DEFER - major feature)
-- [ ] Registry: Class-level state may cause issues in parallel testing - consider instance-based design
+- [x] DONE: Registry: Class-level state may cause issues in parallel testing ✅ (refactored to support instance-based design)
 - [ ] Cache: No TTL/expiration mechanism - stale cache could accumulate indefinitely (DEFER - major feature)
 
 ## Missing Functionality

@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Instance-based DUTRegistry for improved test isolation
+- DUTRegistry.isolated() context manager for parallel testing
+- Comprehensive unit tests for DUTRegistry (27 tests, 100% coverage)
 - PricingConfig dataclass for centralized API pricing configuration
 - Cache size limit documentation and management recommendations
 - Thundering herd mitigation documentation for RateLimiter
@@ -30,11 +33,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Five additional C/C++ tasks (task_022-026)
 
 ### Fixed
+- DUTRegistry class-level state issue that could cause test interference
 - Exception handling to always show actionable suggestions
 - DUTTimeoutError properly displaying retry suggestions
 - Tournament checkpointing with checkpoint_interval parameter
 
 ### Changed
+- DUTRegistry refactored to support both instance and class-level usage (backward compatible)
 - SimpleChatDUT now uses PricingConfig from centralized configuration module
 - TrueSkillRating now uses configurable TrueSkillConfig
 - Exception messages improved for clarity and actionability
