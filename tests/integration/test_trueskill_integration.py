@@ -10,11 +10,7 @@ def test_trueskill_with_custom_config_integration():
     """Test TrueSkillRating with custom configuration in a realistic scenario."""
     # Create a custom config for a high-variance environment
     config = TrueSkillConfig(
-        initial_mu=30.0,
-        initial_sigma=12.0,
-        beta=6.0,
-        tau=0.5,
-        draw_probability=0.15
+        initial_mu=30.0, initial_sigma=12.0, beta=6.0, tau=0.5, draw_probability=0.15
     )
 
     # Set as default config
@@ -88,7 +84,7 @@ def test_multiple_trueskill_configs():
         initial_mu=25.0,
         initial_sigma=4.0,
         tau=0.01,  # Very low skill drift
-        draw_probability=0.05
+        draw_probability=0.05,
     )
 
     # Config for casual environment (high uncertainty)
@@ -96,7 +92,7 @@ def test_multiple_trueskill_configs():
         initial_mu=25.0,
         initial_sigma=10.0,
         tau=0.5,  # High skill drift
-        draw_probability=0.25
+        draw_probability=0.25,
     )
 
     # Create players in different pools
@@ -135,7 +131,7 @@ def test_trueskill_round_robin_tournament():
         "expert": expert,
         "intermediate1": intermediate1,
         "intermediate2": intermediate2,
-        "beginner": beginner
+        "beginner": beginner,
     }
 
     # Simulate realistic tournament results
@@ -155,11 +151,7 @@ def test_trueskill_round_robin_tournament():
         p1.update(p2, result)
 
     # Check final rankings (by conservative estimate)
-    rankings = sorted(
-        players.items(),
-        key=lambda x: x[1].conservative_estimate(),
-        reverse=True
-    )
+    rankings = sorted(players.items(), key=lambda x: x[1].conservative_estimate(), reverse=True)
 
     # Expert should still be highest
     assert rankings[0][0] == "expert"

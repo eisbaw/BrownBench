@@ -211,11 +211,14 @@ class TestPromptOptimizer:
         optimizer = PromptOptimizer()
 
         # High potential (verbose prompt)
-        verbose = """You are an expert. Please make sure to carefully follow all of these instructions.
+        verbose = (
+            """You are an expert. Please make sure to carefully follow all of these instructions.
         It is very important that you understand everything completely.
         In order to successfully complete this task, you must be very careful.
         Examples: Example 1, Example 2, Example 3
-        """ * 3
+        """
+            * 3
+        )
 
         # Low potential (already optimized)
         concise = "Expert. Task: implement X. Output: code."

@@ -258,7 +258,9 @@ class TransientError(BrownBenchError):
     def __init__(self, message: str, retry_after_seconds: int = 60, **kwargs: Any):
         # Only set default retry_suggestion if not already provided
         if "retry_suggestion" not in kwargs:
-            kwargs["retry_suggestion"] = f"Retry after {retry_after_seconds} seconds with exponential backoff"
+            kwargs["retry_suggestion"] = (
+                f"Retry after {retry_after_seconds} seconds with exponential backoff"
+            )
 
         super().__init__(
             message,

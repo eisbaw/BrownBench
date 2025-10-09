@@ -84,6 +84,7 @@ def test_tournament_config_large_values():
 
 # Tests for TrueSkillConfig
 
+
 def test_trueskill_config_defaults():
     """Test default TrueSkillConfig values."""
     config = TrueSkillConfig()
@@ -97,11 +98,7 @@ def test_trueskill_config_defaults():
 def test_trueskill_config_custom_values():
     """Test custom TrueSkillConfig values."""
     config = TrueSkillConfig(
-        initial_mu=30.0,
-        initial_sigma=10.0,
-        beta=5.0,
-        tau=0.1,
-        draw_probability=0.05
+        initial_mu=30.0, initial_sigma=10.0, beta=5.0, tau=0.1, draw_probability=0.05
     )
     assert config.initial_mu == 30.0
     assert config.initial_sigma == 10.0

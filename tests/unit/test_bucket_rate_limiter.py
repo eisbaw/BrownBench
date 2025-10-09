@@ -72,11 +72,7 @@ class TestBucketRateLimiter:
     def test_refill_mechanism(self):
         """Test token refill based on time."""
         mock_clock = MagicMock(side_effect=[0, 0.1, 0.2, 0.5, 1.0])
-        limiter = BucketRateLimiter(
-            requests_per_second=10,
-            burst_size=10,
-            clock=mock_clock
-        )
+        limiter = BucketRateLimiter(requests_per_second=10, burst_size=10, clock=mock_clock)
 
         # Initial state
         assert limiter.available_tokens() == 10
@@ -100,7 +96,7 @@ class TestBucketRateLimiter:
         limiter = BucketRateLimiter(
             requests_per_second=10,
             burst_size=5,  # Lower capacity than rate
-            clock=mock_clock
+            clock=mock_clock,
         )
 
         # Use some tokens
@@ -112,11 +108,7 @@ class TestBucketRateLimiter:
     def test_wait_time(self):
         """Test wait time calculation."""
         mock_clock = MagicMock(return_value=0)
-        limiter = BucketRateLimiter(
-            requests_per_second=10,
-            burst_size=10,
-            clock=mock_clock
-        )
+        limiter = BucketRateLimiter(requests_per_second=10, burst_size=10, clock=mock_clock)
 
         # No wait when tokens available
         assert limiter.wait_time(5) == 0
@@ -270,7 +262,7 @@ class TestMultiTierRateLimiter:
         """Test multiple rate limit tiers."""
         limiter = MultiTierRateLimiter()
         limiter.add_tier("second", requests_per_second=10, burst_size=10)
-        limiter.add_tier("minute", requests_per_second=100/60, burst_size=100)
+        limiter.add_tier("minute", requests_per_second=100 / 60, burst_size=100)
 
         # Can acquire up to second-tier limit
         for _ in range(10):

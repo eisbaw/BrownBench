@@ -44,7 +44,7 @@ class TrueSkillConfig:
     initial_mu: float = 25.0
     initial_sigma: float = 8.33
     beta: float | None = None  # Will default to initial_sigma / 2
-    tau: float | None = None   # Will default to initial_sigma / 100
+    tau: float | None = None  # Will default to initial_sigma / 100
     draw_probability: float = 0.1
 
     def __post_init__(self) -> None:
@@ -58,12 +58,12 @@ class TrueSkillConfig:
 
         # Set defaults based on initial_sigma if not provided
         if self.beta is None:
-            object.__setattr__(self, 'beta', self.initial_sigma / 2)
+            object.__setattr__(self, "beta", self.initial_sigma / 2)
         elif self.beta <= 0:
             raise ValueError(f"beta must be positive, got {self.beta}")
 
         if self.tau is None:
-            object.__setattr__(self, 'tau', self.initial_sigma / 100)
+            object.__setattr__(self, "tau", self.initial_sigma / 100)
         elif self.tau < 0:
             raise ValueError(f"tau must be non-negative, got {self.tau}")
 
@@ -146,7 +146,7 @@ class PricingConfig:
     """
 
     # Claude Sonnet 4.5 pricing
-    claude_sonnet_4_5_input_per_1k: float = 0.003   # $3.00 per million tokens
+    claude_sonnet_4_5_input_per_1k: float = 0.003  # $3.00 per million tokens
     claude_sonnet_4_5_output_per_1k: float = 0.015  # $15.00 per million tokens
 
     def __post_init__(self) -> None:

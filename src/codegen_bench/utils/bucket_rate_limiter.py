@@ -7,7 +7,7 @@ for high-throughput scenarios.
 
 import threading
 import time
-from typing import Optional
+from typing import Callable, Optional
 
 
 class BucketRateLimiter:
@@ -37,7 +37,7 @@ class BucketRateLimiter:
         self,
         requests_per_second: float,
         burst_size: Optional[int] = None,
-        clock: Optional[callable] = None,
+        clock: Optional[Callable[[], float]] = None,
     ):
         """Initialize bucket rate limiter.
 

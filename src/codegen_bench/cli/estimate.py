@@ -256,6 +256,10 @@ def estimate(
 
     # Provide recommendations
     console.print("\n[bold magenta]Recommendations[/bold magenta]")
+
+    # Extract num_comparisons from result
+    num_comparisons = result["num_comparisons"]
+
     if not optimized and result["total_cost"] > 50:
         potential_savings = result["total_cost"] * 0.4  # 40% savings estimate
         console.print(

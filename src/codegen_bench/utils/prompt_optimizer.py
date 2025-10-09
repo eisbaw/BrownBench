@@ -1,9 +1,12 @@
 """Prompt optimization utilities for reducing token usage."""
 
 import re
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
-import tiktoken
+try:
+    import tiktoken
+except ImportError:
+    tiktoken = None  # type: ignore
 
 
 class PromptOptimizer:
@@ -29,7 +32,7 @@ class PromptOptimizer:
         """
         return len(self.encoder.encode(text))
 
-    def analyze_prompt(self, prompt: str) -> Dict[str, any]:
+    def analyze_prompt(self, prompt: str) -> Dict[str, Any]:
         """Analyze prompt for optimization opportunities.
 
         Args:
@@ -91,7 +94,9 @@ class PromptOptimizer:
             "original_tokens": original_tokens,
             "optimized_tokens": optimized_tokens,
             "tokens_saved": original_tokens - optimized_tokens,
-            "reduction_percent": round((1 - optimized_tokens / original_tokens) * 100, 1) if original_tokens > 0 else 0,
+            "reduction_percent": round((1 - optimized_tokens / original_tokens) * 100, 1)
+            if original_tokens > 0
+            else 0,
         }
 
         return optimized, metrics
@@ -235,7 +240,7 @@ class PromptOptimizer:
         else:
             return "LOW"
 
-    def compare_prompts(self, prompt1: str, prompt2: str) -> Dict[str, any]:
+    def compare_prompts(self, prompt1: str, prompt2: str) -> Dict[str, Any]:
         """Compare two prompts for efficiency.
 
         Args:
@@ -253,5 +258,9 @@ class PromptOptimizer:
             "prompt2_tokens": tokens2,
             "difference": tokens2 - tokens1,
             "percent_change": round((tokens2 - tokens1) / tokens1 * 100, 1) if tokens1 > 0 else 0,
-            "more_efficient": "prompt1" if tokens1 < tokens2 else "prompt2" if tokens2 < tokens1 else "equal",
+            "more_efficient": "prompt1"
+            if tokens1 < tokens2
+            else "prompt2"
+            if tokens2 < tokens1
+            else "equal",
         }

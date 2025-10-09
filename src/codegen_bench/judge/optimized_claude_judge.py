@@ -3,7 +3,7 @@
 from typing import Optional
 
 from codegen_bench.core.arena import Arena
-from codegen_bench.core.judgment import Judgment
+from codegen_bench.core.judgment import JudgmentResult
 from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
 from codegen_bench.judge.claude_judge import ClaudeJudge
@@ -74,12 +74,15 @@ CONFIDENCE: [0.0-1.0]"""
         Returns:
             Compact formatted solution
         """
-        if not solution.generated_files:
+        # Combine changed and new files
+        all_files = {**solution.changed_files, **solution.new_files}
+
+        if not all_files:
             return "[Empty]"
 
         # Format files without extra headers
         parts = []
-        for path, content in solution.generated_files.items():
+        for path, content in all_files.items():
             # Skip empty files
             if not content.strip():
                 continue
@@ -120,6 +123,6 @@ Pick more performant solution.""",
 
         # Use optimized prompt if available, otherwise fall back to default
         return optimized_prompts.get(
-            arena.id,
+            arena.name,
             f"Evaluate based on {arena.name} criteria. Pick better solution.",
         )

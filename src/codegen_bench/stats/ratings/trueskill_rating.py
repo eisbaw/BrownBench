@@ -45,14 +45,14 @@ class TrueSkillRating:
             sigma=config.initial_sigma,
             beta=config.beta,
             tau=config.tau,
-            draw_probability=config.draw_probability
+            draw_probability=config.draw_probability,
         )
 
     def __init__(
         self,
         mu: float | None = None,
         sigma: float | None = None,
-        config: TrueSkillConfig | None = None
+        config: TrueSkillConfig | None = None,
     ) -> None:
         """Initialize TrueSkill rating.
 

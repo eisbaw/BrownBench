@@ -16,8 +16,7 @@ def test_pricing_config_defaults():
 def test_pricing_config_custom_values():
     """Test PricingConfig with custom values."""
     config = PricingConfig(
-        claude_sonnet_4_5_input_per_1k=0.005,
-        claude_sonnet_4_5_output_per_1k=0.020
+        claude_sonnet_4_5_input_per_1k=0.005, claude_sonnet_4_5_output_per_1k=0.020
     )
 
     assert config.claude_sonnet_4_5_input_per_1k == 0.005
@@ -46,10 +45,7 @@ def test_pricing_config_negative_output_cost():
 
 def test_pricing_config_zero_cost_allowed():
     """Test that zero cost is allowed (e.g., for testing)."""
-    config = PricingConfig(
-        claude_sonnet_4_5_input_per_1k=0.0,
-        claude_sonnet_4_5_output_per_1k=0.0
-    )
+    config = PricingConfig(claude_sonnet_4_5_input_per_1k=0.0, claude_sonnet_4_5_output_per_1k=0.0)
 
     assert config.claude_sonnet_4_5_input_per_1k == 0.0
     assert config.claude_sonnet_4_5_output_per_1k == 0.0

@@ -9,10 +9,7 @@ from codegen_bench.exceptions import DUTConfigError
 
 def test_simple_chat_default_timeout():
     """Test SimpleChatDUT uses default timeout."""
-    config = {
-        "api_key": "test-key",
-        "model": "claude-3-sonnet-20241022"
-    }
+    config = {"api_key": "test-key", "model": "claude-3-sonnet-20241022"}
     dut = SimpleChatDUT(config)
     assert dut.timeout_seconds == 300  # Default from base class
 
@@ -22,7 +19,7 @@ def test_simple_chat_custom_timeout():
     config = {
         "api_key": "test-key",
         "model": "claude-3-sonnet-20241022",
-        "timeout_seconds": 600  # 10 minutes
+        "timeout_seconds": 600,  # 10 minutes
     }
     dut = SimpleChatDUT(config)
     assert dut.timeout_seconds == 600
@@ -30,43 +27,28 @@ def test_simple_chat_custom_timeout():
 
 def test_simple_chat_invalid_timeout_negative():
     """Test SimpleChatDUT rejects negative timeout."""
-    config = {
-        "api_key": "test-key",
-        "model": "claude-3-sonnet-20241022",
-        "timeout_seconds": -10
-    }
+    config = {"api_key": "test-key", "model": "claude-3-sonnet-20241022", "timeout_seconds": -10}
     with pytest.raises(DUTConfigError, match="timeout_seconds must be a positive integer"):
         SimpleChatDUT(config)
 
 
 def test_simple_chat_invalid_timeout_zero():
     """Test SimpleChatDUT rejects zero timeout."""
-    config = {
-        "api_key": "test-key",
-        "model": "claude-3-sonnet-20241022",
-        "timeout_seconds": 0
-    }
+    config = {"api_key": "test-key", "model": "claude-3-sonnet-20241022", "timeout_seconds": 0}
     with pytest.raises(DUTConfigError, match="timeout_seconds must be a positive integer"):
         SimpleChatDUT(config)
 
 
 def test_simple_chat_invalid_timeout_string():
     """Test SimpleChatDUT rejects non-integer timeout."""
-    config = {
-        "api_key": "test-key",
-        "model": "claude-3-sonnet-20241022",
-        "timeout_seconds": "300"
-    }
+    config = {"api_key": "test-key", "model": "claude-3-sonnet-20241022", "timeout_seconds": "300"}
     with pytest.raises(DUTConfigError, match="timeout_seconds must be a positive integer"):
         SimpleChatDUT(config)
 
 
 def test_elaborate_prompt_default_timeout():
     """Test ElaboratePromptDUT uses default timeout."""
-    config = {
-        "api_key": "test-key",
-        "model": "claude-3-sonnet-20241022"
-    }
+    config = {"api_key": "test-key", "model": "claude-3-sonnet-20241022"}
     dut = ElaboratePromptDUT(config)
     assert dut.timeout_seconds == 300  # Default from base class
 
@@ -78,7 +60,7 @@ def test_elaborate_prompt_custom_timeout():
         "model": "claude-3-sonnet-20241022",
         "timeout_seconds": 900,  # 15 minutes
         "include_codebase_context": True,
-        "max_context_files": 10
+        "max_context_files": 10,
     }
     dut = ElaboratePromptDUT(config)
     assert dut.timeout_seconds == 900
@@ -88,10 +70,6 @@ def test_elaborate_prompt_custom_timeout():
 
 def test_elaborate_prompt_inherits_validation():
     """Test ElaboratePromptDUT inherits timeout validation from base."""
-    config = {
-        "api_key": "test-key",
-        "model": "claude-3-sonnet-20241022",
-        "timeout_seconds": -1
-    }
+    config = {"api_key": "test-key", "model": "claude-3-sonnet-20241022", "timeout_seconds": -1}
     with pytest.raises(DUTConfigError, match="timeout_seconds must be a positive integer"):
         ElaboratePromptDUT(config)

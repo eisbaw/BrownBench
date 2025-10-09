@@ -295,6 +295,7 @@ class TestDUTRegistry:
 
     def test_decorator_usage(self):
         """Test using register as a decorator."""
+
         @DUTRegistry.register
         class DecoratorDUT(CodeGenerationApproach):
             APPROACH_ID = "decorator-dut"
@@ -453,6 +454,7 @@ class TestDUTRegistryBackwardCompatibility:
 
     def test_decorator_still_works(self):
         """Test that decorator usage still works."""
+
         @DUTRegistry.register
         class DecoratorDUT(CodeGenerationApproach):
             APPROACH_ID = "decorator-dut"

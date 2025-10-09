@@ -6,6 +6,8 @@ from pathlib import Path
 import click
 from rich.console import Console
 
+from codegen_bench.cli.estimate import estimate
+
 console = Console()
 
 
@@ -873,8 +875,7 @@ def tournament(
         raise click.Abort() from None
 
 
-# Import and register the estimate command
-from codegen_bench.cli.estimate import estimate
+# Register the estimate command (imported at top of file)
 cli.add_command(estimate)
 
 
