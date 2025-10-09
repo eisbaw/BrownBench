@@ -1,0 +1,42 @@
+id: task_018
+name: Pass typed arguments out of the parser into the arguments list and let it conver
+project: tmux
+domain: refactoring
+difficulty: medium
+codebase_path: submodules/tmux
+specification: 'Based on commit 326d2ef234 from tmux:
+
+
+  Pass typed arguments out of the parser into the arguments list and let it convert
+  them into strings.
+
+
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the tmux repository, representing a typical
+
+  refactoring/enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- arguments.c
+- cmd-parse.y
+- cmd.c
+- tmux.h
+gotchas:
+- This is a real commit from 2021-08-21
+- Review commit message carefully for context
+expected_human_time_minutes: 60
+compile_command: make
+test_command: make test

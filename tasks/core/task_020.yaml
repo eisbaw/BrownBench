@@ -1,0 +1,42 @@
+id: task_020
+name: Refactor IPv6 address comparison logic
+project: etcd
+domain: refactoring
+difficulty: medium
+codebase_path: submodules/etcd
+specification: 'Based on commit ebb0d07894 from etcd:
+
+
+  Refactor IPv6 address comparison logic
+
+
+  Signed-off-by: Ravi Sastry Kadali <ravisastryk@gmail.com>
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the etcd repository, representing a typical
+
+  refactoring/enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- CHANGELOG/CHANGELOG-3.7.md
+- pkg/netutil/host_normalize.go
+- pkg/netutil/host_normalize_test.go
+- pkg/netutil/netutil.go
+gotchas:
+- This is a real commit from 2025-07-19
+- Review commit message carefully for context
+expected_human_time_minutes: 60
+compile_command: make build
+test_command: make test

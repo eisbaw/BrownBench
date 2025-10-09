@@ -1,0 +1,45 @@
+id: task_012
+name: Allow UPDATEs of unindexed columns in fts5 contentless_unindexed=1 tables. Testi
+project: sqlite
+domain: query-optimization
+difficulty: medium
+codebase_path: submodules/sqlite
+specification: 'Based on commit bcd6d5d393 from sqlite:
+
+
+  Allow UPDATEs of unindexed columns in fts5 contentless_unindexed=1 tables. Testing
+  to come.
+
+
+  FossilOrigin-Name: cd36d66c88d7282eb0a3ccde5713253f72f5843e451b2693b71adfdae28b41fb
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the sqlite repository, representing a typical
+
+  refactoring/enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- ext/fts5/fts5Int.h
+- ext/fts5/fts5_main.c
+- ext/fts5/fts5_storage.c
+- ext/fts5/test/fts5unindexed2.test
+- manifest
+- manifest.uuid
+gotchas:
+- This is a real commit from 2024-09-27
+- Review commit message carefully for context
+expected_human_time_minutes: 90
+compile_command: make
+test_command: make test

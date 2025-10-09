@@ -1,0 +1,41 @@
+id: task_019
+name: Tidy tparm wrapper functions to have more obvious names and check tparm return
+  v
+project: tmux
+domain: refactoring
+difficulty: medium
+codebase_path: submodules/tmux
+specification: 'Based on commit 8f34504736 from tmux:
+
+
+  Tidy tparm wrapper functions to have more obvious names and check tparm return value.
+
+
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the tmux repository, representing a typical
+
+  refactoring/enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- tmux.h
+- tty-term.c
+- tty.c
+gotchas:
+- This is a real commit from 2023-04-25
+- Review commit message carefully for context
+expected_human_time_minutes: 60
+compile_command: make
+test_command: make test

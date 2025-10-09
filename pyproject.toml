@@ -51,6 +51,7 @@ dependencies = [
     "tqdm>=4.66.0",
     "tenacity>=8.2.0",
     "python-dotenv>=1.0.0",
+    "httpx>=0.24.0",
 ]
 
 [project.optional-dependencies]
@@ -102,8 +103,15 @@ module = [
     "anthropic",
     "anthropic.*",
     "click",
+    "httpx",
+    "httpx.*",
     "numpy",
+    "numpy.typing",
     "pandas",
+    "plotly",
+    "plotly.*",
+    "pymoo",
+    "pymoo.*",
     "rich.*",
     "scipy",
     "scipy.stats",

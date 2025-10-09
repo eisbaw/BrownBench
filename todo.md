@@ -227,12 +227,12 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Sortable leaderboard tables
 - [ ] Per-arena breakdowns
 - [ ] Cost analysis charts
-- [ ] Multi-objective optimization with pymoo
-- [ ] Pareto frontier calculation
-- [ ] Hypervolume metric
-- [ ] Dominated solution identification
-- [ ] Pareto visualization with Plotly
-- [ ] Pareto frontier unit tests
+- [x] DONE: Multi-objective optimization with pymoo
+- [x] DONE: Pareto frontier calculation
+- [x] DONE: Hypervolume metric
+- [x] DONE: Dominated solution identification
+- [x] DONE: Pareto visualization with Plotly
+- [x] DONE: Pareto frontier unit tests
 
 ### Export Formats ✅ DONE
 - [x] DONE: JSON exporter with schema

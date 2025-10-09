@@ -21,9 +21,8 @@ OUTPUT_PATH = Path("/dev/shm/output.brownbench.json")
 
 # Exact prompt text from the original loop3.source script
 PROMPT = (
-    "Read @todo.md first.\n\n"
-    "You shall read @todo.md and fix the issues mentioned there.\n"
-    "Once done, prefix tasks in todo.md with DONE.\n"
+    "Read @todo.md and implement the tasks listed there, in sequence.\n"
+    "Once a task is done, prefix it in todo.md with DONE.\n"
 )
 
 # Patterns reproducing the original bash greps

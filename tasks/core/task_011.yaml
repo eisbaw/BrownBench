@@ -1,0 +1,48 @@
+id: task_011
+name: 'Events: available bytes calculation via ioctl(FIONREAD).'
+project: nginx
+domain: performance
+difficulty: medium
+codebase_path: submodules/nginx
+specification: 'Based on commit fac4c7bdf5 from nginx:
+
+
+  Events: available bytes calculation via ioctl(FIONREAD).
+
+
+  This makes it possible to avoid looping for a long time while working
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the nginx repository, representing a typical
+
+  refactoring/enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- auto/unix
+- src/event/modules/ngx_devpoll_module.c
+- src/event/modules/ngx_epoll_module.c
+- src/event/modules/ngx_eventport_module.c
+- src/event/modules/ngx_poll_module.c
+- src/event/modules/ngx_select_module.c
+- src/event/modules/ngx_win32_poll_module.c
+- src/event/modules/ngx_win32_select_module.c
+- src/event/ngx_event.h
+- src/os/unix/ngx_readv_chain.c
+gotchas:
+- This is a real commit from 2019-10-17
+- Review commit message carefully for context
+expected_human_time_minutes: 120
+compile_command: make
+test_command: make test

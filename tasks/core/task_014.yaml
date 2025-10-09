@@ -1,0 +1,46 @@
+id: task_014
+name: 'upstream: Move agent listener sockets from /tmp to under'
+project: openssh
+domain: security
+difficulty: medium
+codebase_path: submodules/openssh
+specification: 'Based on commit 80162f9d7e from openssh:
+
+
+  upstream: Move agent listener sockets from /tmp to under
+
+
+  ~/.ssh/agent for both ssh-agent(1) and forwarded sockets in sshd(8).
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the openssh repository, representing a typical
+
+  refactoring/enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- Makefile.in
+- hostfile.c
+- misc.c
+- misc.h
+- pathnames.h
+- session.c
+- ssh-agent.1
+- ssh-agent.c
+gotchas:
+- This is a real commit from 2025-05-05
+- Review commit message carefully for context
+expected_human_time_minutes: 90
+compile_command: make
+test_command: make tests

@@ -1,0 +1,48 @@
+id: task_013
+name: 'TLS: add CURLOPT_SSL_SIGNATURE_ALGORITHMS and --sigalgs'
+project: curl
+domain: protocol
+difficulty: medium
+codebase_path: submodules/curl
+specification: 'Based on commit a638828c88 from curl:
+
+
+  TLS: add CURLOPT_SSL_SIGNATURE_ALGORITHMS and --sigalgs
+
+
+  Fixes #12982
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the curl repository, representing a typical
+
+  refactoring/enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- docs/TODO
+- docs/cmdline-opts/Makefile.inc
+- docs/cmdline-opts/sigalgs.md
+- docs/libcurl/curl_easy_setopt.md
+- '.../opts/CURLOPT_SSL_SIGNATURE_ALGORITHMS.md'
+- docs/libcurl/opts/Makefile.inc
+- docs/libcurl/symbols-in-versions
+- docs/options-in-versions
+- include/curl/curl.h
+- include/curl/typecheck-gcc.h
+gotchas:
+- This is a real commit from 2025-04-02
+- Review commit message carefully for context
+expected_human_time_minutes: 120
+compile_command: make
+test_command: make test

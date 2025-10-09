@@ -1,0 +1,40 @@
+id: task_017
+name: 'MEDIUM: httpclient: implement a way to use directly htx data'
+project: haproxy
+domain: refactoring
+difficulty: medium
+codebase_path: submodules/haproxy
+specification: 'Based on commit 3e05e20029 from haproxy:
+
+
+  MEDIUM: httpclient: implement a way to use directly htx data
+
+
+  Add a HTTPCLIENT_O_RES_HTX flag which allow to store directly the HTX
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the haproxy repository, representing a typical
+
+  refactoring/enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- include/haproxy/http_client-t.h
+- src/http_client.c
+gotchas:
+- This is a real commit from 2025-02-05
+- Review commit message carefully for context
+expected_human_time_minutes: 30
+compile_command: make
+test_command: make test

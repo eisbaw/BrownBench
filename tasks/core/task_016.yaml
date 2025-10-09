@@ -1,0 +1,44 @@
+id: task_016
+name: 'MEDIUM: servers: Add strict-maxconn.'
+project: haproxy
+domain: feature
+difficulty: medium
+codebase_path: submodules/haproxy
+specification: 'Based on commit 706b008429 from haproxy:
+
+
+  MEDIUM: servers: Add strict-maxconn.
+
+
+  Maxconn is a bit of a misnomer when it comes to servers, as it doesn''t
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the haproxy repository, representing a typical
+
+  refactoring/enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- doc/configuration.txt
+- include/haproxy/server-t.h
+- src/backend.c
+- src/connection.c
+- src/server.c
+- src/stream.c
+gotchas:
+- This is a real commit from 2025-02-06
+- Review commit message carefully for context
+expected_human_time_minutes: 90
+compile_command: make
+test_command: make test

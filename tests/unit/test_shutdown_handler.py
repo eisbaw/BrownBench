@@ -359,7 +359,6 @@ def test_shutdown_requested_logs_once(caplog):
 
 def test_reset_clears_logged_flag():
     """Test that reset allows logging again."""
-    import logging
 
     handler = ShutdownHandler()
 

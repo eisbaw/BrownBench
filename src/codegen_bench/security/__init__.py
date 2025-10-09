@@ -1,5 +1,11 @@
 """Security and auditing utilities for BrownBench."""
 
+from codegen_bench.security.api_proxy import (
+    APIProxy,
+    APIProxyConfig,
+    APIProxyError,
+    TemporaryKey,
+)
 from codegen_bench.security.auditor import AuditReport, DUTAuditor
 from codegen_bench.security.isolation import (
     ContainerConfig,
@@ -10,11 +16,15 @@ from codegen_bench.security.isolation import (
 )
 
 __all__ = [
-    "DUTAuditor",
+    "APIProxy",
+    "APIProxyConfig",
+    "APIProxyError",
     "AuditReport",
-    "ContainerIsolation",
     "ContainerConfig",
+    "ContainerIsolation",
     "ContainerIsolationError",
+    "DUTAuditor",
     "NetworkConfig",
     "ResourceLimits",
+    "TemporaryKey",
 ]

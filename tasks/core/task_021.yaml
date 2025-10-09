@@ -1,0 +1,41 @@
+id: task_021
+name: Add DowngradeVersionTestRequest as a field into InternalRaftRequest
+project: etcd
+domain: feature
+difficulty: medium
+codebase_path: submodules/etcd
+specification: 'Based on commit 2eca68e345 from etcd:
+
+
+  Add DowngradeVersionTestRequest as a field into InternalRaftRequest
+
+
+  Executed both scripts below again,
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the etcd repository, representing a typical
+
+  refactoring/enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- api/etcdserverpb/raft_internal.pb.go
+- api/etcdserverpb/raft_internal.proto
+- scripts/etcd_version_annotations.txt
+gotchas:
+- This is a real commit from 2025-01-26
+- Review commit message carefully for context
+expected_human_time_minutes: 60
+compile_command: make build
+test_command: make test
