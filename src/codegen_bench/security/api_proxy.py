@@ -438,8 +438,8 @@ class APIProxy:
 
                 # Use Claude Sonnet 4.5 pricing (matching SimpleChatDUT)
                 # $3/M input, $15/M output
-                input_cost = (input_tokens / 1000) * 0.003
-                output_cost = (output_tokens / 1000) * 0.015
+                input_cost = float((input_tokens / 1000) * 0.003)
+                output_cost = float((output_tokens / 1000) * 0.015)
 
                 return input_cost + output_cost
 
@@ -467,8 +467,4 @@ class APIProxy:
             Dictionary mapping temporary keys to DUT IDs
         """
         with self._lock:
-            return {
-                key: info.dut_id
-                for key, info in self._keys.items()
-                if not info.is_expired()
-            }
+            return {key: info.dut_id for key, info in self._keys.items() if not info.is_expired()}

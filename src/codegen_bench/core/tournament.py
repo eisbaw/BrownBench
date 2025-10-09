@@ -14,6 +14,7 @@ import yaml
 from codegen_bench.cache.store import SolutionCache
 from codegen_bench.checkpoint import CheckpointManager, CheckpointState
 from codegen_bench.core.arena import Arena
+from codegen_bench.core.config import TournamentConfig
 from codegen_bench.core.judgment import JudgmentResult
 from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
@@ -340,6 +341,7 @@ class TournamentRunner:
         arenas: list[Arena],
         cache: SolutionCache,
         samples_per_pairing: int = 3,
+        config: TournamentConfig | None = None,
     ):
         """Initialize tournament runner.
 
@@ -349,10 +351,14 @@ class TournamentRunner:
             judges: Judge orchestrator for comparisons
             arenas: List of arenas (quality dimensions) to evaluate
             cache: Solution cache
-            samples_per_pairing: Number of samples per (DUT, task) pair
+            samples_per_pairing: Number of samples per (DUT, task) pair (deprecated,
+                                use config.samples_per_pairing instead)
+            config: Tournament configuration. If None, uses default TournamentConfig.
+                   If both config and samples_per_pairing are provided, config takes
+                   precedence.
 
         Raises:
-            ValueError: If duts, tasks, or arenas lists are empty, or if samples_per_pairing < 1
+            ValueError: If duts, tasks, or arenas lists are empty
         """
         # Validate inputs at construction time for fail-fast behavior
         if not duts:
@@ -361,15 +367,27 @@ class TournamentRunner:
             raise ValueError("Cannot create tournament with zero tasks")
         if not arenas:
             raise ValueError("Cannot create tournament with zero arenas")
-        if samples_per_pairing < 1:
-            raise ValueError(f"samples_per_pairing must be >= 1, got {samples_per_pairing}")
+
+        # Fail fast if both config and samples_per_pairing are provided
+        if config is not None and samples_per_pairing != 3:
+            raise ValueError(
+                "Cannot specify both 'config' and non-default 'samples_per_pairing'. "
+                "Use TournamentConfig(samples_per_pairing=N) instead. "
+                "The samples_per_pairing parameter is deprecated in favor of config."
+            )
 
         self.duts = duts
         self.tasks = tasks
         self.judges = judges
         self.arenas = arenas
         self.cache = cache
-        self.samples_per_pairing = samples_per_pairing
+
+        # Use config if provided, otherwise create default with samples_per_pairing
+        if config is not None:
+            self.config = config
+        else:
+            # Support legacy samples_per_pairing parameter for backward compatibility
+            self.config = TournamentConfig(samples_per_pairing=samples_per_pairing)
 
         # Initialize ratings
         self.ratings: dict[str, DUTRating] = {}
@@ -382,6 +400,18 @@ class TournamentRunner:
 
         # Track errors for graceful degradation
         self.errors: list[ErrorRecord] = []
+
+    @property
+    def samples_per_pairing(self) -> int:
+        """Get samples_per_pairing from config (backward compatibility property).
+
+        This property maintains backward compatibility with code that directly
+        accesses runner.samples_per_pairing instead of runner.config.samples_per_pairing.
+
+        Returns:
+            Number of samples per (DUT, task) pairing from config
+        """
+        return self.config.samples_per_pairing
 
     def generate_solutions(
         self,
@@ -404,8 +434,8 @@ class TournamentRunner:
             metrics[dut_id] = SolutionMetrics()
 
             for task in self.tasks:
-                for i in range(self.samples_per_pairing):
-                    seed = 42 + i  # Deterministic seeds
+                for i in range(self.config.samples_per_pairing):
+                    seed = self.config.base_seed + i  # Deterministic seeds
 
                     try:
                         sol = self.cache.get(dut, task, seed)
@@ -469,6 +499,12 @@ class TournamentRunner:
     ) -> list[tuple[str, str, str, JudgmentResult]]:
         """Compare all solution pairs across arenas.
 
+        When resuming from checkpoint, all comparisons are re-run (not skipped).
+        This sacrifices API cost efficiency for simpler, more maintainable code.
+        The checkpoint preserves ratings and metrics but not individual comparisons.
+        This design assumes comparisons are relatively cheap compared to solution
+        generation, which is cached.
+
         Args:
             solutions: Dictionary mapping (dut_id, task_id, sample_index) to Solution
             progress_callback: Optional callback called with total comparison count.
@@ -481,7 +517,9 @@ class TournamentRunner:
             List of comparisons: (dut_a_id, dut_b_id, arena_name, judgment)
         """
         comparisons: list[tuple[str, str, str, JudgmentResult]] = []
-        completed_for_checkpoint: list[tuple[str, str, str, str]] = []  # (dut_a, dut_b, task_id, arena)
+        completed_for_checkpoint: list[
+            tuple[str, str, str, str]
+        ] = []  # (dut_a, dut_b, task_id, arena)
         total_comparisons = 0
         comparisons_since_checkpoint = 0
 
@@ -493,7 +531,7 @@ class TournamentRunner:
                     dut_b_id = dut_b.get_metadata().id
 
                     # Compare all sample pairs
-                    for i in range(self.samples_per_pairing):
+                    for i in range(self.config.samples_per_pairing):
                         # Check for shutdown request
                         if shutdown_handler and shutdown_handler.shutdown_requested:
                             logger.info(
@@ -510,15 +548,6 @@ class TournamentRunner:
                                     total_comparisons,
                                 )
                             return comparisons
-
-                        # Skip if already completed (from checkpoint)
-                        if checkpoint_manager and checkpoint_manager.is_comparison_completed(
-                            dut_a_id, dut_b_id, task.id, arena.name
-                        ):
-                            total_comparisons += 1
-                            if progress_callback:
-                                progress_callback(total_comparisons)
-                            continue
 
                         # Check if both solutions exist (graceful degradation)
                         sol_a_key = (dut_a_id, task.id, i)
@@ -556,7 +585,9 @@ class TournamentRunner:
                             # Record comparison
                             comparison = (dut_a_id, dut_b_id, arena.name, judgment)
                             comparisons.append(comparison)
-                            completed_for_checkpoint.append((dut_a_id, dut_b_id, task.id, arena.name))
+                            completed_for_checkpoint.append(
+                                (dut_a_id, dut_b_id, task.id, arena.name)
+                            )
                             total_comparisons += 1
                             comparisons_since_checkpoint += 1
 
@@ -614,7 +645,11 @@ class TournamentRunner:
         # Final checkpoint save
         if checkpoint_manager:
             self._save_checkpoint(
-                checkpoint_manager, comparisons, completed_for_checkpoint, solutions, total_comparisons
+                checkpoint_manager,
+                comparisons,
+                completed_for_checkpoint,
+                solutions,
+                total_comparisons,
             )
 
         logger.info("comparisons_complete", total_comparisons=total_comparisons)
@@ -702,7 +737,7 @@ class TournamentRunner:
         progress_callback: Callable[[int], None] | None = None,
         output_dir: Path | None = None,
         checkpoint_dir: Path | None = None,
-        checkpoint_interval: int = 10,
+        checkpoint_interval: int | None = None,
     ) -> TournamentResult:
         """Run full tournament with optional checkpointing and resume support.
 
@@ -734,7 +769,9 @@ class TournamentRunner:
                        saved to {output_dir}/tournament-{timestamp}/tournament.yaml
             checkpoint_dir: Optional directory for saving checkpoints. Enables resume
                           functionality if tournament is interrupted.
-            checkpoint_interval: Save checkpoint every N comparisons (default: 10)
+            checkpoint_interval: Optional override for checkpoint interval. If not provided,
+                               uses config.checkpoint_interval. Determines how often
+                               checkpoints are saved (every N comparisons).
 
         Returns:
             TournamentResult with all comparisons and ratings
@@ -745,6 +782,11 @@ class TournamentRunner:
         # Setup checkpoint manager and shutdown handler
         checkpoint_manager = CheckpointManager(checkpoint_dir) if checkpoint_dir else None
         shutdown_handler = ShutdownHandler() if checkpoint_dir else None
+
+        # Determine checkpoint interval (parameter overrides config)
+        effective_checkpoint_interval = (
+            checkpoint_interval if checkpoint_interval is not None else self.config.checkpoint_interval
+        )
 
         # Load checkpoint if resuming
         if checkpoint_manager and checkpoint_manager.checkpoint_exists():
@@ -785,7 +827,7 @@ class TournamentRunner:
                 num_duts=len(self.duts),
                 num_tasks=len(self.tasks),
                 num_arenas=len(self.arenas),
-                samples_per_pairing=self.samples_per_pairing,
+                samples_per_pairing=self.config.samples_per_pairing,
             )
 
         # Register shutdown handler if checkpointing enabled
@@ -808,7 +850,7 @@ class TournamentRunner:
                 progress_callback,
                 checkpoint_manager,
                 shutdown_handler,
-                checkpoint_interval,
+                effective_checkpoint_interval,
             )
 
             # Check if shutdown was requested

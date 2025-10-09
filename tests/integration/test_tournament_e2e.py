@@ -225,11 +225,11 @@ def test_tournament_runner_initialization(tmp_path):
 
 
 def test_tournament_with_persistent_api_failures(tmp_path):
-    """Test that DUT API failures propagate as exceptions.
+    """Test tournament graceful degradation with DUT API failures.
 
-    Verifies that when all API calls fail, the tournament runner propagates
-    the error rather than silently swallowing it, allowing calling code to
-    handle the failure appropriately.
+    Verifies that when all API calls fail, the tournament runner uses graceful
+    degradation: it logs errors, records them in the result, and continues with
+    partial results rather than crashing entirely.
     """
     from codegen_bench.cache.store import SolutionCache
     from codegen_bench.judge.claude_judge import ClaudeJudge
@@ -267,9 +267,22 @@ def test_tournament_with_persistent_api_failures(tmp_path):
             samples_per_pairing=1,
         )
 
-        # Should raise an error when trying to generate solutions
-        # With retry logic, this will be wrapped in a DUTError after 3 retry attempts
-        from codegen_bench.exceptions import DUTError
+        # Tournament should complete with graceful degradation
+        # It will record errors but not crash
+        result = runner.run()
 
-        with pytest.raises(DUTError, match="API call failed for task task_001 after retries"):
-            runner.run()
+        # Verify result structure exists even with all failures
+        assert result is not None
+        assert hasattr(result, "errors")
+        assert len(result.errors) > 0
+
+        # Verify error was recorded properly
+        error = result.errors[0]
+        assert error.phase == "solution_generation"
+        assert error.dut_id == "simple-chat"
+        assert error.task_id == "task_001"
+        assert "DUTAPIError" in error.error_type
+        assert "API call failed" in error.error_message
+
+        # No comparisons should have been made (no solutions generated)
+        assert len(result.comparisons) == 0

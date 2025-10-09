@@ -63,7 +63,8 @@ Context Manager Example:
 import logging
 import signal
 import threading
-from typing import Any
+from types import FrameType
+from typing import Any, Callable
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +89,7 @@ class ShutdownHandler:
         as context manager.
         """
         self._shutdown_event = threading.Event()
-        self._original_handlers: dict[int, signal.Handlers] = {}
+        self._original_handlers: dict[int, Callable[[int, FrameType | None], Any] | int | None] = {}
         self._logged_shutdown = False  # Track if we've logged shutdown
 
     @property
@@ -135,9 +136,7 @@ class ShutdownHandler:
             )
 
         # Register handlers and save originals
-        self._original_handlers[signal.SIGINT] = signal.signal(
-            signal.SIGINT, self._handle_signal
-        )
+        self._original_handlers[signal.SIGINT] = signal.signal(signal.SIGINT, self._handle_signal)
 
         # SIGTERM might not be available on Windows
         if hasattr(signal, "SIGTERM"):

@@ -246,7 +246,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [x] DONE: Export CLI options
 - [x] DONE: TournamentResult.from_dict() method for deserialization
 
-### Documentation ✅ PARTIALLY DONE
+### Documentation ✅ DONE
 - [x] DONE: Installation guide
 - [x] DONE: Quickstart tutorial (5-min)
 - [x] DONE: CLI reference
@@ -257,7 +257,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [x] DONE: Adding new arenas guide
 - [x] DONE: Adding new judges guide (include ClaudeCodeJudge example)
 - [x] DONE: Contributing guidelines (with MPED architectural principles)
-- [ ] API reference (auto-generated)
+- [x] DONE: API reference (auto-generated)
 - [x] DONE: Explain rating systems (STATISTICS_GUIDE.md)
 - [x] DONE: Effect size interpretation (STATISTICS_GUIDE.md)
 - [x] DONE: Multiple testing rationale (STATISTICS_GUIDE.md)
@@ -265,23 +265,34 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [x] DONE: References to literature (STATISTICS_GUIDE.md)
 
 ### Additional Tasks & Configs 📋
-- [ ] Add 5 additional C/C++ tasks
-- [ ] Add 5 additional Python tasks
-- [ ] Document each task thoroughly
-- [ ] Default tournament config
-- [ ] Quick evaluation config
-- [ ] Full research config
-- [ ] Per-DUT example configs
-- [ ] Document SimpleChatDUT
-- [ ] Document ElaboratePromptDUT
-- [ ] Document ClaudeCodeDUT (once implemented)
-- [ ] Template for custom DUTs
+- [x] DONE: Add 5 additional C/C++ tasks (task_022-026)
+- [x] SKIPPED: Add 5 additional Python tasks (no Python projects in submodules)
+- [x] DONE: Document each task thoroughly (docs/TASK_022-026_SUMMARY.md)
+- [x] DONE: Default tournament config (examples/configs/default_tournament.py)
+- [x] DONE: Quick evaluation config (examples/configs/quick_eval.py)
+- [x] DONE: Full research config (examples/configs/full_research.py)
+- [x] DONE: Per-DUT example configs (examples/configs/per_dut_simple_chat.py)
+- [x] DONE: Document SimpleChatDUT (examples/duts/SIMPLE_CHAT_DUT.md)
+- [x] DONE: Document ElaboratePromptDUT (examples/duts/ELABORATE_PROMPT_DUT.md)
+- [x] SKIPPED: Document ClaudeCodeDUT (not feasible - circular dependency)
+- [x] DONE: Template for custom DUTs (examples/duts/CUSTOM_DUT_TEMPLATE.py)
 
-### CLI/UX Improvements 📋
-- [ ] Improve progress indicators
-- [ ] Better error messages
-- [ ] Consistent formatting
-- [ ] Help text for all commands
+### CLI/UX Improvements ✅ DONE
+- [x] DONE: Improve progress indicators (Rich progress bars in tournament command)
+- [x] DONE: Better error messages (comprehensive, actionable error messages throughout)
+- [x] DONE: Consistent formatting (standardized across all commands)
+- [x] DONE: Help text for all commands (enhanced help text for all CLI commands)
+- [x] DONE: Add tournament CLI command (comprehensive implementation with tier presets)
+
+**Summary:** All CLI/UX improvements complete! Tournament command now has:
+- Comprehensive help text and examples
+- Rich progress indicators with spinner, bar, and time elapsed
+- Tier-based presets (1=quick, 2=standard, 3=full)
+- Arena registry for proper Arena instance lookup
+- Judge orchestrator with proper type handling
+- Graceful error handling with actionable messages
+- Checkpoint and resume support
+- Results export integration
 
 ## Phase 6: Validation & Publication
 
@@ -348,9 +359,9 @@ See `docs/PHASE2_PROGRESS.md` for full details
 
 ## Technical Debt
 
-- [ ] Async support for API calls (3-5x speedup potential)
+- [ ] Async support for API calls (3-5x speedup potential - defer to Phase 7)
 - [x] DONE: Graceful shutdown handling (SIGINT/SIGTERM) ✅
-- [ ] TournamentConfig dataclass for base_seed, consensus_threshold
+- [x] DONE: TournamentConfig dataclass for base_seed, checkpoint_interval ✅
 - [ ] TrueSkill defaults to configuration
 - [ ] Streaming approach for large tournaments
 - [ ] Store solution IDs and load from cache on demand
@@ -373,7 +384,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 
 - [ ] No async support for concurrent API calls (3-5x speedup potential)
 - [x] No graceful shutdown handling (SIGINT/SIGTERM signals) ✅
-- [~] No checkpoint/resume for long-running tournaments (CheckpointManager done, integration pending)
+- [x] DONE: No checkpoint/resume for long-running tournaments (CheckpointManager done, integration complete) ✅
 - [ ] No timeout protection for DUT.solve() method
 - [ ] No circuit breaker pattern for repeated API failures
 - [ ] No metrics/observability for production deployments (DEFER - Phase 5+ feature)

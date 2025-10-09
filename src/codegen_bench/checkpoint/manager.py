@@ -20,10 +20,15 @@ class CheckpointState:
 
     Immutable to prevent accidental modification after creation.
 
+    Note: When resuming from checkpoint, comparisons are re-run rather than skipped.
+    The completed_comparisons field is maintained for progress monitoring but not used
+    to skip work. This trades API cost efficiency for code simplicity.
+
     Attributes:
         completed_comparisons: Tuple of completed (dut_a, dut_b, task_id, arena) tuples
-        ratings_snapshot: Current ELO ratings for each DUT
-        dut_metrics: Metrics for each DUT (cost, time, tokens)
+                              for progress monitoring (comparisons are re-run on resume)
+        ratings_snapshot: Current ELO ratings for each DUT (restored on resume)
+        dut_metrics: Metrics for each DUT (cost, time, tokens) (restored on resume)
         total_cost_usd: Cumulative cost so far
         total_time_seconds: Cumulative time so far
         checkpoint_time: When this checkpoint was created (ISO format)
@@ -44,7 +49,9 @@ class CheckpointState:
             raise ValueError(f"total_cost_usd must be non-negative, got {self.total_cost_usd}")
 
         if self.total_time_seconds < 0:
-            raise ValueError(f"total_time_seconds must be non-negative, got {self.total_time_seconds}")
+            raise ValueError(
+                f"total_time_seconds must be non-negative, got {self.total_time_seconds}"
+            )
 
         # Validate ISO format timestamp
         try:
@@ -169,7 +176,8 @@ class CheckpointManager:
 
         # Convert back to tuples
         completed_comparisons = tuple(
-            (c["dut_a"], c["dut_b"], c["task_id"], c["arena"]) for c in data["completed_comparisons"]
+            (c["dut_a"], c["dut_b"], c["task_id"], c["arena"])
+            for c in data["completed_comparisons"]
         )
 
         return CheckpointState(

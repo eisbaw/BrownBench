@@ -135,9 +135,9 @@ def test_tournament_creates_checkpoint(mock_anthropic_client, tmp_path):
 
         # Checkpoint should be deleted after successful completion
         checkpoint_manager = CheckpointManager(checkpoint_dir)
-        assert not checkpoint_manager.checkpoint_exists(), (
-            "Checkpoint should be deleted after successful tournament completion"
-        )
+        assert (
+            not checkpoint_manager.checkpoint_exists()
+        ), "Checkpoint should be deleted after successful tournament completion"
 
 
 def test_tournament_resume_from_checkpoint(mock_anthropic_client, tmp_path):
@@ -174,12 +174,10 @@ def test_tournament_resume_from_checkpoint(mock_anthropic_client, tmp_path):
 
         original_compare = TournamentRunner.compare_solutions
 
-        def compare_with_interrupt(self, *args, **kwargs):
-            # Get the shutdown handler
-            shutdown_handler = kwargs.get("shutdown_handler")
+        def compare_with_interrupt(self, solutions, progress_callback=None, checkpoint_manager=None, shutdown_handler=None, checkpoint_interval=10):
+            # Wrap the progress callback to trigger shutdown
             if shutdown_handler:
-                # Wrap the progress callback to trigger shutdown
-                original_callback = kwargs.get("progress_callback")
+                original_callback = progress_callback
 
                 def interrupt_callback(total):
                     nonlocal comparison_count
@@ -190,9 +188,9 @@ def test_tournament_resume_from_checkpoint(mock_anthropic_client, tmp_path):
                     if total >= 1:
                         shutdown_handler._shutdown_event.set()
 
-                kwargs["progress_callback"] = interrupt_callback
+                progress_callback = interrupt_callback
 
-            return original_compare(self, *args, **kwargs)
+            return original_compare(self, solutions, progress_callback, checkpoint_manager, shutdown_handler, checkpoint_interval)
 
         with patch.object(TournamentRunner, "compare_solutions", compare_with_interrupt):
             runner = TournamentRunner(
@@ -213,7 +211,9 @@ def test_tournament_resume_from_checkpoint(mock_anthropic_client, tmp_path):
 
         # Verify partial results
         assert result1 is not None
-        assert len(result1.comparisons) >= 1, "Should have at least 1 comparison before interruption"
+        assert (
+            len(result1.comparisons) >= 1
+        ), "Should have at least 1 comparison before interruption"
 
         # Load checkpoint to verify state
         checkpoint_state = checkpoint_manager.load()
@@ -236,14 +236,14 @@ def test_tournament_resume_from_checkpoint(mock_anthropic_client, tmp_path):
         assert result2 is not None
         # With 2 DUTs, 1 task, 2 samples = 2 comparisons total
         assert len(result2.comparisons) == 2, "Should have 2 comparisons total"
-        assert len(result2.comparisons) > len(result1.comparisons), (
-            "Resumed tournament should have more comparisons than interrupted one"
-        )
+        assert len(result2.comparisons) > len(
+            result1.comparisons
+        ), "Resumed tournament should have more comparisons than interrupted one"
 
         # Checkpoint should be deleted after successful completion
-        assert not checkpoint_manager.checkpoint_exists(), (
-            "Checkpoint should be deleted after successful completion"
-        )
+        assert (
+            not checkpoint_manager.checkpoint_exists()
+        ), "Checkpoint should be deleted after successful completion"
 
 
 def test_checkpoint_preserves_ratings(mock_anthropic_client, tmp_path):
@@ -277,10 +277,9 @@ def test_checkpoint_preserves_ratings(mock_anthropic_client, tmp_path):
         # Simulate interruption after 1 comparison
         original_compare = TournamentRunner.compare_solutions
 
-        def compare_with_early_stop(self, *args, **kwargs):
-            shutdown_handler = kwargs.get("shutdown_handler")
+        def compare_with_early_stop(self, solutions, progress_callback=None, checkpoint_manager=None, shutdown_handler=None, checkpoint_interval=10):
             if shutdown_handler:
-                original_callback = kwargs.get("progress_callback")
+                original_callback = progress_callback
 
                 def stop_callback(total):
                     if original_callback:
@@ -288,9 +287,9 @@ def test_checkpoint_preserves_ratings(mock_anthropic_client, tmp_path):
                     if total >= 1:
                         shutdown_handler._shutdown_event.set()
 
-                kwargs["progress_callback"] = stop_callback
+                progress_callback = stop_callback
 
-            return original_compare(self, *args, **kwargs)
+            return original_compare(self, solutions, progress_callback, checkpoint_manager, shutdown_handler, checkpoint_interval)
 
         with patch.object(TournamentRunner, "compare_solutions", compare_with_early_stop):
             runner = TournamentRunner(
@@ -433,8 +432,12 @@ def test_checkpoint_interval_respected(mock_anthropic_client, tmp_path):
         assert not checkpoint_manager.checkpoint_exists()
 
 
-def test_checkpoint_skips_completed_comparisons(mock_anthropic_client, tmp_path):
-    """Test that resumed tournament skips already-completed comparisons."""
+def test_checkpoint_resume_completes_tournament(mock_anthropic_client, tmp_path):
+    """Test that resumed tournament completes all comparisons after interruption.
+
+    Note: Comparisons are re-run rather than skipped for simplicity.
+    This trades API cost efficiency for maintainability.
+    """
     from codegen_bench.cache.store import SolutionCache
     from codegen_bench.judge.claude_judge import ClaudeJudge
     from codegen_bench.judge.orchestrator import JudgeOrchestrator
@@ -464,10 +467,9 @@ def test_checkpoint_skips_completed_comparisons(mock_anthropic_client, tmp_path)
         # First run: interrupt after 1 comparison
         original_compare = TournamentRunner.compare_solutions
 
-        def compare_with_interrupt(self, *args, **kwargs):
-            shutdown_handler = kwargs.get("shutdown_handler")
+        def compare_with_interrupt(self, solutions, progress_callback=None, checkpoint_manager=None, shutdown_handler=None, checkpoint_interval=10):
             if shutdown_handler:
-                original_callback = kwargs.get("progress_callback")
+                original_callback = progress_callback
 
                 def interrupt_callback(total):
                     if original_callback:
@@ -475,9 +477,9 @@ def test_checkpoint_skips_completed_comparisons(mock_anthropic_client, tmp_path)
                     if total >= 1:
                         shutdown_handler._shutdown_event.set()
 
-                kwargs["progress_callback"] = interrupt_callback
+                progress_callback = interrupt_callback
 
-            return original_compare(self, *args, **kwargs)
+            return original_compare(self, solutions, progress_callback, checkpoint_manager, shutdown_handler, checkpoint_interval)
 
         with patch.object(TournamentRunner, "compare_solutions", compare_with_interrupt):
             runner = TournamentRunner(
@@ -513,6 +515,6 @@ def test_checkpoint_skips_completed_comparisons(mock_anthropic_client, tmp_path)
 
         # Verify completed comparisons
         assert len(result2.comparisons) == 2, "Should have 2 total comparisons"
-        assert len(result2.comparisons) > first_run_comparisons, (
-            "Resumed tournament should complete remaining comparisons"
-        )
+        assert (
+            len(result2.comparisons) > first_run_comparisons
+        ), "Resumed tournament should complete remaining comparisons"
