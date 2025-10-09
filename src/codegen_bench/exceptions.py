@@ -53,7 +53,9 @@ class ErrorContext:
     severity: ErrorSeverity
     is_retryable: bool
     retry_suggestion: str | None = None
-    component: str | None = None  # Which component raised the error (e.g., "SimpleChatDUT", "TournamentRunner")
+    component: str | None = (
+        None  # Which component raised the error (e.g., "SimpleChatDUT", "TournamentRunner")
+    )
     operation: str | None = None  # What operation failed (e.g., "solve", "compare")
     task_id: str | None = None
     dut_id: str | None = None
@@ -143,10 +145,12 @@ class BrownBenchError(Exception):
 
         if self.context.is_retryable:
             msg += "\nThis error is retryable.\n"
-            if self.context.retry_suggestion:
-                msg += f"Suggestion: {self.context.retry_suggestion}\n"
         else:
             msg += "\nThis error is not retryable. Manual intervention required.\n"
+
+        # Show suggestion regardless of retryability (e.g., "increase timeout" is actionable advice)
+        if self.context.retry_suggestion:
+            msg += f"Suggestion: {self.context.retry_suggestion}\n"
 
         return msg
 
@@ -177,6 +181,31 @@ class DUTError(BrownBenchError):
         if "category" not in kwargs:
             kwargs["category"] = ErrorCategory.API
         super().__init__(message, **kwargs)
+
+
+class DUTTimeoutError(DUTError):
+    """Raised when DUT.solve() exceeds timeout limit.
+
+    Examples:
+    - API call hangs
+    - DUT takes too long to generate solution
+    - Processing timeout
+    """
+
+    def __init__(self, message: str, timeout_seconds: int, **kwargs: Any):
+        if "category" not in kwargs:
+            kwargs["category"] = ErrorCategory.RESOURCE
+        if "component" not in kwargs:
+            kwargs["component"] = "DUT"
+        if "operation" not in kwargs:
+            kwargs["operation"] = "solve"
+        if "is_retryable" not in kwargs:
+            kwargs["is_retryable"] = False
+        if "retry_suggestion" not in kwargs:
+            kwargs["retry_suggestion"] = (
+                f"Increase timeout limit (currently {timeout_seconds}s) or optimize DUT implementation."
+            )
+        super().__init__(message, timeout_seconds=timeout_seconds, **kwargs)
 
 
 class DUTConfigError(DUTError):
@@ -227,12 +256,15 @@ class TransientError(BrownBenchError):
     """Base class for transient errors that should be retried."""
 
     def __init__(self, message: str, retry_after_seconds: int = 60, **kwargs: Any):
+        # Only set default retry_suggestion if not already provided
+        if "retry_suggestion" not in kwargs:
+            kwargs["retry_suggestion"] = f"Retry after {retry_after_seconds} seconds with exponential backoff"
+
         super().__init__(
             message,
             category=ErrorCategory.TRANSIENT,
             severity=ErrorSeverity.WARNING,
             is_retryable=True,
-            retry_suggestion=f"Retry after {retry_after_seconds} seconds with exponential backoff",
             **kwargs,
         )
 
@@ -277,16 +309,15 @@ class APIError(BrownBenchError):
         http_status: int | None = None,
         **kwargs: Any,
     ):
-        retry_msg = None
-        if is_retryable:
-            retry_msg = "Retry with exponential backoff (1s, 2s, 4s, 8s, 16s)"
+        # Only set default retry_suggestion if not already provided
+        if "retry_suggestion" not in kwargs and is_retryable:
+            kwargs["retry_suggestion"] = "Retry with exponential backoff (1s, 2s, 4s, 8s, 16s)"
 
         super().__init__(
             message,
             category=ErrorCategory.API,
             severity=ErrorSeverity.ERROR,
             is_retryable=is_retryable,
-            retry_suggestion=retry_msg,
             http_status=http_status,
             **kwargs,
         )
@@ -306,7 +337,9 @@ class DUTAPIError(DUTError):
         http_status = kwargs.get("http_status")
         if "is_retryable" not in kwargs:
             # Non-retryable status codes
-            kwargs["is_retryable"] = http_status not in (400, 401, 403, 404) if http_status else True
+            kwargs["is_retryable"] = (
+                http_status not in (400, 401, 403, 404) if http_status else True
+            )
 
         if "category" not in kwargs:
             kwargs["category"] = ErrorCategory.API
@@ -368,7 +401,9 @@ class DUTParsingError(DUTError):
         if "is_retryable" not in kwargs:
             kwargs["is_retryable"] = False
         if "retry_suggestion" not in kwargs:
-            kwargs["retry_suggestion"] = "Check response format and parsing logic. May indicate LLM output changed."
+            kwargs["retry_suggestion"] = (
+                "Check response format and parsing logic. May indicate LLM output changed."
+            )
         super().__init__(message, **kwargs)
 
 
@@ -423,7 +458,9 @@ class WorktreeError(InfrastructureError):
         if "component" not in kwargs:
             kwargs["component"] = "GitWorktree"
         if "retry_suggestion" not in kwargs and kwargs.get("is_retryable"):
-            kwargs["retry_suggestion"] = "Check git repository state and retry. May need manual cleanup."
+            kwargs["retry_suggestion"] = (
+                "Check git repository state and retry. May need manual cleanup."
+            )
         super().__init__(message, **kwargs)
 
 
@@ -459,7 +496,9 @@ class CacheError(InfrastructureError):
         if "component" not in kwargs:
             kwargs["component"] = "SolutionCache"
         if "retry_suggestion" not in kwargs:
-            kwargs["retry_suggestion"] = "Check disk space and file permissions. Cache may be corrupted."
+            kwargs["retry_suggestion"] = (
+                "Check disk space and file permissions. Cache may be corrupted."
+            )
         super().__init__(message, **kwargs)
 
 
@@ -493,7 +532,9 @@ class BudgetExceededError(ResourceError):
         if "component" not in kwargs:
             kwargs["component"] = "BudgetEnforcer"
         if "retry_suggestion" not in kwargs:
-            kwargs["retry_suggestion"] = "Increase budget limits in configuration or optimize DUT to reduce costs."
+            kwargs["retry_suggestion"] = (
+                "Increase budget limits in configuration or optimize DUT to reduce costs."
+            )
         super().__init__(message, **kwargs)
 
 

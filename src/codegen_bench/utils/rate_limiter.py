@@ -1,4 +1,73 @@
-"""Rate limiting for API calls."""
+"""Rate limiting for API calls.
+
+Implementation Notes
+--------------------
+This rate limiter uses a sliding window approach with deque-based timestamp
+tracking. Each acquire() call:
+1. Removes timestamps older than 60 seconds: O(k) where k = expired entries
+2. Checks if limit is exceeded: O(1)
+3. If over limit, calculates sleep time: O(1) for requests, O(n) for tokens
+
+Time Complexity per acquire():
+- Best case: O(1) when no cleanup needed and limit not exceeded
+- Average case: O(k) where k = timestamps that expired since last call
+- Worst case: O(n) where n = max_requests_per_minute (full window scan)
+
+Alternative: Bucket-Based O(1) Rate Limiter
+--------------------------------------------
+A true O(1) rate limiter can be implemented using the token bucket algorithm
+with continuous token refill:
+
+Concept:
+    - Maintain a bucket with a maximum capacity of tokens
+    - Tokens refill continuously at a constant rate
+    - Each request consumes tokens from the bucket
+    - If insufficient tokens, request waits until enough tokens refill
+
+Implementation sketch:
+    class O1RateLimiter:
+        def __init__(self, rate_per_second):
+            self.capacity = rate_per_second
+            self.tokens = rate_per_second
+            self.rate = rate_per_second
+            self.last_refill = time.time()
+            self.lock = threading.Lock()
+
+        def acquire(self, tokens=1):
+            with self.lock:
+                now = time.time()
+                # Refill tokens based on elapsed time
+                elapsed = now - self.last_refill
+                self.tokens = min(self.capacity, self.tokens + elapsed * self.rate)
+                self.last_refill = now
+
+                if self.tokens >= tokens:
+                    self.tokens -= tokens
+                else:
+                    # Wait for sufficient tokens
+                    wait_time = (tokens - self.tokens) / self.rate
+                    time.sleep(wait_time)
+                    self.tokens = 0
+
+Trade-offs:
+    Current (Sliding Window):
+        + Precise: Enforces exact limit over any 60-second window
+        + Simple: Easy to reason about and debug
+        - O(n) worst case: Must scan/cleanup old timestamps
+        - Memory: Stores timestamp for every request in window
+
+    Bucket-Based O(1):
+        + Constant time: Always O(1) regardless of request rate
+        + Memory efficient: Fixed memory (just token count + timestamp)
+        - Less precise: Allows bursts up to bucket capacity
+        - Refill artifacts: Behavior changes based on refill granularity
+
+The sliding window approach was chosen for BrownBench because:
+    1. Precision matters: API providers enforce strict per-minute limits
+    2. Scale is moderate: max_requests_per_minute typically 50-100
+    3. Debuggability: Easier to inspect/verify exact request history
+    4. Safety: Conservative approach preferred for API cost control
+"""
 
 import threading
 import time
@@ -42,9 +111,7 @@ class RateLimiter:
             )
 
         if max_tokens_per_minute is not None and max_tokens_per_minute <= 0:
-            raise ValueError(
-                f"max_tokens_per_minute must be positive, got {max_tokens_per_minute}"
-            )
+            raise ValueError(f"max_tokens_per_minute must be positive, got {max_tokens_per_minute}")
 
         self.max_requests_per_minute = max_requests_per_minute
         self.max_tokens_per_minute = max_tokens_per_minute
