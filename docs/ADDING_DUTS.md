@@ -77,6 +77,20 @@ class MyDUT(CodeGenerationApproach):
 DUTRegistry.register(MyDUT)
 ```
 
+Note: For testing, you can use an isolated DUTRegistry instance to avoid interference:
+
+```python
+# In tests, use isolated registry
+from codegen_bench.dut.registry import DUTRegistry
+
+def test_my_dut_with_isolated_registry():
+    with DUTRegistry.isolated() as registry:
+        registry.register_instance(MyDUT)
+        # Test with isolated registry
+        assert registry.list_available_instance() == ["my-dut"]
+    # Registry is discarded after context exit
+```
+
 ## DUT Interface
 
 ### Required Class Attribute

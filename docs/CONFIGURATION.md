@@ -198,7 +198,7 @@ duts:
 Configure tournament behavior (currently via Python API).
 
 ```python
-from codegen_bench.core.config import TournamentConfig, TrueSkillConfig
+from codegen_bench.core.config import TournamentConfig, TrueSkillConfig, PricingConfig
 
 # Tournament configuration
 config = TournamentConfig(
@@ -262,6 +262,39 @@ trueskill_config = TrueSkillConfig(
 - **draw_probability** (float): Expected probability of draws
   - Default: `0.1` (10% draws expected)
   - Affects how conservatively skills are updated
+
+### Pricing Configuration
+
+Configure API pricing for cost tracking.
+
+```python
+from codegen_bench.core.config import PricingConfig
+
+# Pricing configuration for API cost calculations
+pricing = PricingConfig(
+    # Claude Sonnet 4.5 pricing (per 1,000 tokens)
+    claude_sonnet_4_5_input_per_1k=0.003,   # $3.00 per million input tokens
+    claude_sonnet_4_5_output_per_1k=0.015,  # $15.00 per million output tokens
+)
+
+# Example: Calculate cost for a request
+input_tokens = 1500
+output_tokens = 500
+input_cost = (input_tokens / 1000) * pricing.claude_sonnet_4_5_input_per_1k
+output_cost = (output_tokens / 1000) * pricing.claude_sonnet_4_5_output_per_1k
+total_cost = input_cost + output_cost  # $0.012
+```
+
+**PricingConfig Parameters**:
+- **claude_sonnet_4_5_input_per_1k** (float): Cost per 1,000 input tokens
+  - Default: `0.003` ($3.00 per million tokens)
+  - As of January 2025 pricing
+
+- **claude_sonnet_4_5_output_per_1k** (float): Cost per 1,000 output tokens
+  - Default: `0.015` ($15.00 per million tokens)
+  - As of January 2025 pricing
+
+Note: Pricing is centralized in this configuration to make it easy to update as API pricing changes.
 
 ## Judge Configuration
 
