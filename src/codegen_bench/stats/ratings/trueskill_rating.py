@@ -14,7 +14,10 @@ References:
 
 from typing import Literal
 
+import trueskill
 from trueskill import Rating, quality, rate
+
+from codegen_bench.core.config import TrueSkillConfig
 
 
 class TrueSkillRating:
@@ -22,19 +25,50 @@ class TrueSkillRating:
 
     Attributes:
         rating: TrueSkill Rating object (μ, σ)
+        config: TrueSkill configuration
     """
 
-    # Default TrueSkill parameters
-    DEFAULT_MU = 25.0  # Initial mean skill
-    DEFAULT_SIGMA = 8.33  # Initial uncertainty (1/3 of skill range)
+    # Class-level default config (can be overridden per instance)
+    _default_config = TrueSkillConfig()
 
-    def __init__(self, mu: float = DEFAULT_MU, sigma: float = DEFAULT_SIGMA) -> None:
+    @classmethod
+    def set_default_config(cls, config: TrueSkillConfig) -> None:
+        """Set the default configuration for new TrueSkillRating instances.
+
+        Args:
+            config: TrueSkillConfig to use as default
+        """
+        cls._default_config = config
+        # Also configure the underlying trueskill library globals
+        trueskill.setup(
+            mu=config.initial_mu,
+            sigma=config.initial_sigma,
+            beta=config.beta,
+            tau=config.tau,
+            draw_probability=config.draw_probability
+        )
+
+    def __init__(
+        self,
+        mu: float | None = None,
+        sigma: float | None = None,
+        config: TrueSkillConfig | None = None
+    ) -> None:
         """Initialize TrueSkill rating.
 
         Args:
-            mu: Mean skill estimate (default: 25.0)
-            sigma: Skill uncertainty (default: 8.33)
+            mu: Mean skill estimate (uses config default if None)
+            sigma: Skill uncertainty (uses config default if None)
+            config: TrueSkillConfig to use (uses class default if None)
         """
+        self.config = config or self._default_config
+
+        # Use provided values or fall back to config defaults
+        if mu is None:
+            mu = self.config.initial_mu
+        if sigma is None:
+            sigma = self.config.initial_sigma
+
         self.rating = Rating(mu, sigma)
 
     def update(self, opponent: "TrueSkillRating", outcome: Literal["win", "loss", "tie"]) -> None:
@@ -96,9 +130,9 @@ class TrueSkillRating:
         TrueSkill default: μ=25, σ=8.33
         ELO range: typically 1000-2000
 
-        Conversion: ELO ≈ 1500 + (μ - 25) * 20
+        Conversion: ELO ≈ 1500 + (μ - initial_mu) * 20
         """
-        return 1500 + (self.mu - self.DEFAULT_MU) * 20
+        return 1500 + (self.mu - self.config.initial_mu) * 20
 
     def __str__(self) -> str:
         """String representation."""

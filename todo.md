@@ -362,7 +362,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Async support for API calls (3-5x speedup potential - defer to Phase 7)
 - [x] DONE: Graceful shutdown handling (SIGINT/SIGTERM) ✅
 - [x] DONE: TournamentConfig dataclass for base_seed, checkpoint_interval ✅
-- [ ] TrueSkill defaults to configuration
+- [x] DONE: TrueSkill defaults to configuration ✅
 - [ ] Streaming approach for large tournaments
 - [ ] Store solution IDs and load from cache on demand
 - [x] DONE: Troubleshooting guide for worktree issues
@@ -370,12 +370,12 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Rate limiter: Consider bucket-based O(1) implementation
 - [ ] Cache: Add lock-free concurrent write protection (currently uses atomic rename)
 - [ ] Cache: Consider TTL/expiration for stale cache entries
-- [ ] Worktree: Add retry logic for transient git failures
-- [ ] Worktree: Document manual cleanup procedure in case of failures
-- [ ] Tournament: Add checkpoint/resume functionality for long-running tournaments
-- [ ] DUT: Add timeout protection for solve() method
-- [ ] Judge: Add circuit breaker for repeated API failures
-- [ ] Add tests for edge-case exception handlers in cache.py (lines 113-114, 120, 176-177, 192-194)
+- [x] DONE: Worktree: Add retry logic for transient git failures ✅
+- [x] DONE: Worktree: Document manual cleanup procedure in case of failures (duplicate - see line 369) ✅
+- [x] DONE: Tournament: Add checkpoint/resume functionality for long-running tournaments ✅
+- [x] DONE: DUT: Add timeout protection for solve() method ✅
+- [x] DONE: Judge: Add circuit breaker for repeated API failures ✅
+- [x] DONE: Add tests for edge-case exception handlers in cache.py (lines 113-114, 120, 176-177, 192-194) ✅
 - [ ] Cache: Add size limits and LRU eviction (DEFER - major feature)
 - [ ] Registry: Class-level state may cause issues in parallel testing - consider instance-based design
 - [ ] Cache: No TTL/expiration mechanism - stale cache could accumulate indefinitely (DEFER - major feature)
@@ -385,22 +385,22 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] No async support for concurrent API calls (3-5x speedup potential)
 - [x] No graceful shutdown handling (SIGINT/SIGTERM signals) ✅
 - [x] DONE: No checkpoint/resume for long-running tournaments (CheckpointManager done, integration complete) ✅
-- [ ] No timeout protection for DUT.solve() method
-- [ ] No circuit breaker pattern for repeated API failures
+- [x] DONE: No timeout protection for DUT.solve() method ✅
+- [x] DONE: No circuit breaker pattern for repeated API failures ✅
 - [ ] No metrics/observability for production deployments (DEFER - Phase 5+ feature)
 
 ## Documentation Gaps
 
 - [x] DONE: Worktree: No troubleshooting guide for manual cleanup (now in TROUBLESHOOTING.md)
 - [ ] Cache: No documentation on size limits or cache management (DEFER - pending cache size feature)
-- [ ] RateLimiter: No explanation of bucket-based O(1) alternative
+- [x] DONE: RateLimiter: No explanation of bucket-based O(1) alternative ✅
 - [ ] Tournament: No guide on cost estimation for different scales (DEFER - Phase 5 documentation)
 
 ## Potential Bugs/Edge Cases
 
 - [ ] Cache: No size limit enforcement - could fill disk (DEFER - major feature)
 - [ ] RateLimiter: Potential thundering herd on rate limit reset (DEFER - edge case optimization)
-- [ ] Worktree: No retry logic for transient git failures
+- [x] DONE: Worktree: No retry logic for transient git failures ✅ (duplicate - see line 373)
 - [ ] SimpleChatDUT: No request timeout configuration (DEFER - feature request)
 
 ## Security/Safety
