@@ -368,9 +368,7 @@ def calculate_confusion_matrix(
     precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
     recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
 
-    f1_score = (
-        2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
-    )
+    f1_score = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
 
     return ConfusionMatrix(
         true_positives=tp,
@@ -435,14 +433,20 @@ def generate_calibration_report(
     if agreement.agreement_rate < 0.70:
         report_lines.append("  [WARNING] Low agreement rate (<70%). Consider revising prompts.")
     elif agreement.agreement_rate < 0.85:
-        report_lines.append("  [WARNING] Moderate agreement (70-85%). Some prompt refinement may help.")
+        report_lines.append(
+            "  [WARNING] Moderate agreement (70-85%). Some prompt refinement may help."
+        )
     else:
         report_lines.append("  [OK] Good agreement rate (≥85%).")
 
     if bias.has_significant_position_bias:
-        report_lines.append("  [WARNING] Significant position bias detected. Review prompt neutrality.")
+        report_lines.append(
+            "  [WARNING] Significant position bias detected. Review prompt neutrality."
+        )
 
     if agreement.fleiss_kappa < 0.40:
-        report_lines.append("  [WARNING] Low inter-rater reliability (κ<0.40). Poor agreement beyond chance.")
+        report_lines.append(
+            "  [WARNING] Low inter-rater reliability (κ<0.40). Poor agreement beyond chance."
+        )
 
     return "\n".join(report_lines)

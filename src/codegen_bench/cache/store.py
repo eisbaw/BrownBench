@@ -174,6 +174,13 @@ class SolutionCache:
                     os.unlink(temp_path)
                     logger.debug("cache_temp_file_cleanup", temp_file=temp_path, status="removed")
             except OSError as cleanup_err:
+                # Rationale for log-and-continue behavior:
+                # The cache write succeeded (os.replace completed), so the cache entry is valid.
+                # Temp file cleanup is best-effort housekeeping. If it fails (e.g., permissions),
+                # we log the failure for observability but don't raise an error because:
+                # 1. The cache operation itself succeeded
+                # 2. Temp files will be cleaned up by OS eventually
+                # 3. Raising here would incorrectly signal cache write failure
                 logger.warning(
                     "cache_temp_file_cleanup_failed",
                     temp_file=temp_path,

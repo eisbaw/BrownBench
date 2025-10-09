@@ -133,7 +133,14 @@ class CSVExporter:
                 row = rating.to_dict()
                 row["rank"] = rank
                 # Format numeric values with fixed decimal places
-                for key in ["elo", "elo_std", "elo_lower_bound", "elo_upper_bound", "total_cost_usd", "total_time_seconds"]:
+                for key in [
+                    "elo",
+                    "elo_std",
+                    "elo_lower_bound",
+                    "elo_upper_bound",
+                    "total_cost_usd",
+                    "total_time_seconds",
+                ]:
                     if key in row:
                         row[key] = f"{row[key]:.{self.config.decimal_places}f}"
                 writer.writerow(row)
@@ -296,11 +303,13 @@ class LaTeXExporter:
             lines.append(line)
 
         # End table
-        lines.extend([
-            "\\bottomrule",
-            "\\end{tabular}",
-            "\\end{table}",
-        ])
+        lines.extend(
+            [
+                "\\bottomrule",
+                "\\end{tabular}",
+                "\\end{table}",
+            ]
+        )
 
         return "\n".join(lines)
 
@@ -353,11 +362,13 @@ class LaTeXExporter:
         if result.errors:
             lines.append(f"Errors & {len(result.errors)} \\\\")
 
-        lines.extend([
-            "\\bottomrule",
-            "\\end{tabular}",
-            "\\end{table}",
-        ])
+        lines.extend(
+            [
+                "\\bottomrule",
+                "\\end{tabular}",
+                "\\end{table}",
+            ]
+        )
 
         return "\n".join(lines)
 

@@ -67,7 +67,9 @@ class Task:
             raise ValueError(f"YAML file '{path}' is empty or contains only null")
 
         if not isinstance(data, dict):
-            raise ValueError(f"YAML file '{path}' must contain a mapping/dict, got {type(data).__name__}")
+            raise ValueError(
+                f"YAML file '{path}' must contain a mapping/dict, got {type(data).__name__}"
+            )
 
         # Convert path strings to Path objects
         if "codebase_path" in data:

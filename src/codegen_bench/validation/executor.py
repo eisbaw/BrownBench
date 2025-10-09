@@ -104,9 +104,17 @@ class ValidationExecutor:
             stdout = ""
             stderr = ""
             if e.stdout:
-                stdout = e.stdout.decode("utf-8", errors="replace") if isinstance(e.stdout, bytes) else str(e.stdout)
+                stdout = (
+                    e.stdout.decode("utf-8", errors="replace")
+                    if isinstance(e.stdout, bytes)
+                    else str(e.stdout)
+                )
             if e.stderr:
-                stderr = e.stderr.decode("utf-8", errors="replace") if isinstance(e.stderr, bytes) else str(e.stderr)
+                stderr = (
+                    e.stderr.decode("utf-8", errors="replace")
+                    if isinstance(e.stderr, bytes)
+                    else str(e.stderr)
+                )
 
             return ValidationResult(
                 success=False,

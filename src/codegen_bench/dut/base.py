@@ -29,13 +29,24 @@ class CodeGenerationApproach(ABC):
     # Subclasses should define this class attribute
     APPROACH_ID: str = ""
 
+    # Default timeout for solve() method in seconds
+    DEFAULT_TIMEOUT_SECONDS: int = 300  # 5 minutes
+
     def __init__(self, config: dict[str, Any]):
         """Initialize approach with configuration.
 
         Args:
-            config: Configuration dictionary
+            config: Configuration dictionary with optional keys:
+                - timeout_seconds: Timeout for solve() in seconds (default: 300)
         """
         self.config = config
+        self.timeout_seconds = config.get("timeout_seconds", self.DEFAULT_TIMEOUT_SECONDS)
+        if not isinstance(self.timeout_seconds, int) or self.timeout_seconds <= 0:
+            from codegen_bench.exceptions import DUTConfigError
+
+            raise DUTConfigError(
+                f"timeout_seconds must be a positive integer, got {self.timeout_seconds}"
+            )
 
     def _compute_prompt_hash(self, prompt: str) -> str:
         """Compute SHA-256 hash of prompt.

@@ -13,6 +13,7 @@ from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
 from codegen_bench.exceptions import JudgeError
 from codegen_bench.judge.base import Judge
+from codegen_bench.utils.circuit_breaker import CircuitBreaker
 from codegen_bench.utils.rate_limiter import RateLimiter
 
 
@@ -21,6 +22,7 @@ class ClaudeJudge(Judge):
 
     client: anthropic.Anthropic
     rate_limiter: RateLimiter
+    circuit_breaker: CircuitBreaker
 
     def __init__(
         self,
@@ -29,6 +31,8 @@ class ClaudeJudge(Judge):
         temperature: float = 0.3,
         variant: int = 0,
         max_requests_per_minute: int = 50,
+        circuit_breaker_threshold: int = 5,
+        circuit_breaker_timeout: float = 60.0,
     ):
         """Initialize ClaudeJudge.
 
@@ -38,6 +42,8 @@ class ClaudeJudge(Judge):
             temperature: Sampling temperature
             variant: Prompt variant for diversity
             max_requests_per_minute: Rate limit for API calls
+            circuit_breaker_threshold: Failures before circuit opens (default: 5)
+            circuit_breaker_timeout: Seconds before circuit attempts reset (default: 60)
 
         Raises:
             JudgeError: If API key not found
@@ -48,6 +54,12 @@ class ClaudeJudge(Judge):
             raise JudgeError("ANTHROPIC_API_KEY not found in environment or config")
         self.client = anthropic.Anthropic(api_key=self.api_key)
         self.rate_limiter = RateLimiter(max_requests_per_minute=max_requests_per_minute)
+        self.circuit_breaker = CircuitBreaker(
+            name=f"claude_judge_{model}",
+            failure_threshold=circuit_breaker_threshold,
+            reset_timeout=circuit_breaker_timeout,
+            expected_exception=Exception,  # Count all errors as failures
+        )
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))  # type: ignore[misc]
     def evaluate(
@@ -63,29 +75,35 @@ class ClaudeJudge(Judge):
 
         Returns:
             JudgeVote with winner, reasoning, and confidence
+
+        Raises:
+            CircuitBreakerOpenError: If circuit breaker is open due to repeated failures
+            JudgeError: If evaluation fails
         """
-        # Build prompt
-        prompt = self._build_prompt(solution_a, solution_b, arena, task)
+        # Wrap API call in circuit breaker for fault tolerance
+        with self.circuit_breaker:
+            # Build prompt
+            prompt = self._build_prompt(solution_a, solution_b, arena, task)
 
-        # Apply rate limiting before API call
-        self.rate_limiter.acquire()
+            # Apply rate limiting before API call
+            self.rate_limiter.acquire()
 
-        # Call API
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=2000,
-            temperature=self.temperature,
-            messages=[{"role": "user", "content": prompt}],
-        )
+            # Call API
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=2000,
+                temperature=self.temperature,
+                messages=[{"role": "user", "content": prompt}],
+            )
 
-        # Parse response - extract text from first content block
-        first_block = response.content[0]
-        if isinstance(first_block, TextBlock):
-            response_text = first_block.text
-        else:
-            raise JudgeError(f"Unexpected response type: {type(first_block)}")
+            # Parse response - extract text from first content block
+            first_block = response.content[0]
+            if isinstance(first_block, TextBlock):
+                response_text = first_block.text
+            else:
+                raise JudgeError(f"Unexpected response type: {type(first_block)}")
 
-        return self._parse_vote(response_text)
+            return self._parse_vote(response_text)
 
     def _build_prompt(
         self, solution_a: Solution, solution_b: Solution, arena: Arena, task: Task

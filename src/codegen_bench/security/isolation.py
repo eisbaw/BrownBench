@@ -156,9 +156,7 @@ class ContainerIsolation:
                 timeout=DOCKER_VERIFICATION_TIMEOUT,
             )
             if result.returncode != 0:
-                raise ContainerIsolationError(
-                    f"Docker not available: {result.stderr}"
-                )
+                raise ContainerIsolationError(f"Docker not available: {result.stderr}")
         except (subprocess.TimeoutExpired, FileNotFoundError) as e:
             raise ContainerIsolationError(f"Docker not available: {e}") from e
 
@@ -252,9 +250,7 @@ class ContainerIsolation:
             )
 
             if result.returncode != 0:
-                raise ContainerIsolationError(
-                    f"Failed to build image: {result.stderr}"
-                )
+                raise ContainerIsolationError(f"Failed to build image: {result.stderr}")
 
             logger.info("container_image_built", image=self._config.image)
 
@@ -387,7 +383,7 @@ class ContainerIsolation:
                         "temp_dir_cleanup_failed",
                         path=temp_dir,
                         error=str(e),
-                        note="Temp directory may need manual cleanup"
+                        note="Temp directory may need manual cleanup",
                     )
 
     def cleanup_image(self) -> None:
@@ -409,9 +405,7 @@ class ContainerIsolation:
             if result.returncode != 0:
                 # Don't raise if image doesn't exist
                 if "No such image" not in result.stderr:
-                    raise ContainerIsolationError(
-                        f"Failed to remove image: {result.stderr}"
-                    )
+                    raise ContainerIsolationError(f"Failed to remove image: {result.stderr}")
 
             logger.info("container_image_removed", image=self._config.image)
 
@@ -444,9 +438,7 @@ class ContainerIsolation:
             )
 
             if result.returncode != 0:
-                raise ContainerIsolationError(
-                    f"Failed to cleanup containers: {result.stderr}"
-                )
+                raise ContainerIsolationError(f"Failed to cleanup containers: {result.stderr}")
 
             logger.info("containers_cleaned_up")
 
@@ -473,9 +465,7 @@ class ContainerIsolation:
             )
 
             if result.returncode != 0:
-                raise ContainerIsolationError(
-                    f"Failed to list images: {result.stderr}"
-                )
+                raise ContainerIsolationError(f"Failed to list images: {result.stderr}")
 
             images = []
             for line in result.stdout.strip().split("\n"):

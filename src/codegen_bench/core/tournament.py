@@ -785,7 +785,9 @@ class TournamentRunner:
 
         # Determine checkpoint interval (parameter overrides config)
         effective_checkpoint_interval = (
-            checkpoint_interval if checkpoint_interval is not None else self.config.checkpoint_interval
+            checkpoint_interval
+            if checkpoint_interval is not None
+            else self.config.checkpoint_interval
         )
 
         # Load checkpoint if resuming

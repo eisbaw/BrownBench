@@ -7,6 +7,7 @@ from codegen_bench.reporting.exporters import (
     LaTeXExporter,
     export_all_formats,
 )
+from codegen_bench.reporting.html import HTMLReporter
 from codegen_bench.reporting.terminal import TerminalReporter
 from codegen_bench.reporting.visualization import (
     create_pareto_parallel_coordinates,
@@ -18,6 +19,7 @@ from codegen_bench.reporting.visualization import (
 
 __all__ = [
     "TerminalReporter",
+    "HTMLReporter",
     "JSONExporter",
     "CSVExporter",
     "LaTeXExporter",

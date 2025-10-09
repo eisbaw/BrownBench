@@ -111,7 +111,14 @@ class GroundTruthDataset:
 
         # Validate and parse each comparison
         comparisons = []
-        required_comp_fields = ["id", "task_id", "arena", "solution_a_id", "solution_b_id", "ground_truth"]
+        required_comp_fields = [
+            "id",
+            "task_id",
+            "arena",
+            "solution_a_id",
+            "solution_b_id",
+            "ground_truth",
+        ]
 
         for i, c in enumerate(data["comparisons"]):
             try:

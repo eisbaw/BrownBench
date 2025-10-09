@@ -63,8 +63,9 @@ Context Manager Example:
 import logging
 import signal
 import threading
+from collections.abc import Callable
 from types import FrameType
-from typing import Any, Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

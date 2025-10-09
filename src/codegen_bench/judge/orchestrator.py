@@ -125,6 +125,10 @@ class JudgeOrchestrator:
     def _compute_consensus(self, votes: list[JudgeVote]) -> Vote:
         """Compute consensus from votes using majority rule.
 
+        For 3 judges: requires 2+ agreement for consensus
+        For 5 judges: requires 3+ agreement for consensus
+        For other counts: uses simple majority (most common vote)
+
         Args:
             votes: List of judge votes
 

@@ -110,8 +110,7 @@ def calculate_hypervolume(
         from pymoo.indicators.hv import HV
     except ImportError as e:
         raise ImportError(
-            "Hypervolume calculation requires pymoo. "
-            "Install with: pip install pymoo"
+            "Hypervolume calculation requires pymoo. " "Install with: pip install pymoo"
         ) from e
 
     # Validate reference point dominates all points
@@ -144,7 +143,10 @@ def analyze_pareto_frontier(
     # Calculate reference point if not provided
     if reference_point is None:
         max_values = np.max(objectives, axis=0)
-        reference_point = max_values * 1.1  # 10% margin
+        # Ensure reference point strictly dominates all points
+        # Use additive margin (10% + 0.1) to handle near-zero values
+        # This ensures even objectives near 0 get a reasonable margin
+        reference_point = max_values + np.maximum(max_values * 0.1, 0.1)
 
     # Calculate hypervolume
     hv = calculate_hypervolume(pareto_front, reference_point)

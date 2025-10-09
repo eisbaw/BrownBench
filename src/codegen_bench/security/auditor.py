@@ -52,10 +52,7 @@ class AuditReport:
         Returns:
             True if no critical/high risk findings, False otherwise
         """
-        return not any(
-            f.risk_level in (RiskLevel.CRITICAL, RiskLevel.HIGH)
-            for f in self.findings
-        )
+        return not any(f.risk_level in (RiskLevel.CRITICAL, RiskLevel.HIGH) for f in self.findings)
 
     @property
     def summary(self) -> str:

@@ -40,9 +40,7 @@ def create_pareto_plot_2d(
         ValueError: If objectives doesn't contain exactly 2 dimensions
     """
     if len(objectives) != 2:
-        raise ValueError(
-            f"2D Pareto plot requires exactly 2 objectives, got {len(objectives)}"
-        )
+        raise ValueError(f"2D Pareto plot requires exactly 2 objectives, got {len(objectives)}")
 
     # Get visualization data
     viz_data = get_pareto_visualization_data(
@@ -76,11 +74,11 @@ def create_pareto_plot_2d(
                     y=obj_matrix[dominated_indices, 1],
                     mode="markers",
                     name="Dominated",
-                    marker=dict(
-                        size=8,
-                        color="lightgray",
-                        symbol="circle",
-                    ),
+                    marker={
+                        "size": 8,
+                        "color": "lightgray",
+                        "symbol": "circle",
+                    },
                     text=[approach_names[i] for i in dominated_indices],
                     hovertemplate="<b>%{text}</b><br>"
                     + f"{x_label}: %{{x:.3f}}<br>"
@@ -96,12 +94,12 @@ def create_pareto_plot_2d(
             y=obj_matrix[pareto_indices, 1],
             mode="markers",
             name="Pareto Optimal",
-            marker=dict(
-                size=12,
-                color="red",
-                symbol="star",
-                line=dict(width=1, color="darkred"),
-            ),
+            marker={
+                "size": 12,
+                "color": "red",
+                "symbol": "star",
+                "line": {"width": 1, "color": "darkred"},
+            },
             text=[approach_names[i] for i in pareto_indices],
             hovertemplate="<b>%{text}</b><br>"
             + f"{x_label}: %{{x:.3f}}<br>"
@@ -123,7 +121,7 @@ def create_pareto_plot_2d(
                 y=obj_matrix[sorted_pareto, 1],
                 mode="lines",
                 name="Pareto Front",
-                line=dict(color="red", width=2, dash="dash"),
+                line={"color": "red", "width": 2, "dash": "dash"},
                 hoverinfo="skip",
                 showlegend=True,
             )
@@ -131,15 +129,15 @@ def create_pareto_plot_2d(
 
     # Update layout
     fig.update_layout(
-        title=dict(
-            text=f"{title}<br><sub>Hypervolume: {viz_data['hypervolume']:.3f}</sub>",
-            x=0.5,
-            xanchor="center",
-        ),
+        title={
+            "text": f"{title}<br><sub>Hypervolume: {viz_data['hypervolume']:.3f}</sub>",
+            "x": 0.5,
+            "xanchor": "center",
+        },
         xaxis_title=f"{x_label} (minimize)",
         yaxis_title=f"{y_label} (minimize)",
         hovermode="closest",
-        legend=dict(yanchor="top", y=0.99, xanchor="right", x=0.99),
+        legend={"yanchor": "top", "y": 0.99, "xanchor": "right", "x": 0.99},
         template="plotly_white",
         width=800,
         height=600,
@@ -173,9 +171,7 @@ def create_pareto_plot_3d(
         ValueError: If objectives doesn't contain exactly 3 dimensions
     """
     if len(objectives) != 3:
-        raise ValueError(
-            f"3D Pareto plot requires exactly 3 objectives, got {len(objectives)}"
-        )
+        raise ValueError(f"3D Pareto plot requires exactly 3 objectives, got {len(objectives)}")
 
     # Get visualization data
     viz_data = get_pareto_visualization_data(
@@ -211,7 +207,7 @@ def create_pareto_plot_3d(
                     z=obj_matrix[dominated_indices, 2],
                     mode="markers",
                     name="Dominated",
-                    marker=dict(size=4, color="lightgray", symbol="circle"),
+                    marker={"size": 4, "color": "lightgray", "symbol": "circle"},
                     text=[approach_names[i] for i in dominated_indices],
                     hovertemplate="<b>%{text}</b><br>"
                     + f"{x_label}: %{{x:.3f}}<br>"
@@ -229,12 +225,12 @@ def create_pareto_plot_3d(
             z=obj_matrix[pareto_indices, 2],
             mode="markers",
             name="Pareto Optimal",
-            marker=dict(
-                size=8,
-                color="red",
-                symbol="diamond",
-                line=dict(width=1, color="darkred"),
-            ),
+            marker={
+                "size": 8,
+                "color": "red",
+                "symbol": "diamond",
+                "line": {"width": 1, "color": "darkred"},
+            },
             text=[approach_names[i] for i in pareto_indices],
             hovertemplate="<b>%{text}</b><br>"
             + f"{x_label}: %{{x:.3f}}<br>"
@@ -247,16 +243,16 @@ def create_pareto_plot_3d(
 
     # Update layout
     fig.update_layout(
-        title=dict(
-            text=f"{title}<br><sub>Hypervolume: {viz_data['hypervolume']:.3f}</sub>",
-            x=0.5,
-            xanchor="center",
-        ),
-        scene=dict(
-            xaxis_title=f"{x_label} (minimize)",
-            yaxis_title=f"{y_label} (minimize)",
-            zaxis_title=f"{z_label} (minimize)",
-        ),
+        title={
+            "text": f"{title}<br><sub>Hypervolume: {viz_data['hypervolume']:.3f}</sub>",
+            "x": 0.5,
+            "xanchor": "center",
+        },
+        scene={
+            "xaxis_title": f"{x_label} (minimize)",
+            "yaxis_title": f"{y_label} (minimize)",
+            "zaxis_title": f"{z_label} (minimize)",
+        },
         hovermode="closest",
         template="plotly_white",
         width=900,
@@ -308,38 +304,38 @@ def create_pareto_parallel_coordinates(
     dimensions = []
     for i, obj_name in enumerate(obj_names):
         dimensions.append(
-            dict(
-                label=objective_labels.get(obj_name, obj_name),
-                values=obj_matrix[:, i],
-            )
+            {
+                "label": objective_labels.get(obj_name, obj_name),
+                "values": obj_matrix[:, i],
+            }
         )
 
     # Create figure
     fig = go.Figure(
         data=go.Parcoords(
-            line=dict(
-                color=colors,
-                colorscale=[[0, "lightgray"], [1, "red"]],
-                showscale=True,
-                cmin=0,
-                cmax=1,
-                colorbar=dict(
-                    title="Status",
-                    tickvals=[0.25, 0.75],
-                    ticktext=["Dominated", "Pareto Optimal"],
-                ),
-            ),
+            line={
+                "color": colors,
+                "colorscale": [[0, "lightgray"], [1, "red"]],
+                "showscale": True,
+                "cmin": 0,
+                "cmax": 1,
+                "colorbar": {
+                    "title": "Status",
+                    "tickvals": [0.25, 0.75],
+                    "ticktext": ["Dominated", "Pareto Optimal"],
+                },
+            },
             dimensions=dimensions,
             labelangle=-45,
         )
     )
 
     fig.update_layout(
-        title=dict(
-            text=f"{title}<br><sub>Hypervolume: {viz_data['hypervolume']:.3f}</sub>",
-            x=0.5,
-            xanchor="center",
-        ),
+        title={
+            "text": f"{title}<br><sub>Hypervolume: {viz_data['hypervolume']:.3f}</sub>",
+            "x": 0.5,
+            "xanchor": "center",
+        },
         template="plotly_white",
         width=900,
         height=600,
@@ -380,9 +376,7 @@ def create_pareto_visualization(
     n_objectives = len(objectives)
 
     if n_objectives < 2:
-        raise ValueError(
-            f"Pareto analysis requires at least 2 objectives, got {n_objectives}"
-        )
+        raise ValueError(f"Pareto analysis requires at least 2 objectives, got {n_objectives}")
     elif n_objectives == 2:
         return create_pareto_plot_2d(
             approach_names=approach_names,
@@ -447,10 +441,6 @@ def save_visualization(
                 "Image export requires kaleido. Install with: pip install kaleido"
             ) from e
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to export image to {format} format: {e}"
-            ) from e
+            raise RuntimeError(f"Failed to export image to {format} format: {e}") from e
     else:
-        raise ValueError(
-            f"Unsupported format: {format}. Use 'html', 'png', 'svg', or 'pdf'"
-        )
+        raise ValueError(f"Unsupported format: {format}. Use 'html', 'png', 'svg', or 'pdf'")

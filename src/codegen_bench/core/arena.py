@@ -39,9 +39,7 @@ class Arena:
             with open(template_path) as f:
                 return f.read()
         except FileNotFoundError as e:
-            raise FileNotFoundError(
-                f"Prompt template not found: '{template_path}'"
-            ) from e
+            raise FileNotFoundError(f"Prompt template not found: '{template_path}'") from e
 
     def load_prompt(self, **kwargs: str) -> str:
         """Load and format prompt template.
