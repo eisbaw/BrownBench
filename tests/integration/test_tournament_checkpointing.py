@@ -174,7 +174,14 @@ def test_tournament_resume_from_checkpoint(mock_anthropic_client, tmp_path):
 
         original_compare = TournamentRunner.compare_solutions
 
-        def compare_with_interrupt(self, solutions, progress_callback=None, checkpoint_manager=None, shutdown_handler=None, checkpoint_interval=10):
+        def compare_with_interrupt(
+            self,
+            solutions,
+            progress_callback=None,
+            checkpoint_manager=None,
+            shutdown_handler=None,
+            checkpoint_interval=10,
+        ):
             # Wrap the progress callback to trigger shutdown
             if shutdown_handler:
                 original_callback = progress_callback
@@ -190,7 +197,14 @@ def test_tournament_resume_from_checkpoint(mock_anthropic_client, tmp_path):
 
                 progress_callback = interrupt_callback
 
-            return original_compare(self, solutions, progress_callback, checkpoint_manager, shutdown_handler, checkpoint_interval)
+            return original_compare(
+                self,
+                solutions,
+                progress_callback,
+                checkpoint_manager,
+                shutdown_handler,
+                checkpoint_interval,
+            )
 
         with patch.object(TournamentRunner, "compare_solutions", compare_with_interrupt):
             runner = TournamentRunner(
@@ -277,7 +291,14 @@ def test_checkpoint_preserves_ratings(mock_anthropic_client, tmp_path):
         # Simulate interruption after 1 comparison
         original_compare = TournamentRunner.compare_solutions
 
-        def compare_with_early_stop(self, solutions, progress_callback=None, checkpoint_manager=None, shutdown_handler=None, checkpoint_interval=10):
+        def compare_with_early_stop(
+            self,
+            solutions,
+            progress_callback=None,
+            checkpoint_manager=None,
+            shutdown_handler=None,
+            checkpoint_interval=10,
+        ):
             if shutdown_handler:
                 original_callback = progress_callback
 
@@ -289,7 +310,14 @@ def test_checkpoint_preserves_ratings(mock_anthropic_client, tmp_path):
 
                 progress_callback = stop_callback
 
-            return original_compare(self, solutions, progress_callback, checkpoint_manager, shutdown_handler, checkpoint_interval)
+            return original_compare(
+                self,
+                solutions,
+                progress_callback,
+                checkpoint_manager,
+                shutdown_handler,
+                checkpoint_interval,
+            )
 
         with patch.object(TournamentRunner, "compare_solutions", compare_with_early_stop):
             runner = TournamentRunner(
@@ -467,7 +495,14 @@ def test_checkpoint_resume_completes_tournament(mock_anthropic_client, tmp_path)
         # First run: interrupt after 1 comparison
         original_compare = TournamentRunner.compare_solutions
 
-        def compare_with_interrupt(self, solutions, progress_callback=None, checkpoint_manager=None, shutdown_handler=None, checkpoint_interval=10):
+        def compare_with_interrupt(
+            self,
+            solutions,
+            progress_callback=None,
+            checkpoint_manager=None,
+            shutdown_handler=None,
+            checkpoint_interval=10,
+        ):
             if shutdown_handler:
                 original_callback = progress_callback
 
@@ -479,7 +514,14 @@ def test_checkpoint_resume_completes_tournament(mock_anthropic_client, tmp_path)
 
                 progress_callback = interrupt_callback
 
-            return original_compare(self, solutions, progress_callback, checkpoint_manager, shutdown_handler, checkpoint_interval)
+            return original_compare(
+                self,
+                solutions,
+                progress_callback,
+                checkpoint_manager,
+                shutdown_handler,
+                checkpoint_interval,
+            )
 
         with patch.object(TournamentRunner, "compare_solutions", compare_with_interrupt):
             runner = TournamentRunner(

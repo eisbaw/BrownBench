@@ -198,7 +198,9 @@ def test_arena_with_absolute_prompt_path(tmp_path):
     """Test Arena with absolute prompt_template_path."""
     # Create a temporary prompt template file
     prompt_file = tmp_path / "custom_prompt.txt"
-    prompt_file.write_text("Task: {task_spec}\nSolution A: {solution_a}\nSolution B: {solution_b}\nWINNER:")
+    prompt_file.write_text(
+        "Task: {task_spec}\nSolution A: {solution_a}\nSolution B: {solution_b}\nWINNER:"
+    )
 
     arena = Arena(
         name="custom",

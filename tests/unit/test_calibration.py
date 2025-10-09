@@ -273,7 +273,7 @@ def test_bias_metrics_string():
     s = str(bias)
 
     assert "Position bias:" in s
-    assert ("WARNING" in s or "OK" in s)  # Has indicator
+    assert "WARNING" in s or "OK" in s  # Has indicator
     # Length bias not included when None
 
 

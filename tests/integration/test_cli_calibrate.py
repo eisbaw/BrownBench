@@ -38,7 +38,9 @@ def test_calibrate_command_with_output_file(tmp_path):
     ground_truth_file = fixtures_dir / "ground_truth_sample.yaml"
     output_file = tmp_path / "calibration_report.txt"
 
-    result = runner.invoke(cli, ["calibrate", str(ground_truth_file), "-o", str(output_file), "--simulate"])
+    result = runner.invoke(
+        cli, ["calibrate", str(ground_truth_file), "-o", str(output_file), "--simulate"]
+    )
 
     # Command should succeed
     assert result.exit_code == 0
@@ -59,7 +61,9 @@ def test_calibrate_command_with_verbose_report():
     fixtures_dir = Path(__file__).parent.parent / "fixtures"
     ground_truth_file = fixtures_dir / "ground_truth_sample.yaml"
 
-    result = runner.invoke(cli, ["calibrate", str(ground_truth_file), "--verbose-report", "--simulate"])
+    result = runner.invoke(
+        cli, ["calibrate", str(ground_truth_file), "--verbose-report", "--simulate"]
+    )
 
     # Command should succeed
     assert result.exit_code == 0
@@ -88,7 +92,9 @@ def test_calibrate_command_with_judge_option():
     fixtures_dir = Path(__file__).parent.parent / "fixtures"
     ground_truth_file = fixtures_dir / "ground_truth_sample.yaml"
 
-    result = runner.invoke(cli, ["calibrate", str(ground_truth_file), "--judge", "test-judge", "--simulate"])
+    result = runner.invoke(
+        cli, ["calibrate", str(ground_truth_file), "--judge", "test-judge", "--simulate"]
+    )
 
     # Command should succeed
     assert result.exit_code == 0

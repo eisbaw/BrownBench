@@ -255,7 +255,9 @@ def test_thread_safety_multiple_threads():
             t.join(timeout=2.0)
 
         # All threads should have detected shutdown
-        assert len(shutdown_detected) == 5, f"Expected 5 threads to detect shutdown, got {len(shutdown_detected)}"
+        assert (
+            len(shutdown_detected) == 5
+        ), f"Expected 5 threads to detect shutdown, got {len(shutdown_detected)}"
         assert handler.shutdown_requested
     finally:
         handler.unregister()

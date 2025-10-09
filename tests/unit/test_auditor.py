@@ -261,7 +261,9 @@ class TestDUTAuditor:
 
         # Should detect socket import (may be MEDIUM risk)
         network_findings = [
-            f for f in report.findings if "network" in f.category.lower() or "socket" in f.description.lower()
+            f
+            for f in report.findings
+            if "network" in f.category.lower() or "socket" in f.description.lower()
         ]
         assert len(network_findings) >= 1
 
@@ -274,7 +276,10 @@ class TestDUTAuditor:
         # Should have HIGH risk finding for os.remove
         high_findings = [f for f in report.findings if f.risk_level == RiskLevel.HIGH]
         assert len(high_findings) >= 1
-        assert any("remove" in f.description.lower() or "filesystem" in f.category.lower() for f in high_findings)
+        assert any(
+            "remove" in f.description.lower() or "filesystem" in f.category.lower()
+            for f in high_findings
+        )
 
     def test_get_function_name(self) -> None:
         """Test function name extraction from AST."""
@@ -360,7 +365,11 @@ import httpx
 
         # httpx is allowed (used by anthropic SDK)
         # socket and requests should be flagged
-        flagged = [f for f in report.findings if "socket" in f.description.lower() or "requests" in f.description.lower()]
+        flagged = [
+            f
+            for f in report.findings
+            if "socket" in f.description.lower() or "requests" in f.description.lower()
+        ]
         assert len(flagged) >= 1
 
     def test_check_code_execution(self) -> None:

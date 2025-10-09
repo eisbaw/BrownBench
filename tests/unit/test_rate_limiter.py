@@ -180,9 +180,9 @@ def test_rate_limiter_timestamp_consistency() -> None:
     stats = limiter.get_stats()
     # After sleeping ~60s, old requests should have aged out
     # We should see exactly 1 request in the last minute (the one just made)
-    assert stats["requests_in_last_minute"] == 1, (
-        f"Expected 1 request after sleep, got {stats['requests_in_last_minute']}"
-    )
+    assert (
+        stats["requests_in_last_minute"] == 1
+    ), f"Expected 1 request after sleep, got {stats['requests_in_last_minute']}"
 
 
 def test_rate_limiter_release() -> None:

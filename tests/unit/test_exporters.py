@@ -44,12 +44,17 @@ def sample_result() -> TournamentResult:
         JudgeVote(vote="A", reasoning="Cleaner code", confidence=0.85),
         JudgeVote(vote="B", reasoning="More concise", confidence=0.75),
     ]
-    comparison = ("dut1", "dut2", "correctness", JudgmentResult(
-        winner="A",
-        votes=votes,
-        agreement_rate=0.85,
-        confidence=0.9,
-    ))
+    comparison = (
+        "dut1",
+        "dut2",
+        "correctness",
+        JudgmentResult(
+            winner="A",
+            votes=votes,
+            agreement_rate=0.85,
+            confidence=0.9,
+        ),
+    )
     ratings["dut1"]._comparisons.append(comparison)
     ratings["dut2"]._comparisons.append(comparison)
 
@@ -101,7 +106,9 @@ class TestJSONExporter:
         assert data["tournament_metadata"]["total_cost_usd"] == 18.8
         assert len(data["leaderboard"]) == 2
 
-    def test_export_without_comparisons(self, sample_result: TournamentResult, tmp_path: Path) -> None:
+    def test_export_without_comparisons(
+        self, sample_result: TournamentResult, tmp_path: Path
+    ) -> None:
         """Test exporting without comparisons."""
         config = ExportConfig(include_comparisons=False)
         exporter = JSONExporter(config)
@@ -152,7 +159,9 @@ class TestJSONExporter:
         # Compact format should have no indentation
         assert "\n  " not in content or content.count("\n") < 5  # Very few newlines
 
-    def test_export_creates_parent_directory(self, sample_result: TournamentResult, tmp_path: Path) -> None:
+    def test_export_creates_parent_directory(
+        self, sample_result: TournamentResult, tmp_path: Path
+    ) -> None:
         """Test that export creates parent directory if needed."""
         output_path = tmp_path / "subdir" / "result.json"
         exporter = JSONExporter()
@@ -242,7 +251,9 @@ class TestCSVExporter:
 
         assert not output_path.exists()
 
-    def test_export_errors_skipped_when_no_errors(self, sample_result: TournamentResult, tmp_path: Path) -> None:
+    def test_export_errors_skipped_when_no_errors(
+        self, sample_result: TournamentResult, tmp_path: Path
+    ) -> None:
         """Test that errors export is skipped when there are no errors."""
         sample_result.errors = []
         exporter = CSVExporter()

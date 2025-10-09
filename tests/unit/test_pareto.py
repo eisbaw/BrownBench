@@ -53,47 +53,55 @@ class TestFindParetoFront:
 
     def test_simple_2d_front(self) -> None:
         """Test simple 2D Pareto front."""
-        objectives = np.array([
-            [1.0, 5.0],  # Pareto optimal
-            [2.0, 3.0],  # Pareto optimal
-            [3.0, 2.0],  # Pareto optimal
-            [2.5, 4.0],  # Dominated by point 1
-            [4.0, 4.0],  # Dominated
-        ])
+        objectives = np.array(
+            [
+                [1.0, 5.0],  # Pareto optimal
+                [2.0, 3.0],  # Pareto optimal
+                [3.0, 2.0],  # Pareto optimal
+                [2.5, 4.0],  # Dominated by point 1
+                [4.0, 4.0],  # Dominated
+            ]
+        )
         pareto = find_pareto_front(objectives)
         expected = np.array([0, 1, 2])
         np.testing.assert_array_equal(pareto, expected)
 
     def test_all_pareto_optimal(self) -> None:
         """Test when all points are Pareto optimal."""
-        objectives = np.array([
-            [1.0, 3.0],
-            [2.0, 2.0],
-            [3.0, 1.0],
-        ])
+        objectives = np.array(
+            [
+                [1.0, 3.0],
+                [2.0, 2.0],
+                [3.0, 1.0],
+            ]
+        )
         pareto = find_pareto_front(objectives)
         expected = np.array([0, 1, 2])
         np.testing.assert_array_equal(pareto, expected)
 
     def test_single_optimal(self) -> None:
         """Test when single point dominates all."""
-        objectives = np.array([
-            [1.0, 1.0],  # Dominates all
-            [2.0, 2.0],
-            [3.0, 3.0],
-        ])
+        objectives = np.array(
+            [
+                [1.0, 1.0],  # Dominates all
+                [2.0, 2.0],
+                [3.0, 3.0],
+            ]
+        )
         pareto = find_pareto_front(objectives)
         expected = np.array([0])
         np.testing.assert_array_equal(pareto, expected)
 
     def test_three_objectives(self) -> None:
         """Test Pareto front with 3 objectives."""
-        objectives = np.array([
-            [1.0, 2.0, 3.0],  # Pareto optimal
-            [2.0, 1.0, 4.0],  # Pareto optimal
-            [3.0, 3.0, 1.0],  # Pareto optimal
-            [2.0, 2.0, 3.0],  # Dominated by point 0
-        ])
+        objectives = np.array(
+            [
+                [1.0, 2.0, 3.0],  # Pareto optimal
+                [2.0, 1.0, 4.0],  # Pareto optimal
+                [3.0, 3.0, 1.0],  # Pareto optimal
+                [2.0, 2.0, 3.0],  # Dominated by point 0
+            ]
+        )
         pareto = find_pareto_front(objectives)
         assert len(pareto) == 3
         assert 3 not in pareto
@@ -119,11 +127,13 @@ class TestCalculateHypervolume:
 
     def test_2d_hypervolume_multiple_points(self) -> None:
         """Test 2D hypervolume with multiple points."""
-        pareto_front = np.array([
-            [1.0, 4.0],
-            [2.0, 2.0],
-            [4.0, 1.0],
-        ])
+        pareto_front = np.array(
+            [
+                [1.0, 4.0],
+                [2.0, 2.0],
+                [4.0, 1.0],
+            ]
+        )
         reference_point = np.array([5.0, 5.0])
         hv = calculate_hypervolume(pareto_front, reference_point)
         # Correct hypervolume from pymoo (not the buggy implementation)
@@ -208,12 +218,14 @@ class TestAnalyzeParetoFrontier:
 
     def test_basic_analysis(self) -> None:
         """Test basic Pareto frontier analysis."""
-        objectives = np.array([
-            [1.0, 5.0],  # Pareto optimal
-            [2.0, 3.0],  # Pareto optimal
-            [3.0, 2.0],  # Pareto optimal
-            [2.5, 4.0],  # Dominated
-        ])
+        objectives = np.array(
+            [
+                [1.0, 5.0],  # Pareto optimal
+                [2.0, 3.0],  # Pareto optimal
+                [3.0, 2.0],  # Pareto optimal
+                [2.5, 4.0],  # Dominated
+            ]
+        )
         result = analyze_pareto_frontier(objectives)
 
         assert isinstance(result, ParetoResult)
@@ -224,10 +236,12 @@ class TestAnalyzeParetoFrontier:
 
     def test_auto_reference_point(self) -> None:
         """Test automatic reference point calculation."""
-        objectives = np.array([
-            [1.0, 2.0],
-            [2.0, 1.0],
-        ])
+        objectives = np.array(
+            [
+                [1.0, 2.0],
+                [2.0, 1.0],
+            ]
+        )
         result = analyze_pareto_frontier(objectives)
 
         # Reference point should be max values * 1.1
@@ -236,10 +250,12 @@ class TestAnalyzeParetoFrontier:
 
     def test_custom_reference_point(self) -> None:
         """Test with custom reference point."""
-        objectives = np.array([
-            [1.0, 2.0],
-            [2.0, 1.0],
-        ])
+        objectives = np.array(
+            [
+                [1.0, 2.0],
+                [2.0, 1.0],
+            ]
+        )
         reference_point = np.array([5.0, 5.0])
         result = analyze_pareto_frontier(objectives, reference_point)
 
@@ -247,11 +263,13 @@ class TestAnalyzeParetoFrontier:
 
     def test_dominated_mask_correct(self) -> None:
         """Test that dominated mask is correctly set."""
-        objectives = np.array([
-            [1.0, 1.0],  # Dominates all
-            [2.0, 2.0],  # Dominated
-            [3.0, 3.0],  # Dominated
-        ])
+        objectives = np.array(
+            [
+                [1.0, 1.0],  # Dominates all
+                [2.0, 2.0],  # Dominated
+                [3.0, 3.0],  # Dominated
+            ]
+        )
         result = analyze_pareto_frontier(objectives)
 
         expected_mask = np.array([False, True, True])

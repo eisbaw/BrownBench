@@ -225,7 +225,7 @@ def test_atomic_save(tmp_path):
     manager.save(state)
 
     # Temp file should not exist after save
-    temp_file = (tmp_path / "checkpoints" / "checkpoint.json.tmp")
+    temp_file = tmp_path / "checkpoints" / "checkpoint.json.tmp"
     assert not temp_file.exists()
 
     # Final file should exist

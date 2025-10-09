@@ -278,3 +278,162 @@ def test_cache_put_exception_during_write(
     key = solution_cache._cache_key(mock_dut, simple_task, 42)
     cache_file = solution_cache.cache_dir / f"{key}.json"
     assert not cache_file.exists()
+
+
+def test_cache_corrupted_file_deletion_fails(
+    solution_cache, mock_dut, simple_task, sample_solution, cache_dir, monkeypatch
+):
+    """Test handling when corrupt cache file cannot be deleted (lines 113-114).
+
+    Edge case: When cache detects corruption and attempts to delete the corrupt file,
+    but the deletion itself fails (e.g., permission denied). Should still return None
+    (cache miss) and log the deletion failure without raising an exception.
+
+    Related to todo.md task: Add tests for edge-case exception handlers in cache.py
+    """
+    from pathlib import Path
+
+    # Store valid solution
+    solution_cache.put(mock_dut, simple_task, 42, sample_solution)
+
+    # Corrupt the cache file
+    key = solution_cache._cache_key(mock_dut, simple_task, 42)
+    cache_file = cache_dir / f"{key}.json"
+    with open(cache_file, "w") as f:
+        f.write("{ invalid json }")
+
+    # Mock Path.unlink to raise OSError
+    original_unlink = Path.unlink
+
+    def mock_unlink(self, *args, **kwargs):
+        if str(self).endswith(f"{key}.json"):
+            raise OSError("Permission denied")
+        return original_unlink(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "unlink", mock_unlink)
+
+    # Should still treat as cache miss even if deletion fails
+    result = solution_cache.get(mock_dut, simple_task, 42)
+    assert result is None
+
+    # Cache file still exists (deletion failed)
+    assert cache_file.exists()
+
+
+def test_cache_fail_on_corruption_mode(
+    solution_cache, mock_dut, simple_task, sample_solution, cache_dir
+):
+    """Test fail_on_corruption mode raises CacheError (line 120).
+
+    Edge case: When fail_on_corruption=True, corrupted cache files should raise
+    CacheError instead of being treated as cache misses. This debugging mode makes
+    corruption failures explicit rather than silent.
+
+    Related to todo.md task: Add tests for edge-case exception handlers in cache.py
+    """
+    from codegen_bench.exceptions import CacheError
+
+    # Create cache with fail_on_corruption=True
+    strict_cache = SolutionCache(cache_dir, fail_on_corruption=True)
+
+    # Store valid solution
+    strict_cache.put(mock_dut, simple_task, 42, sample_solution)
+
+    # Corrupt the cache file
+    key = strict_cache._cache_key(mock_dut, simple_task, 42)
+    cache_file = cache_dir / f"{key}.json"
+    with open(cache_file, "w") as f:
+        f.write("{ invalid json }")
+
+    # Should raise CacheError in strict mode
+    with pytest.raises(CacheError, match="Corrupted cache file"):
+        strict_cache.get(mock_dut, simple_task, 42)
+
+
+def test_cache_put_temp_cleanup_fails(
+    solution_cache, mock_dut, simple_task, sample_solution, monkeypatch
+):
+    """Test temp file cleanup failure is logged but doesn't prevent success (lines 176-177).
+
+    Edge case: After successful atomic write (os.replace), if temp file cleanup fails,
+    the cache operation should still succeed since the actual write completed. The test
+    simulates this by recreating the temp file after replace() to trigger the cleanup path.
+
+    Rationale: Cache write succeeded, temp cleanup is best-effort housekeeping. Failure
+    to cleanup shouldn't invalidate a successful cache operation.
+
+    Related to todo.md task: Add tests for edge-case exception handlers in cache.py
+    """
+    import os
+
+    # Track cleanup attempts
+    cleanup_attempted = []
+
+    # Mock os.replace to succeed but leave temp file (simulating partial failure)
+    original_replace = os.replace
+    original_unlink = os.unlink
+
+    def mock_replace(src, dst, *args, **kwargs):
+        # Do the actual replace
+        result = original_replace(src, dst, *args, **kwargs)
+        # But also recreate the temp file to trigger cleanup path
+        if str(src).endswith(".tmp"):
+            with open(src, "w") as f:
+                f.write("leftover")
+        return result
+
+    def mock_unlink(path, *args, **kwargs):
+        if str(path).endswith(".tmp"):
+            cleanup_attempted.append(path)
+            raise OSError("Simulated cleanup failure")
+        return original_unlink(path, *args, **kwargs)
+
+    monkeypatch.setattr(os, "replace", mock_replace)
+    monkeypatch.setattr(os, "unlink", mock_unlink)
+
+    # Store solution - should succeed despite cleanup failure
+    solution_cache.put(mock_dut, simple_task, 42, sample_solution)
+
+    # Verify solution was cached successfully
+    cached = solution_cache.get(mock_dut, simple_task, 42)
+    assert cached is not None
+    assert cached.seed == 42
+
+    # Verify cleanup was attempted (even though it failed)
+    assert len(cleanup_attempted) > 0
+
+
+def test_cache_clear_file_deletion_fails(
+    solution_cache, mock_dut, simple_task, sample_solution, monkeypatch
+):
+    """Test cache clear handles file deletion failures (lines 192-194).
+
+    Edge case: When clearing cache, if some files cannot be deleted (e.g., permission
+    denied), clear() should continue processing remaining files and track both successful
+    and failed deletions in the log.
+
+    Related to todo.md task: Add tests for edge-case exception handlers in cache.py
+    """
+    from pathlib import Path
+
+    # Store multiple solutions
+    solution_cache.put(mock_dut, simple_task, 42, sample_solution)
+    solution_cache.put(mock_dut, simple_task, 43, sample_solution)
+    assert solution_cache.size() == 2
+
+    # Mock Path.unlink to fail for one file
+    original_unlink = Path.unlink
+    key_42 = solution_cache._cache_key(mock_dut, simple_task, 42)
+
+    def mock_unlink(self, *args, **kwargs):
+        if str(self).endswith(f"{key_42}.json"):
+            raise OSError("Permission denied")
+        return original_unlink(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "unlink", mock_unlink)
+
+    # Clear should handle the failure and continue
+    solution_cache.clear()
+
+    # One file should remain (the one that failed to delete)
+    assert solution_cache.size() == 1

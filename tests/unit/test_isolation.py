@@ -301,9 +301,7 @@ class TestContainerIsolation:
             subprocess.CompletedProcess(
                 args=["docker", "version"], returncode=0, stdout="", stderr=""
             ),
-            subprocess.CompletedProcess(
-                args=["docker", "run"], returncode=0, stdout="", stderr=""
-            ),
+            subprocess.CompletedProcess(args=["docker", "run"], returncode=0, stdout="", stderr=""),
         ]
 
         resources = ResourceLimits(cpu_count=2.0, memory_mb=1024, timeout_seconds=60)
@@ -325,9 +323,7 @@ class TestContainerIsolation:
             subprocess.CompletedProcess(
                 args=["docker", "version"], returncode=0, stdout="", stderr=""
             ),
-            subprocess.CompletedProcess(
-                args=["docker", "run"], returncode=0, stdout="", stderr=""
-            ),
+            subprocess.CompletedProcess(args=["docker", "run"], returncode=0, stdout="", stderr=""),
         ]
 
         network = NetworkConfig(enabled=False)
@@ -346,9 +342,7 @@ class TestContainerIsolation:
             subprocess.CompletedProcess(
                 args=["docker", "version"], returncode=0, stdout="", stderr=""
             ),
-            subprocess.CompletedProcess(
-                args=["docker", "run"], returncode=0, stdout="", stderr=""
-            ),
+            subprocess.CompletedProcess(args=["docker", "run"], returncode=0, stdout="", stderr=""),
         ]
 
         network = NetworkConfig(enabled=True, proxy_host="localhost", proxy_port=8080)
@@ -371,9 +365,7 @@ class TestContainerIsolation:
             subprocess.CompletedProcess(
                 args=["docker", "version"], returncode=0, stdout="", stderr=""
             ),
-            subprocess.CompletedProcess(
-                args=["docker", "run"], returncode=0, stdout="", stderr=""
-            ),
+            subprocess.CompletedProcess(args=["docker", "run"], returncode=0, stdout="", stderr=""),
         ]
 
         config = ContainerConfig(image="python:3.11-slim")
@@ -413,9 +405,7 @@ class TestContainerIsolation:
             subprocess.CompletedProcess(
                 args=["docker", "version"], returncode=0, stdout="", stderr=""
             ),
-            subprocess.CompletedProcess(
-                args=["docker", "rmi"], returncode=0, stdout="", stderr=""
-            ),
+            subprocess.CompletedProcess(args=["docker", "rmi"], returncode=0, stdout="", stderr=""),
         ]
 
         config = ContainerConfig(image="test-image:latest")
