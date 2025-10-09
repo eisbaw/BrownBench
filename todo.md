@@ -342,7 +342,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 
 - [ ] Maintain >90% code coverage
 - [x] DONE: Add integration tests for new features ✅
-- [ ] Run test suite before all commits
+- [x] DONE: Run test suite before all commits (pre-commit hook added) ✅
 - [ ] Fix flaky tests immediately
 - [x] DONE: Run ruff linter regularly ✅
 - [x] DONE: Type check with mypy ✅
@@ -350,7 +350,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Refactor technical debt
 - [ ] Use record/replay for development
 - [ ] Monitor spending weekly
-- [ ] Optimize prompts for token efficiency
+- [x] DONE: Optimize prompts for token efficiency (created OptimizedPromptDUT, OptimizedClaudeJudge, PromptOptimizer) ✅
 - [ ] Budget reviews at phase boundaries
 - [x] DONE: Update docs with new features ✅ (PricingConfig, DUTRegistry improvements documented)
 - [x] DONE: Fix outdated information ✅ (checked and updated)

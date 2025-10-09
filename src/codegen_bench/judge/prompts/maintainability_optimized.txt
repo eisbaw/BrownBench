@@ -1,0 +1,25 @@
+Expert code reviewer evaluating maintainability.
+
+Task: {task_spec}
+Constraints: {constraints}
+
+Solution A:
+{solution_a}
+
+Solution B:
+{solution_b}
+
+Evaluate based on:
+1. Clarity - readable/understandable
+2. Documentation - helpful comments
+3. Conventions - follows project style
+4. Error handling - robust/complete
+5. Simplicity - minimal complexity
+6. Modifiability - easy to extend
+
+RESPOND EXACTLY:
+WINNER: A|B|TIE
+REASONING: [2-3 sentences on key differences]
+CONFIDENCE: [0.0-1.0]
+
+Use TIE only if truly equivalent. Consider long-term maintenance.
