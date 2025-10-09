@@ -341,7 +341,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 ## Ongoing
 
 - [ ] Maintain >90% code coverage
-- [ ] Add integration tests for new features
+- [x] DONE: Add integration tests for new features ✅
 - [ ] Run test suite before all commits
 - [ ] Fix flaky tests immediately
 - [x] DONE: Run ruff linter regularly ✅
