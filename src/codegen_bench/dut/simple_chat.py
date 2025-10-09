@@ -10,6 +10,7 @@ import structlog
 from anthropic.types import TextBlock
 from tenacity import RetryError, retry, stop_after_attempt, wait_exponential
 
+from codegen_bench.core.config import PricingConfig
 from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
 from codegen_bench.dut.base import ApproachMetadata, CodeGenerationApproach
@@ -20,11 +21,8 @@ from codegen_bench.utils.timeout import timeout_context
 
 logger = structlog.get_logger(__name__)
 
-# Pricing for Claude Sonnet 4.5 (as of January 2025)
-# Source: https://www.anthropic.com/pricing
-# TODO: Move these constants to a centralized config module when config system is implemented
-CLAUDE_SONNET_4_5_INPUT_COST_PER_1K_TOKENS = 0.003  # $3.00 per million tokens
-CLAUDE_SONNET_4_5_OUTPUT_COST_PER_1K_TOKENS = 0.015  # $15.00 per million tokens
+# Use centralized pricing configuration
+_PRICING_CONFIG = PricingConfig()
 
 
 class SimpleChatDUT(CodeGenerationApproach):
@@ -279,8 +277,7 @@ int main() {{
     def _calculate_cost(self, input_tokens: int, output_tokens: int) -> float:
         """Calculate API cost based on token usage.
 
-        Uses pricing as of January 2025:
-        - Claude Sonnet 4.5: $3/M input, $15/M output
+        Uses centralized pricing configuration for Claude Sonnet 4.5.
 
         Args:
             input_tokens: Number of input tokens
@@ -289,8 +286,8 @@ int main() {{
         Returns:
             Cost in USD
         """
-        input_cost = (input_tokens / 1000) * CLAUDE_SONNET_4_5_INPUT_COST_PER_1K_TOKENS
-        output_cost = (output_tokens / 1000) * CLAUDE_SONNET_4_5_OUTPUT_COST_PER_1K_TOKENS
+        input_cost = (input_tokens / 1000) * _PRICING_CONFIG.claude_sonnet_4_5_input_per_1k
+        output_cost = (output_tokens / 1000) * _PRICING_CONFIG.claude_sonnet_4_5_output_per_1k
 
         return input_cost + output_cost
 

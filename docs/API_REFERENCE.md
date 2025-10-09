@@ -78,6 +78,9 @@ You can browse the generated documentation by opening `docs/api/index.html` in a
     - `beta`: Distance for 76% win probability
     - `tau`: Skill dynamics factor
     - `draw_probability`: Expected probability of draws
+  - `PricingConfig`: API pricing configuration
+    - `claude_sonnet_4_5_input_per_1k`: Cost per 1,000 input tokens ($0.003 default)
+    - `claude_sonnet_4_5_output_per_1k`: Cost per 1,000 output tokens ($0.015 default)
 
 ### Tournament
 
@@ -201,8 +204,33 @@ You can browse the generated documentation by opening `docs/api/index.html` in a
 
 - **`codegen_bench.cache.store`**: Solution caching
   - `SolutionCache`: Cache for generated solutions
-  - `get()`: Retrieve cached solution
-  - `put()`: Store solution in cache
+    - `get()`: Retrieve cached solution
+    - `put()`: Store solution in cache (atomic write with temp file)
+    - `clear()`: Clear all cached solutions
+    - `size()`: Get number of cached solutions
+    - `invalidate()`: Remove specific cached entry
+
+  **⚠️ Important Cache Management Notes:**
+  - **No Size Limits**: The cache has no built-in size limits and will grow unbounded
+  - **Disk Space**: Monitor disk usage as cache can consume significant space over time
+  - **Manual Cleanup**: Use `clear()` method or manually delete `.cache/` directory
+  - **Atomic Writes**: Uses temp file + atomic rename for concurrent write safety
+  - **Cache Keys**: SHA-256 hashes of (dut_id, dut_version, task_id, seed)
+  - **No TTL/Expiration**: Cache entries persist indefinitely until manually cleared
+
+  **Recommended Cache Management Practices:**
+  ```python
+  # Monitor cache size
+  cache = SolutionCache(Path(".cache"))
+  if cache.size() > 10000:  # Threshold for your use case
+      cache.clear()  # Or implement selective eviction
+
+  # Periodic cleanup (e.g., in CI/CD)
+  find .cache -type f -mtime +30 -delete  # Remove files older than 30 days
+
+  # Size monitoring
+  du -sh .cache  # Check total cache directory size
+  ```
 
 - **`codegen_bench.checkpoint.manager`**: Tournament checkpointing
   - `CheckpointManager`: Save/restore tournament state

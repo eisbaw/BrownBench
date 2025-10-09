@@ -67,6 +67,25 @@ The sliding window approach was chosen for BrownBench because:
     2. Scale is moderate: max_requests_per_minute typically 50-100
     3. Debuggability: Easier to inspect/verify exact request history
     4. Safety: Conservative approach preferred for API cost control
+
+Thundering Herd Consideration:
+    When multiple threads are waiting on the rate limit and it resets, they may
+    all wake up simultaneously and compete for available slots. The current
+    implementation partially mitigates this by:
+    1. Using a single lock for atomic operations
+    2. Re-verifying limits after sleep (lines 217-268)
+    3. Releasing lock before sleep to allow other threads to proceed
+
+    However, a true thundering herd could still occur when:
+    - Many threads wait for the 60-second window to expire
+    - All wake when the oldest timestamp ages out
+    - All compete for the newly available slots
+
+    Mitigation strategies if this becomes an issue:
+    - Add random jitter to sleep times (e.g., +0-100ms)
+    - Use a priority queue or fair scheduling
+    - Implement exponential backoff for retries
+    - Consider the O(1) bucket approach which naturally spreads wakeups
 """
 
 import threading

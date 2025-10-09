@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- PricingConfig dataclass for centralized API pricing configuration
+- Cache size limit documentation and management recommendations
+- Thundering herd mitigation documentation for RateLimiter
 - TrueSkillConfig dataclass for configurable rating system parameters
 - O(1) rate limiter documentation explaining alternative implementations
 - Comprehensive Phase 5 documentation (43 files, 35K+ lines)
@@ -32,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tournament checkpointing with checkpoint_interval parameter
 
 ### Changed
+- SimpleChatDUT now uses PricingConfig from centralized configuration module
 - TrueSkillRating now uses configurable TrueSkillConfig
 - Exception messages improved for clarity and actionability
 

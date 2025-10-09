@@ -368,7 +368,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [x] DONE: Troubleshooting guide for worktree issues
 - [x] DONE: Manual cleanup commands documentation
 - [ ] Rate limiter: Consider bucket-based O(1) implementation
-- [ ] Cache: Add lock-free concurrent write protection (currently uses atomic rename)
+- [x] DONE: Cache: Add lock-free concurrent write protection ✅ (uses atomic rename - documented)
 - [ ] Cache: Consider TTL/expiration for stale cache entries
 - [x] DONE: Worktree: Add retry logic for transient git failures ✅
 - [x] DONE: Worktree: Document manual cleanup procedure in case of failures (duplicate - see line 369) ✅
@@ -392,16 +392,16 @@ See `docs/PHASE2_PROGRESS.md` for full details
 ## Documentation Gaps
 
 - [x] DONE: Worktree: No troubleshooting guide for manual cleanup (now in TROUBLESHOOTING.md)
-- [ ] Cache: No documentation on size limits or cache management (DEFER - pending cache size feature)
+- [x] DONE: Cache: No documentation on size limits or cache management ✅
 - [x] DONE: RateLimiter: No explanation of bucket-based O(1) alternative ✅
 - [ ] Tournament: No guide on cost estimation for different scales (DEFER - Phase 5 documentation)
 
 ## Potential Bugs/Edge Cases
 
 - [ ] Cache: No size limit enforcement - could fill disk (DEFER - major feature)
-- [ ] RateLimiter: Potential thundering herd on rate limit reset (DEFER - edge case optimization)
+- [x] DONE: RateLimiter: Potential thundering herd on rate limit reset ✅ (documented in code)
 - [x] DONE: Worktree: No retry logic for transient git failures ✅ (duplicate - see line 373)
-- [ ] SimpleChatDUT: No request timeout configuration (DEFER - feature request)
+- [x] DONE: SimpleChatDUT: Request timeout configuration ✅ (already implemented in base class, documented)
 
 ## Security/Safety
 

@@ -110,3 +110,54 @@ class TournamentConfig:
             raise ValueError(f"samples_per_pairing must be >= 1, got {self.samples_per_pairing}")
         if self.checkpoint_interval < 1:
             raise ValueError(f"checkpoint_interval must be >= 1, got {self.checkpoint_interval}")
+
+
+@dataclass(frozen=True)
+class PricingConfig:
+    """Configuration for API pricing.
+
+    This dataclass centralizes pricing constants for different models
+    and providers that were previously hardcoded in individual DUT implementations.
+
+    Attributes:
+        claude_sonnet_4_5_input_per_1k: Cost per 1,000 input tokens for Claude Sonnet 4.5
+                                        Default: $0.003 ($3.00 per million tokens)
+        claude_sonnet_4_5_output_per_1k: Cost per 1,000 output tokens for Claude Sonnet 4.5
+                                         Default: $0.015 ($15.00 per million tokens)
+
+    Example:
+        >>> config = PricingConfig()
+        >>> config.claude_sonnet_4_5_input_per_1k
+        0.003
+        >>> config.claude_sonnet_4_5_output_per_1k
+        0.015
+
+        # Calculate cost for a request:
+        >>> input_tokens = 1500
+        >>> output_tokens = 500
+        >>> input_cost = (input_tokens / 1000) * config.claude_sonnet_4_5_input_per_1k
+        >>> output_cost = (output_tokens / 1000) * config.claude_sonnet_4_5_output_per_1k
+        >>> total_cost = input_cost + output_cost
+        >>> round(total_cost, 4)
+        0.012
+
+    Note:
+        Pricing as of January 2025. Source: https://www.anthropic.com/pricing
+    """
+
+    # Claude Sonnet 4.5 pricing
+    claude_sonnet_4_5_input_per_1k: float = 0.003   # $3.00 per million tokens
+    claude_sonnet_4_5_output_per_1k: float = 0.015  # $15.00 per million tokens
+
+    def __post_init__(self) -> None:
+        """Validate pricing configuration."""
+        if self.claude_sonnet_4_5_input_per_1k < 0:
+            raise ValueError(
+                f"claude_sonnet_4_5_input_per_1k must be non-negative, "
+                f"got {self.claude_sonnet_4_5_input_per_1k}"
+            )
+        if self.claude_sonnet_4_5_output_per_1k < 0:
+            raise ValueError(
+                f"claude_sonnet_4_5_output_per_1k must be non-negative, "
+                f"got {self.claude_sonnet_4_5_output_per_1k}"
+            )
