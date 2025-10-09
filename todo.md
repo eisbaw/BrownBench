@@ -145,63 +145,65 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Record which prompt version used in judgments
 - [ ] Changelog for prompt evolution
 
-## Phase 4: Security & Robustness (Started)
+## Phase 4: Security & Robustness ✅ COMPLETE
 
-### Budget Management ✅
-- [x] BudgetEnforcer class
-- [x] Per-DUT cost limits
-- [x] Global tournament budget
-- [x] Warnings at thresholds
-- [x] Hard stops when exceeded
-- [x] Thread-safe cost tracking
-- [x] Budget unit tests (20 tests, 98% coverage)
+### Budget Management ✅ DONE
+- [x] DONE: BudgetEnforcer class
+- [x] DONE: Per-DUT cost limits
+- [x] DONE: Global tournament budget
+- [x] DONE: Warnings at thresholds
+- [x] DONE: Hard stops when exceeded
+- [x] DONE: Thread-safe cost tracking
+- [x] DONE: Budget unit tests (20 tests, 98% coverage)
 
 **Summary:** Complete budget enforcement system with pre-flight checks and configurable limits.
 
 ### Container Isolation ✅ DONE
-- [x] ContainerIsolation class
-- [x] Build DUT container images
-- [x] Network restriction (API proxy only)
-- [x] Resource limits (CPU, memory)
-- [x] Read-only mounts
-- [x] Container cleanup after execution
-- [x] Validation of mount paths
-- [x] Immutable configuration dataclasses
-- [x] Unit tests (33 tests, 78% coverage)
-- [x] Docker file template and documentation
+- [x] DONE: ContainerIsolation class
+- [x] DONE: Build DUT container images
+- [x] DONE: Network restriction (API proxy only)
+- [x] DONE: Resource limits (CPU, memory)
+- [x] DONE: Read-only mounts
+- [x] DONE: Container cleanup after execution
+- [x] DONE: Validation of mount paths
+- [x] DONE: Immutable configuration dataclasses
+- [x] DONE: Unit tests (33 tests, 78% coverage)
+- [x] DONE: Docker file template and documentation
 
 **Summary:** Complete Docker-based container isolation with resource limits, network restrictions, and comprehensive testing.
 
-### API Proxy 📋
-- [ ] APIProxy server
-- [ ] Temporary key generation
-- [ ] Request forwarding with real key
-- [ ] Cost tracking per DUT (integrated with BudgetEnforcer)
-- [ ] API proxy integration tests
+### API Proxy ✅ DONE
+- [x] DONE: APIProxy server
+- [x] DONE: Temporary key generation
+- [x] DONE: Request forwarding with real key
+- [x] DONE: Cost tracking per DUT (integrated with BudgetEnforcer)
+- [x] DONE: API proxy integration tests (25 tests, 82% coverage)
 
-### DUT Auditing ✅
-- [x] DUTAuditor class
-- [x] Static analysis for dangerous patterns
-- [x] Network access detection
-- [x] Audit report generation
-- [x] Integration with DUT loading
-- [x] Unit tests for DUTAuditor (19 tests, 97% coverage)
-- [x] Integration tests with DUTRegistry (7 tests, 95% coverage)
+**Summary:** Complete HTTP proxy server with temporary key management, request forwarding, and budget integration. All tests passing.
 
-### Tournament Checkpointing ✅
-- [x] CheckpointManager class
-- [x] CheckpointState dataclass (immutable)
-- [x] Atomic save operations
-- [x] Progress tracking and resume support
-- [x] Checkpoint unit tests (19 tests, 90% coverage)
-- [x] Integrate checkpointing into TournamentRunner
-- [x] Handle resume from checkpoint in tournament
-- [x] Checkpointing integration tests (6 tests, basic functionality verified)
-- [ ] Comprehensive error taxonomy
-- [ ] Actionable error messages
-- [ ] Retry strategies
-- [ ] Graceful degradation
-- [ ] Error reporting in results
+### DUT Auditing ✅ DONE
+- [x] DONE: DUTAuditor class
+- [x] DONE: Static analysis for dangerous patterns
+- [x] DONE: Network access detection
+- [x] DONE: Audit report generation
+- [x] DONE: Integration with DUT loading
+- [x] DONE: Unit tests for DUTAuditor (19 tests, 97% coverage)
+- [x] DONE: Integration tests with DUTRegistry (7 tests, 95% coverage)
+
+### Tournament Checkpointing ✅ DONE
+- [x] DONE: CheckpointManager class
+- [x] DONE: CheckpointState dataclass (immutable)
+- [x] DONE: Atomic save operations
+- [x] DONE: Progress tracking and resume support
+- [x] DONE: Checkpoint unit tests (19 tests, 90% coverage)
+- [x] DONE: Integrate checkpointing into TournamentRunner
+- [x] DONE: Handle resume from checkpoint in tournament
+- [x] DONE: Checkpointing integration tests (6 tests, basic functionality verified)
+- [x] DONE: Comprehensive error taxonomy (with 8 categories, severity levels, retry hints)
+- [x] DONE: Actionable error messages (get_actionable_message() with suggestions)
+- [x] DONE: Retry strategies (SimpleChatDUT has retry with tenacity, exponential backoff)
+- [x] DONE: Graceful degradation (tournament continues on DUT/judge failures, errors logged)
+- [x] DONE: Error reporting in results (ErrorRecord tracking, included in TournamentResult)
 
 ## Phase 5: Usability & Polish
 
@@ -232,11 +234,15 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [ ] Pareto visualization with Plotly
 - [ ] Pareto frontier unit tests
 
-### Export Formats 📋
-- [ ] JSON exporter with schema
-- [ ] CSV exporter for custom analysis
-- [ ] LaTeX table generator
-- [ ] Export CLI options
+### Export Formats ✅ DONE
+- [x] DONE: JSON exporter with schema
+- [x] DONE: CSV exporter for custom analysis
+- [x] DONE: LaTeX table generator
+- [x] DONE: ExportConfig for customization
+- [x] DONE: export_all_formats convenience function
+- [x] DONE: Unit tests (22 tests, 98% coverage)
+- [x] DONE: Export CLI options
+- [x] DONE: TournamentResult.from_dict() method for deserialization
 
 ### Documentation 📋
 - [ ] Installation guide

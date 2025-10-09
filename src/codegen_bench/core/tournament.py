@@ -18,11 +18,41 @@ from codegen_bench.core.judgment import JudgmentResult
 from codegen_bench.core.solution import Solution
 from codegen_bench.core.task import Task
 from codegen_bench.dut.base import CodeGenerationApproach
+from codegen_bench.exceptions import BrownBenchError
 from codegen_bench.judge.orchestrator import JudgeOrchestrator
 from codegen_bench.stats.ratings.bayesian_elo import BayesianELO
 from codegen_bench.utils import ShutdownHandler
 
 logger = structlog.get_logger()
+
+
+@dataclass
+class ErrorRecord:
+    """Record of an error that occurred during tournament execution."""
+
+    timestamp: str
+    phase: str  # "solution_generation" or "comparison"
+    dut_id: str | None = None
+    task_id: str | None = None
+    arena: str | None = None
+    error_type: str = ""
+    error_message: str = ""
+    is_retryable: bool = False
+    error_context: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for serialization."""
+        return {
+            "timestamp": self.timestamp,
+            "phase": self.phase,
+            "dut_id": self.dut_id,
+            "task_id": self.task_id,
+            "arena": self.arena,
+            "error_type": self.error_type,
+            "error_message": self.error_message,
+            "is_retryable": self.is_retryable,
+            "error_context": self.error_context,
+        }
 
 
 @dataclass
@@ -138,6 +168,7 @@ class TournamentResult:
     total_cost_usd: float = 0.0
     start_time: float = 0.0  # Set explicitly when tournament starts
     end_time: float = 0.0
+    errors: list[ErrorRecord] = field(default_factory=list)  # Error records for degraded execution
 
     @property
     def duration_seconds(self) -> float:
@@ -160,13 +191,14 @@ class TournamentResult:
         Returns:
             Dictionary representation suitable for YAML/JSON
         """
-        return {
+        result = {
             "tournament_metadata": {
                 "start_time": self.start_time,
                 "end_time": self.end_time,
                 "duration_seconds": self.duration_seconds,
                 "total_comparisons": self.total_comparisons,
                 "total_cost_usd": self.total_cost_usd,
+                "total_errors": len(self.errors),
             },
             "tasks_evaluated": self.tasks_evaluated,
             "arenas": self.arenas,
@@ -184,6 +216,99 @@ class TournamentResult:
                 for dut_a, dut_b, arena, judgment in self.comparisons
             ],
         }
+        # Only include errors if there are any
+        if self.errors:
+            result["errors"] = [error.to_dict() for error in self.errors]
+        return result
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "TournamentResult":
+        """Load tournament result from dictionary.
+
+        Args:
+            data: Dictionary representation from to_dict()
+
+        Returns:
+            TournamentResult instance
+
+        Raises:
+            ValueError: If required fields are missing or invalid
+        """
+        # Extract metadata
+        try:
+            metadata = data["tournament_metadata"]
+            tasks_evaluated = data["tasks_evaluated"]
+            arenas = data["arenas"]
+            ratings_data = data["ratings"]
+            comparisons_data = data["comparisons"]
+        except KeyError as e:
+            raise ValueError(f"Missing required field in tournament data: {e}") from e
+
+        # Reconstruct ratings (without comparisons initially)
+        ratings: dict[str, DUTRating] = {}
+        for dut_id, rating_dict in ratings_data.items():
+            # Reconstruct BayesianELO from elo and elo_std
+            rating = BayesianELO()
+            rating.mean = rating_dict["elo"]
+            rating.std = rating_dict["elo_std"]
+
+            ratings[dut_id] = DUTRating(
+                dut_id=dut_id,
+                rating=rating,
+                total_cost_usd=rating_dict.get("total_cost_usd", 0.0),
+                total_time_seconds=rating_dict.get("total_time_seconds", 0.0),
+                total_tokens=rating_dict.get("total_tokens", 0),
+            )
+
+        # Reconstruct comparisons
+        comparisons: list[tuple[str, str, str, JudgmentResult]] = []
+        for comp in comparisons_data:
+            # Create minimal JudgmentResult (we don't have votes saved)
+            judgment = JudgmentResult(
+                winner=comp["winner"],
+                votes=[],  # Votes not serialized, so we can't reconstruct them
+                agreement_rate=comp.get("agreement_rate", 1.0),
+                confidence=comp.get("confidence", 1.0),
+            )
+            comparisons.append((comp["dut_a"], comp["dut_b"], comp["arena"], judgment))
+
+        # Add comparisons to ratings for win/loss/tie calculation
+        for comparison in comparisons:
+            dut_a, dut_b, _, _ = comparison
+            if dut_a in ratings:
+                ratings[dut_a]._comparisons.append(comparison)
+            if dut_b in ratings:
+                ratings[dut_b]._comparisons.append(comparison)
+
+        # Reconstruct errors if present
+        errors: list[ErrorRecord] = []
+        if "errors" in data:
+            for error_dict in data["errors"]:
+                errors.append(
+                    ErrorRecord(
+                        timestamp=error_dict["timestamp"],
+                        phase=error_dict["phase"],
+                        dut_id=error_dict.get("dut_id"),
+                        task_id=error_dict.get("task_id"),
+                        arena=error_dict.get("arena"),
+                        error_type=error_dict.get("error_type", ""),
+                        error_message=error_dict.get("error_message", ""),
+                        is_retryable=error_dict.get("is_retryable", False),
+                        error_context=error_dict.get("error_context", {}),
+                    )
+                )
+
+        return cls(
+            ratings=ratings,
+            comparisons=comparisons,
+            tasks_evaluated=tasks_evaluated,
+            arenas=arenas,
+            total_comparisons=metadata.get("total_comparisons", len(comparisons)),
+            total_cost_usd=metadata.get("total_cost_usd", 0.0),
+            start_time=metadata.get("start_time", 0.0),
+            end_time=metadata.get("end_time", 0.0),
+            errors=errors,
+        )
 
     def save(self, output_dir: Path) -> Path:
         """Save tournament results to YAML file.
@@ -255,10 +380,16 @@ class TournamentRunner:
                 rating=BayesianELO(),
             )
 
+        # Track errors for graceful degradation
+        self.errors: list[ErrorRecord] = []
+
     def generate_solutions(
         self,
     ) -> tuple[dict[tuple[str, str, int], Solution], dict[str, SolutionMetrics]]:
         """Generate all solutions for DUT-task-seed combinations.
+
+        Implements graceful degradation: if a DUT fails to generate a solution for a task,
+        the error is logged and recorded, but the tournament continues with other DUTs/tasks.
 
         Returns:
             Tuple of (solutions dict, metrics dict) where:
@@ -275,19 +406,57 @@ class TournamentRunner:
             for task in self.tasks:
                 for i in range(self.samples_per_pairing):
                     seed = 42 + i  # Deterministic seeds
-                    sol = self.cache.get(dut, task, seed)
-                    if sol is None:
-                        sol = dut.solve(task, seed)
-                        self.cache.put(dut, task, seed, sol)
 
-                    solutions[(dut_id, task.id, i)] = sol
+                    try:
+                        sol = self.cache.get(dut, task, seed)
+                        if sol is None:
+                            sol = dut.solve(task, seed)
+                            self.cache.put(dut, task, seed, sol)
 
-                    # Collect metrics (no mutation of self.ratings)
-                    metrics[dut_id].cost_usd += sol.cost_usd
-                    metrics[dut_id].time_seconds += sol.generation_time_seconds
-                    metrics[dut_id].tokens += sol.total_tokens
+                        solutions[(dut_id, task.id, i)] = sol
 
-        logger.info("solutions_generated", total_solutions=len(solutions))
+                        # Collect metrics (no mutation of self.ratings)
+                        metrics[dut_id].cost_usd += sol.cost_usd
+                        metrics[dut_id].time_seconds += sol.generation_time_seconds
+                        metrics[dut_id].tokens += sol.total_tokens
+
+                    except Exception as e:
+                        # Graceful degradation: log error and continue
+                        error_context = {}
+                        is_retryable = False
+
+                        if isinstance(e, BrownBenchError):
+                            error_context = e.context.to_dict()
+                            is_retryable = e.context.is_retryable
+
+                        error_record = ErrorRecord(
+                            timestamp=datetime.now(UTC).isoformat(),
+                            phase="solution_generation",
+                            dut_id=dut_id,
+                            task_id=task.id,
+                            error_type=type(e).__name__,
+                            error_message=str(e),
+                            is_retryable=is_retryable,
+                            error_context=error_context,
+                        )
+                        self.errors.append(error_record)
+
+                        logger.error(
+                            "solution_generation_failed",
+                            dut_id=dut_id,
+                            task_id=task.id,
+                            seed=seed,
+                            error_type=type(e).__name__,
+                            error_message=str(e),
+                            is_retryable=is_retryable,
+                        )
+                        # Continue to next task/sample
+
+        logger.info(
+            "solutions_generated",
+            total_solutions=len(solutions),
+            total_errors=len([e for e in self.errors if e.phase == "solution_generation"]),
+        )
         return solutions, metrics
 
     def compare_solutions(
@@ -351,21 +520,82 @@ class TournamentRunner:
                                 progress_callback(total_comparisons)
                             continue
 
-                        sol_a = solutions[(dut_a_id, task.id, i)]
-                        sol_b = solutions[(dut_b_id, task.id, i)]
+                        # Check if both solutions exist (graceful degradation)
+                        sol_a_key = (dut_a_id, task.id, i)
+                        sol_b_key = (dut_b_id, task.id, i)
 
-                        # Get judgment
-                        judgment = self.judges.compare(sol_a, sol_b, arena, task)
+                        if sol_a_key not in solutions:
+                            logger.warning(
+                                "solution_missing_for_comparison",
+                                dut_id=dut_a_id,
+                                task_id=task.id,
+                                sample_index=i,
+                                arena=arena.name,
+                                reason="Solution generation failed earlier",
+                            )
+                            continue
 
-                        # Record comparison
-                        comparison = (dut_a_id, dut_b_id, arena.name, judgment)
-                        comparisons.append(comparison)
-                        completed_for_checkpoint.append((dut_a_id, dut_b_id, task.id, arena.name))
-                        total_comparisons += 1
-                        comparisons_since_checkpoint += 1
+                        if sol_b_key not in solutions:
+                            logger.warning(
+                                "solution_missing_for_comparison",
+                                dut_id=dut_b_id,
+                                task_id=task.id,
+                                sample_index=i,
+                                arena=arena.name,
+                                reason="Solution generation failed earlier",
+                            )
+                            continue
 
-                        if progress_callback:
-                            progress_callback(total_comparisons)
+                        sol_a = solutions[sol_a_key]
+                        sol_b = solutions[sol_b_key]
+
+                        try:
+                            # Get judgment
+                            judgment = self.judges.compare(sol_a, sol_b, arena, task)
+
+                            # Record comparison
+                            comparison = (dut_a_id, dut_b_id, arena.name, judgment)
+                            comparisons.append(comparison)
+                            completed_for_checkpoint.append((dut_a_id, dut_b_id, task.id, arena.name))
+                            total_comparisons += 1
+                            comparisons_since_checkpoint += 1
+
+                            if progress_callback:
+                                progress_callback(total_comparisons)
+
+                        except Exception as e:
+                            # Graceful degradation: log judge error and continue
+                            error_context = {}
+                            is_retryable = False
+
+                            if isinstance(e, BrownBenchError):
+                                error_context = e.context.to_dict()
+                                is_retryable = e.context.is_retryable
+
+                            error_record = ErrorRecord(
+                                timestamp=datetime.now(UTC).isoformat(),
+                                phase="comparison",
+                                dut_id=f"{dut_a_id} vs {dut_b_id}",
+                                task_id=task.id,
+                                arena=arena.name,
+                                error_type=type(e).__name__,
+                                error_message=str(e),
+                                is_retryable=is_retryable,
+                                error_context=error_context,
+                            )
+                            self.errors.append(error_record)
+
+                            logger.error(
+                                "comparison_failed",
+                                dut_a_id=dut_a_id,
+                                dut_b_id=dut_b_id,
+                                task_id=task.id,
+                                arena=arena.name,
+                                error_type=type(e).__name__,
+                                error_message=str(e),
+                                is_retryable=is_retryable,
+                            )
+                            # Continue to next comparison
 
                         # Save checkpoint periodically
                         if (
@@ -517,7 +747,6 @@ class TournamentRunner:
         shutdown_handler = ShutdownHandler() if checkpoint_dir else None
 
         # Load checkpoint if resuming
-        resumed_comparisons: list[tuple[str, str, str, JudgmentResult]] = []
         if checkpoint_manager and checkpoint_manager.checkpoint_exists():
             try:
                 checkpoint_state = checkpoint_manager.load()
@@ -587,6 +816,7 @@ class TournamentRunner:
                 logger.warning(
                     "tournament_interrupted",
                     completed_comparisons=len(comparisons),
+                    total_errors=len(self.errors),
                     message="Tournament interrupted by shutdown signal, checkpoint saved",
                 )
                 # Return partial result
@@ -599,6 +829,7 @@ class TournamentRunner:
                     total_cost_usd=sum(r.total_cost_usd for r in self.ratings.values()),
                     start_time=self._tournament_start_time,
                     end_time=time.time(),
+                    errors=self.errors,
                 )
 
             # Step 3: Update ratings
@@ -609,7 +840,11 @@ class TournamentRunner:
             if shutdown_handler:
                 shutdown_handler.unregister()
 
-        logger.info("tournament_complete", total_comparisons=len(comparisons))
+        logger.info(
+            "tournament_complete",
+            total_comparisons=len(comparisons),
+            total_errors=len(self.errors),
+        )
 
         result = TournamentResult(
             ratings=self.ratings,
@@ -620,6 +855,7 @@ class TournamentRunner:
             total_cost_usd=sum(r.total_cost_usd for r in self.ratings.values()),
             start_time=self._tournament_start_time,
             end_time=time.time(),
+            errors=self.errors,
         )
 
         # Delete checkpoint after successful completion

@@ -160,7 +160,7 @@ class ContainerIsolation:
                     f"Docker not available: {result.stderr}"
                 )
         except (subprocess.TimeoutExpired, FileNotFoundError) as e:
-            raise ContainerIsolationError(f"Docker not available: {e}")
+            raise ContainerIsolationError(f"Docker not available: {e}") from e
 
     def _validate_mount_paths(self) -> None:
         """Validate mount paths exist and are absolute.
@@ -258,10 +258,10 @@ class ContainerIsolation:
 
             logger.info("container_image_built", image=self._config.image)
 
-        except subprocess.TimeoutExpired:
+        except subprocess.TimeoutExpired as e:
             raise ContainerIsolationError(
                 f"Image build timed out after {IMAGE_BUILD_TIMEOUT} seconds"
-            )
+            ) from e
 
     def execute(
         self,
@@ -415,10 +415,10 @@ class ContainerIsolation:
 
             logger.info("container_image_removed", image=self._config.image)
 
-        except subprocess.TimeoutExpired:
+        except subprocess.TimeoutExpired as e:
             raise ContainerIsolationError(
                 f"Image cleanup timed out after {IMAGE_CLEANUP_TIMEOUT} seconds"
-            )
+            ) from e
 
     def cleanup_containers(self, label: str | None = None) -> None:
         """Remove stopped containers.
@@ -450,10 +450,10 @@ class ContainerIsolation:
 
             logger.info("containers_cleaned_up")
 
-        except subprocess.TimeoutExpired:
+        except subprocess.TimeoutExpired as e:
             raise ContainerIsolationError(
                 f"Container cleanup timed out after {CONTAINER_CLEANUP_TIMEOUT} seconds"
-            )
+            ) from e
 
     def list_images(self) -> list[dict[str, Any]]:
         """List available Docker images.
@@ -485,7 +485,7 @@ class ContainerIsolation:
             return images
 
         except (subprocess.TimeoutExpired, json.JSONDecodeError) as e:
-            raise ContainerIsolationError(f"Failed to list images: {e}")
+            raise ContainerIsolationError(f"Failed to list images: {e}") from e
 
     def image_exists(self, image: str | None = None) -> bool:
         """Check if a Docker image exists.

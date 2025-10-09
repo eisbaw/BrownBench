@@ -231,6 +231,141 @@ def validate(
 
 
 @cli.command()
+@click.argument("tournament_result_file", type=Path)
+@click.argument("output_dir", type=Path)
+@click.option("--format", "-f", "formats", multiple=True,
+              type=click.Choice(["json", "csv", "latex", "all"], case_sensitive=False),
+              default=["all"], help="Output formats (can specify multiple)")
+@click.option("--no-comparisons", is_flag=True, help="Exclude detailed comparison data")
+@click.option("--no-errors", is_flag=True, help="Exclude error records")
+@click.option("--decimal-places", type=int, default=4, help="Number of decimal places for numeric values")
+@click.pass_context
+def export(
+    ctx: click.Context,
+    tournament_result_file: Path,
+    output_dir: Path,
+    formats: tuple[str, ...],
+    no_comparisons: bool,
+    no_errors: bool,
+    decimal_places: int,
+) -> None:
+    """Export tournament results to various formats (JSON, CSV, LaTeX).
+
+    Exports tournament results from a saved tournament result file to one or more
+    output formats. The command creates separate files for different data views:
+
+    - JSON: Complete tournament data
+    - CSV: Leaderboard, comparisons, and errors as separate files
+    - LaTeX: Publication-ready tables for leaderboard and summary
+
+    Examples:
+        codegen-bench export results.json ./output --format json
+        codegen-bench export results.json ./output --format csv --format latex
+        codegen-bench export results.json ./output --no-comparisons --no-errors
+    """
+    import json
+
+    from codegen_bench.core.tournament import TournamentResult
+    from codegen_bench.reporting.exporters import (
+        CSVExporter,
+        ExportConfig,
+        JSONExporter,
+        LaTeXExporter,
+    )
+
+    console.print("[bold]Exporting tournament results[/bold]")
+    console.print(f"Input: {tournament_result_file}")
+    console.print(f"Output directory: {output_dir}")
+
+    # Load tournament result
+    if not tournament_result_file.exists():
+        console.print(f"[red]Error: Tournament result file not found: {tournament_result_file}[/red]")
+        raise click.Abort()
+
+    try:
+        with open(tournament_result_file) as f:
+            result_data = json.load(f)
+        result = TournamentResult.from_dict(result_data)
+        console.print(f"Loaded tournament with {result.total_comparisons} comparisons")
+    except (ValueError, FileNotFoundError, json.JSONDecodeError) as e:
+        console.print(f"[red]Error loading tournament result: {e}[/red]")
+        raise click.Abort() from e
+
+    # Create export configuration
+    config = ExportConfig(
+        include_comparisons=not no_comparisons,
+        include_errors=not no_errors,
+        pretty_print=True,
+        decimal_places=decimal_places,
+    )
+
+    # Determine which formats to export
+    export_formats = set(formats)
+    if "all" in export_formats:
+        export_formats = {"json", "csv", "latex"}
+
+    # Create output directory
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Export based on requested formats
+    exported_files: list[Path] = []
+
+    try:
+        if "json" in export_formats:
+            with console.status("[bold blue]Exporting JSON..."):
+                json_exporter = JSONExporter(config)
+                json_path = output_dir / "tournament.json"
+                json_exporter.export(result, json_path)
+                exported_files.append(json_path)
+                console.print(f"[green]✓[/green] JSON: {json_path}")
+
+        if "csv" in export_formats:
+            csv_exporter = CSVExporter(config)
+
+            with console.status("[bold blue]Exporting CSV leaderboard..."):
+                leaderboard_csv = output_dir / "leaderboard.csv"
+                csv_exporter.export_leaderboard(result, leaderboard_csv)
+                exported_files.append(leaderboard_csv)
+                console.print(f"[green]✓[/green] CSV Leaderboard: {leaderboard_csv}")
+
+            if config.include_comparisons:
+                with console.status("[bold blue]Exporting CSV comparisons..."):
+                    comparisons_csv = output_dir / "comparisons.csv"
+                    csv_exporter.export_comparisons(result, comparisons_csv)
+                    exported_files.append(comparisons_csv)
+                    console.print(f"[green]✓[/green] CSV Comparisons: {comparisons_csv}")
+
+            if config.include_errors and result.errors:
+                with console.status("[bold blue]Exporting CSV errors..."):
+                    errors_csv = output_dir / "errors.csv"
+                    csv_exporter.export_errors(result, errors_csv)
+                    exported_files.append(errors_csv)
+                    console.print(f"[green]✓[/green] CSV Errors: {errors_csv}")
+
+        if "latex" in export_formats:
+            latex_exporter = LaTeXExporter(config)
+
+            with console.status("[bold blue]Exporting LaTeX leaderboard..."):
+                leaderboard_tex = output_dir / "leaderboard.tex"
+                latex_exporter.export_leaderboard(result, leaderboard_tex)
+                exported_files.append(leaderboard_tex)
+                console.print(f"[green]✓[/green] LaTeX Leaderboard: {leaderboard_tex}")
+
+            with console.status("[bold blue]Exporting LaTeX summary..."):
+                summary_tex = output_dir / "summary.tex"
+                latex_exporter.export_summary_table(result, summary_tex)
+                exported_files.append(summary_tex)
+                console.print(f"[green]✓[/green] LaTeX Summary: {summary_tex}")
+
+        console.print("\n[bold green]Export complete![/bold green]")
+        console.print(f"Exported {len(exported_files)} file(s)")
+
+    except OSError as e:
+        console.print(f"[red]Error writing output files: {e}[/red]")
+        raise click.Abort() from e
+
+
+@cli.command()
 @click.argument("ground_truth_file", type=Path)
 @click.option("--judge", default="claude", help="Judge to calibrate (default: claude)")
 @click.option("--output", "-o", type=Path, help="Output file for calibration report")
