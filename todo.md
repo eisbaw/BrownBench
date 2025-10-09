@@ -244,12 +244,12 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [x] DONE: Export CLI options
 - [x] DONE: TournamentResult.from_dict() method for deserialization
 
-### Documentation 📋
-- [ ] Installation guide
-- [ ] Quickstart tutorial (5-min)
-- [ ] CLI reference
-- [ ] Configuration guide
-- [ ] Troubleshooting guide
+### Documentation ✅ PARTIALLY DONE
+- [x] DONE: Installation guide
+- [x] DONE: Quickstart tutorial (5-min)
+- [x] DONE: CLI reference
+- [x] DONE: Configuration guide
+- [x] DONE: Troubleshooting guide
 - [ ] Architecture overview
 - [ ] Adding new DUTs guide (include ClaudeCodeDUT example)
 - [ ] Adding new arenas guide
@@ -347,13 +347,13 @@ See `docs/PHASE2_PROGRESS.md` for full details
 ## Technical Debt
 
 - [ ] Async support for API calls (3-5x speedup potential)
-- [x] Graceful shutdown handling (SIGINT/SIGTERM) ✅
+- [x] DONE: Graceful shutdown handling (SIGINT/SIGTERM) ✅
 - [ ] TournamentConfig dataclass for base_seed, consensus_threshold
 - [ ] TrueSkill defaults to configuration
 - [ ] Streaming approach for large tournaments
 - [ ] Store solution IDs and load from cache on demand
-- [ ] Troubleshooting guide for worktree issues
-- [ ] Manual cleanup commands documentation
+- [x] DONE: Troubleshooting guide for worktree issues
+- [x] DONE: Manual cleanup commands documentation
 - [ ] Rate limiter: Consider bucket-based O(1) implementation
 - [ ] Cache: Add lock-free concurrent write protection (currently uses atomic rename)
 - [ ] Cache: Consider TTL/expiration for stale cache entries
@@ -378,7 +378,7 @@ See `docs/PHASE2_PROGRESS.md` for full details
 
 ## Documentation Gaps
 
-- [ ] Worktree: No troubleshooting guide for manual cleanup
+- [x] DONE: Worktree: No troubleshooting guide for manual cleanup (now in TROUBLESHOOTING.md)
 - [ ] Cache: No documentation on size limits or cache management (DEFER - pending cache size feature)
 - [ ] RateLimiter: No explanation of bucket-based O(1) alternative
 - [ ] Tournament: No guide on cost estimation for different scales (DEFER - Phase 5 documentation)
