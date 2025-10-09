@@ -1,0 +1,51 @@
+id: task_022
+name: 'seekable_format: Make parallel_compression use memory properly'
+project: zstd
+domain: performance
+difficulty: medium
+codebase_path: submodules/zstd
+specification: 'Based on commit 2d4cff69c4 from zstd:
+
+  seekable_format: Make parallel_compression use memory properly
+
+  Previously, parallel_compression would only handle each job''s results after ALL
+  jobs were successfully queued. This caused all src/dst buffers to remain in memory
+  until then!
+
+
+  It also polled to check whether a job completed, which is racy without any memory
+  barrier.
+
+
+  Now, we flush results as a side effect of completing a job. Completed frames are
+  placed in an ordered linked-list, and any eligible frames are flushed. This may
+  be zero or multiple frames, depending on the order in which jobs finish.
+
+
+  This design also makes it simple to support streaming input, so that is now available.
+  Just pass `-` as the filename, and stdin/stdout will be used for I/O.
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the zstd repository, representing a typical refactoring/enhancement
+  task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- contrib/seekable_format/examples/parallel_compression.c
+gotchas:
+- This is a real commit from 2025-05-06
+- Review commit message carefully for context
+expected_human_time_minutes: 60
+compile_command: make
+test_command: make test

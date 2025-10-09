@@ -1,0 +1,46 @@
+id: task_026
+name: 'only keep one setting: concurrent_layer_fetch_buffer'
+project: containerd
+domain: refactoring
+difficulty: medium
+codebase_path: submodules/containerd
+specification: 'Based on commit 72c8c7708c from containerd:
+
+  only keep one setting: concurrent_layer_fetch_buffer
+
+  Signed-off-by: Adrien Delorme <azr@users.noreply.github.com>
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the containerd repository, representing a typical refactoring
+  task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- client/client.go
+- client/client_opts.go
+- client/pull.go
+- core/remotes/docker/fetcher.go
+- core/remotes/docker/fetcher_fuzz_test.go
+- core/remotes/docker/fetcher_test.go
+- core/remotes/docker/resolver.go
+- core/transfer/local/pull.go
+- core/transfer/local/transfer.go
+- core/transfer/transfer.go
+gotchas:
+- This is a real commit from 2025-04-16
+- Review commit message carefully for context
+- Simplifies configuration by consolidating settings
+expected_human_time_minutes: 90
+compile_command: make
+test_command: make test

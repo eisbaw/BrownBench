@@ -1,0 +1,67 @@
+id: task_025
+name: 'Move agent listener sockets from /tmp to under ~/.ssh/agent'
+project: openssh
+domain: security
+difficulty: medium
+codebase_path: submodules/openssh
+specification: 'Based on commit 80162f9d7e from openssh:
+
+  upstream: Move agent listener sockets from /tmp to under
+
+  ~/.ssh/agent for both ssh-agent(1) and forwarded sockets in sshd(8).
+
+
+  This ensures processes (such as Firefox) that have restricted filesystem access
+  that includes /tmp (via unveil(3)) do not have the ability to use keys in an agent.
+
+
+  Moving the default directory has the consequence that the OS will no longer clean
+  up stale agent sockets, so ssh-agent now gains this ability.
+
+
+  To support $HOME on NFS, the socket path includes a truncated hash of the hostname.
+  ssh-agent will by default only clean up sockets from the same hostname.
+
+
+  ssh-agent gains some new flags: -U suppresses the automatic cleanup of stale sockets
+  when it starts. -u forces a cleanup without keeping a running agent, -uu forces a
+  cleanup that ignores the hostname. -T makes ssh-agent put the socket back in /tmp.
+
+
+  feedback deraadt@ naddy@, doitdoitdoit deraadt@
+
+
+  OpenBSD-Commit-ID: 8383dabd98092fe5498d5f7f15c7d314b03a93e1
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the openssh repository, representing a typical security
+  enhancement task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- Makefile.in
+- hostfile.c
+- misc.c
+- misc.h
+- pathnames.h
+- session.c
+- ssh-agent.1
+- ssh-agent.c
+gotchas:
+- This is a real commit from 2025-05-05
+- Review commit message carefully for context
+- Security-sensitive code dealing with socket paths
+expected_human_time_minutes: 90
+compile_command: make
+test_command: make tests

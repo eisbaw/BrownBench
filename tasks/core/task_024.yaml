@@ -1,0 +1,37 @@
+id: task_024
+name: 'regex filters (#432): scan, splits, split, sub, gsub'
+project: jq
+domain: feature
+difficulty: medium
+codebase_path: submodules/jq
+specification: 'Based on commit a696c6b551 from jq:
+
+  regex filters (#432): scan, splits, split, sub, gsub
+
+
+  Implement the changes described in this commit. The change should:
+
+  - Maintain the existing API/interface
+
+  - Pass all existing tests
+
+  - Follow the project''s coding style
+
+
+  This is a real commit from the jq repository, representing a typical feature
+  addition task in a brownfield codebase.'
+constraints:
+- Must pass all existing tests
+- Must maintain backward compatibility
+- Must follow project coding conventions
+key_files:
+- builtin.c
+- docs/content/3.manual/manual.yml
+- tests/all.test
+gotchas:
+- This is a real commit from 2014-07-31
+- Review commit message carefully for context
+- Adds new regex filtering capabilities
+expected_human_time_minutes: 60
+compile_command: make
+test_command: make check
