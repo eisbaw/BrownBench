@@ -258,11 +258,11 @@ See `docs/PHASE2_PROGRESS.md` for full details
 - [x] DONE: Adding new judges guide (include ClaudeCodeJudge example)
 - [x] DONE: Contributing guidelines (with MPED architectural principles)
 - [ ] API reference (auto-generated)
-- [ ] Explain rating systems
-- [ ] Effect size interpretation
-- [ ] Multiple testing rationale
-- [ ] Adaptive design benefits
-- [ ] References to literature
+- [x] DONE: Explain rating systems (STATISTICS_GUIDE.md)
+- [x] DONE: Effect size interpretation (STATISTICS_GUIDE.md)
+- [x] DONE: Multiple testing rationale (STATISTICS_GUIDE.md)
+- [x] DONE: Adaptive design benefits (STATISTICS_GUIDE.md)
+- [x] DONE: References to literature (STATISTICS_GUIDE.md)
 
 ### Additional Tasks & Configs 📋
 - [ ] Add 5 additional C/C++ tasks
